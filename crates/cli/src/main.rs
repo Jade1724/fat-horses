@@ -1,6 +1,7 @@
 //! `fat-horses`: run picks and manage visits from the terminal (SPEC.md §7).
 
 mod render;
+mod serve;
 
 use std::path::PathBuf;
 use std::time::Duration;
@@ -73,6 +74,17 @@ enum Command {
         #[arg(long)]
         cursor: Option<String>,
     },
+    /// Serve the HTTP API (and optionally the built web UI) on localhost.
+    Serve {
+        #[arg(long, default_value_t = 8080)]
+        port: u16,
+        /// Key the API expects in `x-api-key`.
+        #[arg(long, env = "FAT_HORSES_API_KEY")]
+        api_key: String,
+        /// Built web UI to serve at `/` (e.g. web/dist).
+        #[arg(long)]
+        web: Option<PathBuf>,
+    },
 }
 
 fn open_store(path: Option<PathBuf>) -> Result<FileStore> {
@@ -141,6 +153,7 @@ async fn main() -> Result<()> {
             );
             Ok(())
         }
+        Command::Serve { port, api_key, web } => serve::serve(store, port, api_key, web).await,
         Command::History { cursor } => {
             let page = store.history(cursor, HISTORY_PAGE).await?;
             print!("{}", render::history(&page, &CountriesFile::bundled()));

@@ -138,6 +138,90 @@ pub trait GeocodeCache {
     ) -> impl Future<Output = Result<(), StoreError>> + Send;
 }
 
+// Shared stores: the API and a background pick can hold the same store.
+impl<T: VisitStore + Send + Sync> VisitStore for std::sync::Arc<T> {
+    fn get_restaurant(
+        &self,
+        id: &str,
+    ) -> impl Future<Output = Result<Option<Restaurant>, StoreError>> + Send {
+        (**self).get_restaurant(id)
+    }
+
+    fn currently_picked(
+        &self,
+    ) -> impl Future<Output = Result<Option<Restaurant>, StoreError>> + Send {
+        (**self).currently_picked()
+    }
+
+    fn apply(&self, change: Change) -> impl Future<Output = Result<(), StoreError>> + Send {
+        (**self).apply(change)
+    }
+
+    fn country_visits(
+        &self,
+    ) -> impl Future<Output = Result<Vec<CountryVisits>, StoreError>> + Send {
+        (**self).country_visits()
+    }
+
+    fn history(
+        &self,
+        cursor: Option<String>,
+        limit: usize,
+    ) -> impl Future<Output = Result<HistoryPage, StoreError>> + Send {
+        (**self).history(cursor, limit)
+    }
+}
+
+impl<T: PickStore + Send + Sync> PickStore for std::sync::Arc<T> {
+    fn get_pick(
+        &self,
+        pick_id: &str,
+    ) -> impl Future<Output = Result<Option<PickSession>, StoreError>> + Send {
+        (**self).get_pick(pick_id)
+    }
+
+    fn put_pick(
+        &self,
+        session: &PickSession,
+    ) -> impl Future<Output = Result<(), StoreError>> + Send {
+        (**self).put_pick(session)
+    }
+}
+
+impl<T: GuessCache + Send + Sync> GuessCache for std::sync::Arc<T> {
+    fn get_guess(
+        &self,
+        place_id: &str,
+        prompt_version: u32,
+    ) -> impl Future<Output = Result<Option<CachedGuess>, StoreError>> + Send {
+        (**self).get_guess(place_id, prompt_version)
+    }
+
+    fn put_guess(
+        &self,
+        guess: &CachedGuess,
+    ) -> impl Future<Output = Result<(), StoreError>> + Send {
+        (**self).put_guess(guess)
+    }
+}
+
+impl<T: GeocodeCache + Send + Sync> GeocodeCache for std::sync::Arc<T> {
+    fn get_geocode(
+        &self,
+        key: &str,
+    ) -> impl Future<Output = Result<Option<CachedLocation>, StoreError>> + Send {
+        (**self).get_geocode(key)
+    }
+
+    fn put_geocode(
+        &self,
+        key: &str,
+        value: &CachedLocation,
+    ) -> impl Future<Output = Result<(), StoreError>> + Send {
+        (**self).put_geocode(key, value)
+    }
+}
+
 /// Whether a cached value created at `created_at` is still fresh at `now`.
 pub fn is_fresh(created_at: DateTime<Utc>, ttl: Duration, now: DateTime<Utc>) -> bool {
     now - created_at < ttl

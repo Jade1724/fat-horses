@@ -6,11 +6,17 @@ use domain::geo::distance_m;
 use domain::places::{Place, Places, PlacesError, parse_cuisine};
 use serde::Deserialize;
 
-/// Public instances, tried in order. The main instance is sometimes overloaded.
+/// Public instances, tried in order. The main instance is often briefly
+/// overloaded (HTTP 504 on about half of first attempts in testing), so each is
+/// tried [`ATTEMPTS`] times.
 pub const DEFAULT_ENDPOINTS: &[&str] = &[
     "https://overpass-api.de/api/interpreter",
-    "https://overpass.private.coffee/api/interpreter",
+    "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
 ];
+/// Attempts per endpoint.
+pub const ATTEMPTS: u32 = 3;
+/// Pause between attempts.
+pub const RETRY_DELAY: std::time::Duration = std::time::Duration::from_secs(3);
 
 /// OSM tags passed on to the classifier (SPEC.md L3). Public data only.
 const KEPT_TAGS: &[&str] = &[
@@ -172,15 +178,22 @@ impl Places for Overpass {
         let query = build_query(lat, lon, radius_m, amenities);
         let mut errors = Vec::new();
         for endpoint in &self.endpoints {
-            let result = match self.post(endpoint, &query).await {
-                Ok(body) => parse_response(&body, lat, lon, radius_m).map_err(|e| e.to_string()),
-                Err(e) => Err(e),
-            };
-            match result {
-                Ok(places) => return Ok(places),
-                Err(e) => {
-                    tracing::warn!(endpoint, error = %e, "Overpass endpoint failed");
-                    errors.push(format!("{endpoint}: {e}"));
+            for attempt in 1..=ATTEMPTS {
+                let result = match self.post(endpoint, &query).await {
+                    Ok(body) => {
+                        parse_response(&body, lat, lon, radius_m).map_err(|e| e.to_string())
+                    }
+                    Err(e) => Err(e),
+                };
+                match result {
+                    Ok(places) => return Ok(places),
+                    Err(e) => {
+                        tracing::warn!(endpoint, attempt, error = %e, "Overpass request failed");
+                        errors.push(format!("{endpoint} (attempt {attempt}): {e}"));
+                        if attempt < ATTEMPTS {
+                            tokio::time::sleep(RETRY_DELAY).await;
+                        }
+                    }
                 }
             }
         }
