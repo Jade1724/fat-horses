@@ -39,8 +39,8 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 - [x] **T2.5 Race types and selection (F3).** Domain types `Race`, `Runner`, `RaceType`, `RaceStatus`; `select_race(races, now) -> Option<Race>`. Tests: the 2–15 min window, fallback to the next race, the 3 h limit, non-gallops ignored, fewer than 2 runners ignored, closed or abandoned races ignored.
 - [x] **T2.6 Assignment (F4).** `assign(runners, pool, full_pool, rng) -> RaceCard`. Tests: distinct when possible, the top-up order of F4.2, repeats only when forced, scratched runners get no country, same seed → same card.
 - [x] **T2.7 Winner (F5).** `resolve(card, result_snapshot, now, first_interim_seen_at, rng) -> Decision { Pending | Winner{..} }`. Tests: official result, interim after 10 min, interim before 10 min is pending, dead heat, abandoned, 45-min timeout, scratched runner can't win.
-- [ ] **T2.8 Tier 1 matching (F6.2).** Cuisine tag parsing (`;`, trim, lowercase) and matching. Tests include `"Japanese; sushi"` and ways/nodes alike.
-- [ ] **T2.9 Tier 2 matching (F6.3, F6.4).** Given places and guesses, return inferred matches (threshold 0.7; tagged places never inferred). Tests at the threshold boundary.
+- [x] **T2.8 Tier 1 matching (F6.2).** Cuisine tag parsing (`;`, trim, lowercase) and matching. Tests include `"Japanese; sushi"` and ways/nodes alike.
+- [x] **T2.9 Tier 2 matching (F6.3, F6.4).** Given places and guesses, return inferred matches (threshold 0.7; tagged places never inferred). Tests at the threshold boundary.
 - [ ] **T2.10 Choosing the restaurant (F7).** Tests: prefers unvisited, falls back to all, uses fallback matches only when there are no primary ones, empty → none, same seed → same choice.
 - [ ] **T2.11 Status state machine (F8.2, F8.3, F8.6).** Pure transition function returning the new restaurant state, the country delta and the log entry, or `InvalidTransition`. Tests for every row of F8.2, rejected transitions, and restoring `status_before_pick` on skip/superseded.
 

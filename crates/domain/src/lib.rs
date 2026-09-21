@@ -1,7 +1,10 @@
 //! Domain types and rules for fat-horses (SPEC.md F2–F8). No I/O.
 
 pub mod assign;
+pub mod classify;
 pub mod countries;
+pub mod matching;
+pub mod places;
 pub mod pool;
 pub mod race;
 pub mod winner;
