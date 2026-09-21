@@ -13,6 +13,16 @@
   dish list. With `--fake-llm` there are no inferred or fallback matches.
 - Exit code 0; session saved in the store.
 
+## Run 2 — 2026-09-21, by Claude, TypeScript CLI
+
+`npm run cli -- --store <tmp> pick "Sky Tower, Auckland" --radius 500 --fake-llm`
+
+- Race: Scottsville R4 (SAF gallops), 11:55 UTC, 10 runners, 2 scratched → 8 countries.
+- Places loaded before the race on the first try (after raising Node's per-address connect timeout).
+- Result: horse 7 won → 🇳🇵 Nepal. No place within 500 m is tagged Nepalese/Himalayan/momo, so
+  "No match nearby" with the dish list is correct. Exit code 0.
+- Two bugs found on the way, both fixed: `systemRng` range, and Node's 250 ms happy-eyeballs timeout.
+
 ## Still to do
 
 - Owner runs one pick at a real address and confirms (T4.2 done-when).
