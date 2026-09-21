@@ -13,7 +13,7 @@ import {
   statusText,
   winReasonText,
 } from "../format";
-import type { PickMap } from "../map";
+import type { MapView } from "../mapView";
 import { storage } from "../storage";
 
 const POLL_MS = 5000;
@@ -28,9 +28,9 @@ export class PickPage {
   private pollTimer: number | undefined;
   private tickTimer: number | undefined;
   private readonly api: Api;
-  private readonly map: PickMap;
+  private readonly map: MapView;
 
-  constructor(api: Api, map: PickMap, mapEl: HTMLElement) {
+  constructor(api: Api, map: MapView, mapEl: HTMLElement) {
     this.api = api;
     this.map = map;
     this.banner = h("div", { class: "banner", hidden: true });

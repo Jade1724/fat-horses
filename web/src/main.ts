@@ -4,6 +4,7 @@ import "./style.css";
 import { Api } from "./api";
 import { clear, h } from "./dom";
 import { PickMap } from "./map";
+import { createMap } from "./mapView";
 import { storage } from "./storage";
 import { historyPage } from "./views/history";
 import { passportPage } from "./views/passport";
@@ -74,7 +75,7 @@ function boot(): void {
   app.append(header, main);
 
   const mapEl = h("div", { class: "map", role: "region", "aria-label": "Map" });
-  const map = new PickMap(mapEl);
+  const map = createMap(mapEl, (el) => new PickMap(el));
   const pick = new PickPage(api, map, mapEl);
   const other = h("div", { class: "page" });
   void pick.start();

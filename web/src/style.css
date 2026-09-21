@@ -613,3 +613,17 @@ select {
   border-radius: var(--radius);
   padding: 1.25rem;
 }
+
+.map-unavailable {
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  padding: 16px;
+}
+
+.map-message {
+  max-width: 28rem;
+  text-align: center;
+  color: var(--muted);
+}

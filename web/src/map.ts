@@ -3,13 +3,20 @@
 import * as maplibregl from "maplibre-gl";
 import type { Feature } from "geojson";
 import "maplibre-gl/dist/maplibre-gl.css";
+// MapLibre loads tiles in a web worker shipped as a separate module that the
+// bundler doesn't emit by itself; `?worker&url` bundles it (with the shared
+// chunk it imports) and gives its URL.
+import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import { circleRing, pinKind } from "./format";
 import type { PickRestaurant } from "./api";
+import type { MapView } from "./mapView";
+
+maplibregl.setWorkerUrl(workerUrl);
 
 const STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
 const AREA = "search-area";
 
-export class PickMap {
+export class PickMap implements MapView {
   private readonly map: maplibregl.Map;
   private markers: maplibregl.Marker[] = [];
   private centre: maplibregl.Marker | null = null;
