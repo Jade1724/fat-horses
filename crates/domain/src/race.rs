@@ -1,7 +1,11 @@
 //! Races and race selection (SPEC.md F3).
 
+use std::future::Future;
+
 use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
+
+use crate::winner::{Placing, ResultSnapshot};
 
 /// A race must start at least this long after `now` to be chosen (F3.2).
 pub const MIN_LEAD: Duration = Duration::minutes(2);
@@ -65,6 +69,41 @@ impl Race {
     pub fn has_enough_runners(&self) -> bool {
         self.active_runners().count() >= MIN_RUNNERS
     }
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum RaceError {
+    #[error("race source unavailable: {0}")]
+    Unavailable(String),
+}
+
+/// A fresh look at one race: its status, runners (with scratchings) and placings.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RaceUpdate {
+    pub race: Race,
+    /// Empty until there is an interim or final result.
+    pub placings: Vec<Placing>,
+}
+
+impl RaceUpdate {
+    pub fn snapshot(&self) -> ResultSnapshot {
+        ResultSnapshot {
+            status: self.race.status,
+            placings: self.placings.clone(),
+        }
+    }
+}
+
+/// Where races come from (TAB NZ in production).
+pub trait RaceProvider {
+    /// Races scheduled from `now` to at least `now + MAX_LEAD`, without runners.
+    fn schedule(
+        &self,
+        now: DateTime<Utc>,
+    ) -> impl Future<Output = Result<Vec<Race>, RaceError>> + Send;
+
+    /// The current state of `race`, with runners.
+    fn update(&self, race: &Race) -> impl Future<Output = Result<RaceUpdate, RaceError>> + Send;
 }
 
 /// Races that may be chosen, in the order to try them (F3.1–F3.3, schedule

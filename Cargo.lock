@@ -781,6 +781,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "fat-horses-race"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "fat-horses-domain",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
 name = "fat-horses-store"
 version = "0.1.0"
 dependencies = [

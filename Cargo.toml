@@ -8,6 +8,7 @@ edition = "2024"
 publish = false
 
 [workspace.dependencies]
+race = { package = "fat-horses-race", path = "crates/race" }
 store = { package = "fat-horses-store", path = "crates/store" }
 places = { package = "fat-horses-places", path = "crates/places" }
 domain = { package = "fat-horses-domain", path = "crates/domain" }

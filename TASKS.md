@@ -46,7 +46,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 
 ## M3 Adapters and stores
 
-- [ ] **T3.1 `RaceProvider` + TAB NZ client.** Trait in domain; `crates/race` client (reqwest, rustls) mapping TAB JSON to domain types. Tests parse the T1.1 fixtures (no network).
+- [x] **T3.1 `RaceProvider` + TAB NZ client.** Trait in domain; `crates/race` client (reqwest, rustls) mapping TAB JSON to domain types. Tests parse the T1.1 fixtures (no network).
   Needs: T1.1, T2.5.
 - [x] **T3.2 Nominatim geocoder (F1.2, N4).** Client + response parsing tests from recorded fixtures; User-Agent set; 1 request/s limit.
 - [x] **T3.3 Overpass places client (F6.1).** Query builder (radius, amenity list, `out center`) with a snapshot test of the query text; parsing tests from fixtures (T1.5 fixtures if available, otherwise hand-written ones).
