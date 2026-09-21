@@ -178,5 +178,8 @@ async fn pick(store: FileStore, input: StartInput) -> Result<()> {
     })
     .await?;
     print!("{}", render::summary(&done, &deps.countries));
+    if done.status == domain::session::PickStatus::Failed {
+        std::process::exit(1);
+    }
     Ok(())
 }

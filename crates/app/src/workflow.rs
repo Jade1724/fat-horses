@@ -135,7 +135,8 @@ where
 }
 
 /// Step 3: fetch nearby places and guess cuisines for untagged ones (F6.1, F6.3),
-/// while the race hasn't started yet (F6.4).
+/// while the race hasn't started yet (F6.4). A failed lookup leaves
+/// `places_loaded` false; [`ensure_places`] retries it after the race.
 pub async fn prepare_nearby<R, P, C, S>(
     deps: &Deps<R, P, C, S>,
     mut session: PickSession,
@@ -153,10 +154,12 @@ where
         .nearby(loc.lat, loc.lon, session.request.radius_m, &amenities)
         .await
     {
-        Ok(places) => session.places = places,
+        Ok(places) => {
+            session.places = places;
+            session.places_loaded = true;
+        }
         Err(e) => {
-            tracing::warn!(error = %e, "places unavailable");
-            session.fail(PickError::PlacesUnavailable);
+            tracing::warn!(error = %e, "places unavailable; will retry after the race");
             return session;
         }
     }
@@ -170,6 +173,27 @@ where
     .await;
     session.guesses = out.guesses;
     session.llm_unavailable |= out.llm_unavailable;
+    session
+}
+
+/// Before matching: retry the places lookup if it failed earlier; fail the pick
+/// with `places_unavailable` if it still does.
+pub async fn ensure_places<R, P, C, S>(
+    deps: &Deps<R, P, C, S>,
+    mut session: PickSession,
+    now: DateTime<Utc>,
+) -> PickSession
+where
+    P: Places + Sync,
+    C: Classifier + Sync,
+    S: GuessCache + Sync,
+{
+    if !session.places_loaded {
+        session = prepare_nearby(deps, session, now).await;
+        if !session.places_loaded {
+            session.fail(PickError::PlacesUnavailable);
+        }
+    }
     session
 }
 
@@ -438,6 +462,8 @@ where
         }
         clock.sleep_until(clock.now() + POLL_INTERVAL).await;
     }
+    session = ensure_places(deps, session, clock.now()).await;
+    save!();
     session = match_restaurants(deps, session);
     session = fallback_match(deps, session).await;
     save!();

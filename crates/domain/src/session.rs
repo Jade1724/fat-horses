@@ -56,6 +56,9 @@ pub struct PickSession {
     pub interim_placings: Vec<Placing>,
     pub interim_since: Option<DateTime<Utc>>,
     pub winner: Option<Winner>,
+    /// `false` until the places lookup has succeeded (it is retried after the race).
+    #[serde(default)]
+    pub places_loaded: bool,
     pub places: Vec<Place>,
     pub guesses: Vec<Guess>,
     pub matches: Vec<Match>,
@@ -84,6 +87,7 @@ impl PickSession {
             interim_placings: Vec::new(),
             interim_since: None,
             winner: None,
+            places_loaded: false,
             places: Vec::new(),
             guesses: Vec::new(),
             matches: Vec::new(),

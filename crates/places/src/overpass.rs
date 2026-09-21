@@ -194,6 +194,8 @@ mod tests {
 
     const HAND_WRITTEN: &str = include_str!("../tests/fixtures/overpass/hand_written.json");
     const RUNTIME_ERROR: &str = include_str!("../tests/fixtures/overpass/runtime_error.html");
+    /// Real response, recorded 2026-09-21: 500 m around the Sky Tower, Auckland.
+    const SKY_TOWER_500M: &str = include_str!("../tests/fixtures/overpass/sky_tower_500m.json");
     const ORIGIN: (f64, f64) = (-36.848_463_2, 174.762_183);
 
     fn parse(radius: u32) -> Vec<Place> {
@@ -275,6 +277,24 @@ mod tests {
         let unnamed = places.iter().find(|p| p.id == "osm:node/1004").unwrap();
         assert_eq!(unnamed.name, "Unnamed restaurant");
         assert_eq!(unnamed.address, None);
+    }
+
+    #[test]
+    fn real_response_parses() {
+        let places = parse_response(SKY_TOWER_500M, ORIGIN.0, ORIGIN.1, 500).unwrap();
+        assert!(places.len() > 150, "{}", places.len());
+        let tagged = places.iter().filter(|p| p.is_tagged()).count();
+        assert!(tagged > 100, "{tagged}");
+        assert!(places.iter().all(|p| p.distance_m <= 500.0));
+        assert!(
+            places
+                .iter()
+                .any(|p| p.cuisine.iter().any(|c| c == "japanese"))
+        );
+        assert!(places.iter().any(|p| p.id.starts_with("osm:way/")));
+        // Narrowing the radius keeps a subset.
+        let near = parse_response(SKY_TOWER_500M, ORIGIN.0, ORIGIN.1, 200).unwrap();
+        assert!(!near.is_empty() && near.len() < places.len());
     }
 
     #[test]

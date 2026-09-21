@@ -60,7 +60,24 @@ impl RaceProvider for FakeRaces {
     }
 }
 
-struct FakePlaces(Vec<Place>);
+/// Returns its places, after failing the first `failures` calls.
+struct FakePlaces {
+    places: Vec<Place>,
+    failures: Mutex<usize>,
+}
+
+impl FakePlaces {
+    fn new(places: Vec<Place>) -> Self {
+        Self::failing(places, 0)
+    }
+
+    fn failing(places: Vec<Place>, failures: usize) -> Self {
+        Self {
+            places,
+            failures: Mutex::new(failures),
+        }
+    }
+}
 
 impl Places for FakePlaces {
     async fn nearby(
@@ -70,7 +87,12 @@ impl Places for FakePlaces {
         _radius_m: u32,
         _amenities: &[&str],
     ) -> Result<Vec<Place>, PlacesError> {
-        Ok(self.0.clone())
+        let mut left = self.failures.lock().unwrap();
+        if *left > 0 {
+            *left -= 1;
+            return Err(PlacesError::Unavailable("504".into()));
+        }
+        Ok(self.places.clone())
     }
 }
 
@@ -202,12 +224,29 @@ async fn run_with_store(
     places: Vec<Place>,
     classifier: FakeClassifier,
 ) -> Run {
+    run_full(
+        store,
+        schedule,
+        updates,
+        FakePlaces::new(places),
+        classifier,
+    )
+    .await
+}
+
+async fn run_full(
+    store: MemoryStore,
+    schedule: Vec<Race>,
+    updates: Vec<RaceUpdate>,
+    places: FakePlaces,
+    classifier: FakeClassifier,
+) -> Run {
     let deps = Deps {
         races: FakeRaces {
             schedule,
             updates: Mutex::new(updates.into()),
         },
-        places: FakePlaces(places),
+        places,
         classifier,
         store,
         countries: countries(),
@@ -399,6 +438,39 @@ async fn fallback_when_no_primary_match() {
     assert_eq!(r.session.matches.len(), 1);
     assert_eq!(r.session.matches[0].kind, MatchKind::Fallback);
     assert_eq!(r.session.pick.as_deref(), Some("osm:node/9"));
+}
+
+#[tokio::test]
+async fn places_outage_before_the_race_is_retried() {
+    let r = run_full(
+        MemoryStore::new(),
+        vec![race(RaceStatus::Open)],
+        open_then(update(RaceStatus::Final, &[(1, 1)])),
+        FakePlaces::failing(one_per_country(), 1),
+        FakeClassifier::new(),
+    )
+    .await;
+    assert_eq!(r.session.status, PickStatus::Done);
+    assert!(r.session.places_loaded);
+    assert!(r.session.pick.is_some());
+}
+
+#[tokio::test]
+async fn places_outage_after_the_race_fails() {
+    let r = run_full(
+        MemoryStore::new(),
+        vec![race(RaceStatus::Open)],
+        open_then(update(RaceStatus::Final, &[(1, 1)])),
+        FakePlaces::failing(one_per_country(), 2),
+        FakeClassifier::new(),
+    )
+    .await;
+    assert_eq!(r.session.status, PickStatus::Failed);
+    assert_eq!(r.session.error, Some(PickError::PlacesUnavailable));
+    assert!(
+        r.session.winner.is_some(),
+        "the winner is still shown (F5.5)"
+    );
 }
 
 #[tokio::test]

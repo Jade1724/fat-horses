@@ -76,7 +76,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
   Needs: T3.1, T3.2, T3.3, T3.5, T4.1. Done when: a real pick runs end to end (owner runs it once and confirms in `docs/spikes/cli-e2e.md`).
 - [x] **T4.3 CLI `visit`, `skip`, `passport`, `history`.** Tests for output formatting against the in-memory store.
   Needs: T3.5.
-- [ ] **T4.4 HTTP API handlers (§5, F11.1) in `crates/app`.** Request validation, error codes, API-key check (constant time). Tested with in-memory stores and fake request objects.
+- [x] **T4.4 HTTP API handlers (§5, F11.1) in `crates/app`.** Request validation, error codes, API-key check (constant time). Tested with in-memory stores and fake request objects.
   Needs: T4.1.
 - [ ] **T4.5 `api` Lambda binary.** `lambda_http` wiring for T4.4. Runs locally with `cargo lambda watch`, using the JSON-file store and running the workflow in-process in the background, for UI development.
   Needs: T4.4.

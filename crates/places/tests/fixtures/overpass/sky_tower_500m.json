@@ -1,0 +1,3209 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-09-21T10:32:20Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "node",
+  "id": 91921372,
+  "lat": -36.8506597,
+  "lon": 174.7643444,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "irish",
+    "name": "Jax Munster Inn",
+    "phone": "+64 9 377 3147",
+    "website": "https://www.munsterinn.co.nz/",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 317678223,
+  "lat": -36.8505634,
+  "lon": 174.7656167,
+  "tags": {
+    "addr:street": "Lorne Street",
+    "amenity": "restaurant",
+    "cuisine": "vietnamese",
+    "name": "Saigon Chill",
+    "opening_hours": "Mo-Th 11:00-22:00; Fr,Sa 11:00-22:30; Su 11:00-22:00",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 1312240513,
+  "lat": -36.8498865,
+  "lon": 174.7664159,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "18",
+    "addr:postcode": "1010",
+    "addr:street": "Kitchener Street",
+    "amenity": "restaurant",
+    "diet:kosher": "no",
+    "name": "Changan burger",
+    "opening_hours": "Mo-Su 10:00-21:00",
+    "payment:credit_cards": "yes",
+    "payment:debit_cards": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 1538399997,
+  "lat": -36.8481707,
+  "lon": 174.7650909,
+  "tags": {
+    "addr:housenumber": "187-189",
+    "addr:street": "Queen Street",
+    "air_conditioning": "yes",
+    "amenity": "restaurant",
+    "cuisine": "chinese",
+    "name": "得记",
+    "name:en": "BBQ King Restaurant",
+    "name:zh": "得记",
+    "opening_hours": "Mo-Su 11:30-21:00",
+    "phone": "+64 9 368 5218",
+    "toilets": "yes",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 1669619700,
+  "lat": -36.8501213,
+  "lon": 174.7650489,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "268",
+    "addr:street": "Queen Street",
+    "amenity": "fast_food",
+    "branch": "Queen Street",
+    "branch:en": "Queen Street",
+    "branch:mi": "Kuīni Tiriti",
+    "brand": "McDonald's",
+    "brand:en": "McDonald's",
+    "brand:mi": "Makitānara",
+    "brand:wikidata": "Q38076",
+    "cuisine": "burger",
+    "loc_name": "Maccas",
+    "name": "McDonald's",
+    "name:en": "McDonald's",
+    "name:mi": "Makitānara",
+    "takeaway": "yes",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 1723581048,
+  "lat": -36.8506768,
+  "lon": 174.7647980,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "korean",
+    "name": "Bbq Village",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 1789448043,
+  "lat": -36.8489148,
+  "lon": 174.7663473,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "pizza",
+    "name": "High On Pizza"
+  }
+},
+{
+  "type": "node",
+  "id": 1789448054,
+  "lat": -36.8515422,
+  "lon": 174.7639184,
+  "tags": {
+    "amenity": "fast_food",
+    "brand": "BurgerFuel",
+    "brand:wikidata": "Q4998537",
+    "brand:wikipedia": "en:Burger Fuel",
+    "cuisine": "burger",
+    "name": "BurgerFuel",
+    "takeaway": "yes",
+    "website": "https://burgerfuel.com/",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 1789448112,
+  "lat": -36.8498225,
+  "lon": 174.7659586,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "chinese",
+    "name": "Kowloon Cafe",
+    "wheelchair": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 1789448118,
+  "lat": -36.8497238,
+  "lon": 174.7660014,
+  "tags": {
+    "amenity": "restaurant",
+    "brand": "Meet Fresh",
+    "brand:wikidata": "Q11172707",
+    "brand:wikipedia": "en:Meet Fresh",
+    "cuisine": "taiwanese",
+    "name": "Meet Fresh",
+    "opening_hours": "Su-Th 11:00-23:00; Fr,Sa 11:00-24:00",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 2711494014,
+  "lat": -36.8497978,
+  "lon": 174.7586081,
+  "tags": {
+    "addr:unit": "Shed 3",
+    "amenity": "fast_food",
+    "cuisine": "bagel",
+    "name": "Best Ugly Bagels",
+    "outdoor_seating": "yes",
+    "takeaway": "yes",
+    "toilets": "yes",
+    "website": "https://www.bestugly.co.nz/"
+  }
+},
+{
+  "type": "node",
+  "id": 2874845575,
+  "lat": -36.8466179,
+  "lon": 174.7620929,
+  "tags": {
+    "amenity": "restaurant",
+    "diet:halal": "no",
+    "name": "Berlinchen",
+    "opening_hours": "Mo-Sa 07:00-11:00, We-Sa 17:00-21:00, Su 07:00-14:00"
+  }
+},
+{
+  "type": "node",
+  "id": 3292002061,
+  "lat": -36.8480498,
+  "lon": 174.7672225,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "201a/32",
+    "addr:postcode": "1010",
+    "addr:street": "Courthouse Lane",
+    "amenity": "restaurant",
+    "brewery": "yes",
+    "check_date": "2025-09-04",
+    "check_date:opening_hours": "2025-09-04",
+    "cuisine": "sushi",
+    "level": "0",
+    "name": "Sushi Train",
+    "opening_hours": "Mo-Su 11:30-21:30",
+    "outdoor_seating": "no",
+    "phone": "+64 9 368 7200",
+    "toilets": "yes",
+    "website": "https://sushitrain.co.nz/chancery",
+    "website:menu": "https://sushitrain.co.nz/chancery-menu"
+  }
+},
+{
+  "type": "node",
+  "id": 3292060961,
+  "lat": -36.8473338,
+  "lon": 174.7621746,
+  "tags": {
+    "addr:housenumber": "34",
+    "addr:street": "Kingston Street",
+    "amenity": "restaurant",
+    "branch": "Hobson Street",
+    "brand": "Pizza Hut",
+    "brand:wikidata": "Q191615",
+    "brand:wikipedia": "en:Pizza Hut",
+    "check_date:opening_hours": "2023-09-15",
+    "cuisine": "pizza",
+    "name": "Pizza Hut",
+    "opening_hours": "Mo-Su 10:00-23:00",
+    "phone": "+64 9 309 2835"
+  }
+},
+{
+  "type": "node",
+  "id": 3292067761,
+  "lat": -36.8480490,
+  "lon": 174.7668010,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "japanese",
+    "name": "Dengdeng",
+    "opening_hours": "Mo-Su 18:00-03:30",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 3293815362,
+  "lat": -36.8491243,
+  "lon": 174.7644135,
+  "tags": {
+    "amenity": "fast_food",
+    "brand": "Domino's",
+    "brand:wikidata": "Q839466",
+    "brand:wikipedia": "en:Domino's Pizza",
+    "cuisine": "pizza",
+    "delivery": "yes",
+    "diet:halal": "no",
+    "name": "Domino's",
+    "opening_hours": "Su-Th 10:00-01:00, Fr,Sa 10:00-03:00",
+    "takeaway": "yes",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 3579328558,
+  "lat": -36.8503505,
+  "lon": 174.7631383,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "27",
+    "addr:postcode": "1010",
+    "addr:street": "Wellesley Street West",
+    "addr:suburb": "Auckland Central",
+    "amenity": "restaurant",
+    "check_date": "2025-11-21",
+    "name": "Tony's Original Steak & Seafood",
+    "opening_hours": "Mo-Fr 11:45-14:15,17:00-22:00; Sa 17:00-22:00; Su 17:00-21:30",
+    "ref:linz:address_id": "1854925"
+  }
+},
+{
+  "type": "node",
+  "id": 3837892615,
+  "lat": -36.8493632,
+  "lon": 174.7626850,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "90",
+    "addr:postcode": "1010",
+    "addr:street": "Federal Street",
+    "amenity": "restaurant",
+    "cuisine": "italian",
+    "delivery": "no",
+    "name": "Gusto at the Grand",
+    "outdoor_seating": "no",
+    "smoking": "no",
+    "takeaway": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 3838497737,
+  "lat": -36.8493368,
+  "lon": 174.7622728,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "90",
+    "addr:postcode": "1010",
+    "addr:street": "Federal Street",
+    "amenity": "restaurant",
+    "cuisine": "indian",
+    "delivery": "no",
+    "name": "Cassia",
+    "opening_hours": "PH,Mo-Su 17:00-21:30, Fr-Su 12:00-14:30",
+    "outdoor_seating": "no",
+    "smoking": "no",
+    "takeaway": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 4142281889,
+  "lat": -36.8471861,
+  "lon": 174.7662967,
+  "tags": {
+    "addr:housenumber": "15",
+    "addr:street": "Vulcan Lane",
+    "amenity": "restaurant",
+    "cuisine": "japanese",
+    "name": "Sushi Factory",
+    "opening_hours": "Su-Th 11:00-15:30; Fr,Sa 11:00-20:00",
+    "phone": "+64 9 307 3600",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 4218296998,
+  "lat": -36.8497484,
+  "lon": 174.7583876,
+  "tags": {
+    "amenity": "restaurant",
+    "changing_table": "no",
+    "internet_access": "wlan",
+    "internet_access:fee": "no",
+    "name": "Odettes",
+    "toilets": "unisex",
+    "toilets:access": "customers",
+    "wheelchair": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 4218297091,
+  "lat": -36.8473349,
+  "lon": 174.7650454,
+  "tags": {
+    "addr:housenumber": "12",
+    "addr:street": "Wyndham Street",
+    "addr:suburb": "Auckland Central",
+    "amenity": "restaurant",
+    "name": "Culprit Dining Room & Bar",
+    "ref:linz:address_id": "1132020"
+  }
+},
+{
+  "type": "node",
+  "id": 4308190090,
+  "lat": -36.8478049,
+  "lon": 174.7614686,
+  "tags": {
+    "amenity": "fast_food",
+    "cuisine": "burger;kebab",
+    "indoor_seating": "yes",
+    "level": "0",
+    "name": "Chill & Grill",
+    "takeaway": "yes",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 4383563190,
+  "lat": -36.8489282,
+  "lon": 174.7624718,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "86",
+    "addr:postcode": "1010",
+    "addr:street": "Federal Street",
+    "addr:suburb": "Auckland Central",
+    "amenity": "restaurant",
+    "bar": "yes",
+    "brewery": "yes",
+    "check_date": "2025-08-14",
+    "cuisine": "Delicatessen",
+    "delivery": "no",
+    "internet_access": "wlan",
+    "internet_access:fee": "no",
+    "internet_access:ssid": "SKYCITY FREE WIFI",
+    "level": "0",
+    "name": "Federal Delicatessen",
+    "opening_hours": "Mo-Th 08:00-15:00; Fr-Sa 08:00-21:00, Su 08:00-16:00",
+    "outdoor_seating": "yes",
+    "phone": "+64 9 363 7184",
+    "ref:linz:address_id": "1123683",
+    "reservation": "no",
+    "smoking": "no",
+    "website": "https://thefed.co.nz"
+  }
+},
+{
+  "type": "node",
+  "id": 4753906378,
+  "lat": -36.8502778,
+  "lon": 174.7604628,
+  "tags": {
+    "amenity": "fast_food",
+    "brand": "Subway",
+    "brand:wikidata": "Q244457",
+    "brand:wikipedia": "en:Subway (restaurant)",
+    "cuisine": "sandwich",
+    "diet:halal": "no",
+    "drive_through": "no",
+    "name": "Subway",
+    "opening_hours": "Mo-Fr 07:00-21:00; Sa 08:00-21:00; Su 08:00-20:00",
+    "takeaway": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 4753906390,
+  "lat": -36.8472715,
+  "lon": 174.7611843,
+  "tags": {
+    "amenity": "fast_food",
+    "cuisine": "indian",
+    "name": "Akbar Durbar",
+    "opening_hours": "Mo-Su 12:00-24:00"
+  }
+},
+{
+  "type": "node",
+  "id": 4753906391,
+  "lat": -36.8472837,
+  "lon": 174.7612312,
+  "tags": {
+    "amenity": "fast_food",
+    "cuisine": "indian",
+    "diet:halal": "yes",
+    "name": "Bal Ganga",
+    "opening_hours": "Mo-Su 09:30-22:00"
+  }
+},
+{
+  "type": "node",
+  "id": 4753906393,
+  "lat": -36.8473219,
+  "lon": 174.7613817,
+  "tags": {
+    "addr:housenumber": "51D",
+    "addr:street": "Hobson Street",
+    "amenity": "fast_food",
+    "cuisine": "chicken",
+    "diet:halal": "yes",
+    "name": "New Sensational Kebab & Fried Chicken",
+    "opening_hours": "Sa-Th 11:30-03:00, Fr 11:30-14:00,16:00-03:00"
+  }
+},
+{
+  "type": "node",
+  "id": 4753906394,
+  "lat": -36.8474428,
+  "lon": 174.7617092,
+  "tags": {
+    "amenity": "fast_food",
+    "brand": "Saravanaa Bhavan",
+    "brand:wikidata": "Q3528082",
+    "cuisine": "indian;south_indian",
+    "indoor_seating": "yes",
+    "name": "Saravanaa Bhavan",
+    "outdoor_seating": "no",
+    "takeaway": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 4753906396,
+  "lat": -36.8477348,
+  "lon": 174.7615878,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "indian",
+    "diet:halal": "yes",
+    "name": "Raviz",
+    "opening_hours": "PH,Mo-Su 11:00-24:00+"
+  }
+},
+{
+  "type": "node",
+  "id": 4753906397,
+  "lat": -36.8476641,
+  "lon": 174.7616185,
+  "tags": {
+    "amenity": "restaurant",
+    "brand": "Denny's",
+    "brand:wikidata": "Q1189695",
+    "brand:wikipedia": "en:Denny's",
+    "cuisine": "american",
+    "diet:halal": "yes",
+    "name": "Denny's",
+    "opening_hours": "24/7"
+  }
+},
+{
+  "type": "node",
+  "id": 4769024245,
+  "lat": -36.8496020,
+  "lon": 174.7660559,
+  "tags": {
+    "amenity": "restaurant",
+    "check_date:opening_hours": "2023-09-20",
+    "cuisine": "chinese",
+    "name": "Chong Qing",
+    "opening_hours": "Mo-Su 11:00-21:00",
+    "wheelchair": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 4769024246,
+  "lat": -36.8475203,
+  "lon": 174.7670278,
+  "tags": {
+    "amenity": "restaurant",
+    "check_date": "2025-09-02",
+    "cuisine": "korean",
+    "name": "Sophia"
+  }
+},
+{
+  "type": "node",
+  "id": 4769024251,
+  "lat": -36.8469789,
+  "lon": 174.7671720,
+  "tags": {
+    "amenity": "restaurant",
+    "name": "Vivace",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 4769024253,
+  "lat": -36.8478217,
+  "lon": 174.7672834,
+  "tags": {
+    "amenity": "fast_food",
+    "brand": "Krispy Kreme",
+    "brand:wikidata": "Q1192805",
+    "check_date": "2025-09-04",
+    "check_date:opening_hours": "2025-09-04",
+    "cuisine": "donut",
+    "name": "Krispy Kreme",
+    "opening_hours": "Mo-Fr 08:00-20:30; Sa,Su 09:00-21:00",
+    "takeaway": "yes",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 4769024254,
+  "lat": -36.8483174,
+  "lon": 174.7665098,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "korean",
+    "name": "Dong De Moon",
+    "name:en": "Dong De Moon",
+    "name:ja": "東大門",
+    "opening_hours": "Mo 17:00-24:00, Tu-Th 12:00-24:00, Fr,Sa 12:00-01:00, Su 12:00-23:00",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 4769024256,
+  "lat": -36.8471632,
+  "lon": 174.7662389,
+  "tags": {
+    "amenity": "restaurant",
+    "check_date:opening_hours": "2024-03-05",
+    "cuisine": "indian",
+    "name": "Curries and Kebabs",
+    "opening_hours:signed": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 4769024313,
+  "lat": -36.8512144,
+  "lon": 174.7645715,
+  "tags": {
+    "amenity": "fast_food",
+    "cuisine": "chicken",
+    "name": "ChickQueen",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 4769024315,
+  "lat": -36.8520320,
+  "lon": 174.7642609,
+  "tags": {
+    "addr:city": "Auckland",
+    "amenity": "fast_food",
+    "name": "Toro Churro",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 4769024317,
+  "lat": -36.8519539,
+  "lon": 174.7647920,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "chinese",
+    "name": "Palsun",
+    "opening_hours": "Mo-Sa 11:30-15:00,17:00-20:30"
+  }
+},
+{
+  "type": "node",
+  "id": 4797304729,
+  "lat": -36.8500545,
+  "lon": 174.7640223,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "japanese",
+    "name": "Nikko Japanese Restaurant",
+    "name:en": "Nikko Japanese Restaurant",
+    "name:ja": "日光"
+  }
+},
+{
+  "type": "node",
+  "id": 4797304730,
+  "lat": -36.8495488,
+  "lon": 174.7641986,
+  "tags": {
+    "amenity": "fast_food",
+    "cuisine": "pizza",
+    "name": "Pizza Club",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 4797304732,
+  "lat": -36.8496176,
+  "lon": 174.7639296,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "chinese",
+    "diet:halal": "yes",
+    "name": "Dragon Boat Restaurant",
+    "opening_hours": "Mo-Su 09:30-15:30,05:30-22:00",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 4797304733,
+  "lat": -36.8492359,
+  "lon": 174.7643606,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "indian",
+    "diet:halal": "only",
+    "name": "Tandoor",
+    "opening_hours": "Mo-Su 12:00-22:00+"
+  }
+},
+{
+  "type": "node",
+  "id": 4797304735,
+  "lat": -36.8476639,
+  "lon": 174.7633361,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "japanese",
+    "name": "Rakuten",
+    "name:en": "Rakuten",
+    "name:ja": "楽伝"
+  }
+},
+{
+  "type": "node",
+  "id": 4797304742,
+  "lat": -36.8485718,
+  "lon": 174.7642387,
+  "tags": {
+    "amenity": "restaurant",
+    "check_date:opening_hours": "2025-09-04",
+    "name": "Tonys Lord Nelson Restaurant",
+    "opening_hours": "We-Fr 12:00-14:30, Mo-Su 17:00-22:00"
+  }
+},
+{
+  "type": "node",
+  "id": 4797304743,
+  "lat": -36.8481042,
+  "lon": 174.7647051,
+  "tags": {
+    "amenity": "fast_food",
+    "cuisine": "japanese",
+    "name": "Kushi Takeaway",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 4810883921,
+  "lat": -36.8509351,
+  "lon": 174.7652498,
+  "tags": {
+    "amenity": "fast_food",
+    "cuisine": "chinese",
+    "name": "Lailai Liang Pi",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 4814853857,
+  "lat": -36.8506116,
+  "lon": 174.7661065,
+  "tags": {
+    "addr:housenumber": "2",
+    "addr:postcode": "1010",
+    "addr:street": "Kitchener Street",
+    "addr:suburb": "Auckland Central",
+    "amenity": "restaurant",
+    "building:flats": "11",
+    "cuisine": "chinese",
+    "name": "1982 Xinjiang Rice Noodle",
+    "opening_hours": "Tu-Su 11:00-20:00",
+    "ref:linz:address_id": "3079988",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 4814853858,
+  "lat": -36.8506770,
+  "lon": 174.7660412,
+  "tags": {
+    "amenity": "restaurant",
+    "name": "Red Pig",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 4814853859,
+  "lat": -36.8506399,
+  "lon": 174.7659302,
+  "tags": {
+    "amenity": "restaurant",
+    "name": "Yo Si Noodle Bar",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 4814853860,
+  "lat": -36.8497140,
+  "lon": 174.7665405,
+  "tags": {
+    "addr:housenumber": "22",
+    "addr:street": "Kitchener Street",
+    "amenity": "restaurant",
+    "check_date:opening_hours": "2023-09-26",
+    "cuisine": "chinese",
+    "diet:halal": "only",
+    "name": "No. 1 Handmade Lanzhou Beef Ramen",
+    "opening_hours:signed": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 5021399232,
+  "lat": -36.8446829,
+  "lon": 174.7603376,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "chinese",
+    "name": "Grand Harbour Chinese Restaurant",
+    "name:en": "Grand Harbour Chinese Restaurant",
+    "name:mk": "Кинески ресторан „Гранд харбор“",
+    "opening_hours": "Mo-Fr 11:00-15:00, 17:30-22:00; Sa-Su 10:30-15:00, 17:30-22:00",
+    "phone": "+64 9 357 6889"
+  }
+},
+{
+  "type": "node",
+  "id": 5021399260,
+  "lat": -36.8500046,
+  "lon": 174.7647073,
+  "tags": {
+    "amenity": "fast_food",
+    "name": "Avachi",
+    "takeaway": "only",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 5021399261,
+  "lat": -36.8501087,
+  "lon": 174.7646197,
+  "tags": {
+    "amenity": "fast_food",
+    "brand": "Subway",
+    "brand:wikidata": "Q244457",
+    "brand:wikipedia": "en:Subway (restaurant)",
+    "cuisine": "sandwich",
+    "name": "Subway",
+    "takeaway": "only",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 5163973524,
+  "lat": -36.8465551,
+  "lon": 174.7664221,
+  "tags": {
+    "addr:housenumber": "3",
+    "addr:postcode": "1010",
+    "addr:street": "Shortland Street",
+    "amenity": "fast_food",
+    "brand": "Taco Bell",
+    "brand:wikidata": "Q752941",
+    "brand:wikipedia": "en:Taco Bell",
+    "cuisine": "tex-mex",
+    "name": "Taco Bell",
+    "opening_hours": "Mo-Su 10:00-22:00",
+    "takeaway": "yes",
+    "website": "https://www.tacobell.co.nz/"
+  }
+},
+{
+  "type": "node",
+  "id": 5235551921,
+  "lat": -36.8496880,
+  "lon": 174.7657409,
+  "tags": {
+    "amenity": "restaurant",
+    "check_date": "2024-10-07",
+    "cuisine": "korean",
+    "name": "Faro",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 5257025321,
+  "lat": -36.8485899,
+  "lon": 174.7627187,
+  "tags": {
+    "amenity": "restaurant",
+    "name": "The Glass Goose",
+    "opening_hours": "Su-Th 11:30-02:00, Fr 11:30-03:00, Sa 11:30-04:00"
+  }
+},
+{
+  "type": "node",
+  "id": 5355634922,
+  "lat": -36.8485882,
+  "lon": 174.7664882,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "50",
+    "addr:postcode": "1010",
+    "addr:street": "High Street",
+    "addr:suburb": "Auckland Central",
+    "amenity": "restaurant",
+    "building:flats": "6",
+    "contact:facebook": "sunflowerthairestaurant",
+    "cuisine": "asian;thai",
+    "diet:vegan": "only",
+    "diet:vegetarian": "yes",
+    "name": "Sunflower Thai Vegetarian Restaurant",
+    "opening_hours": "Mo-Sa 12:00-15:00,17:00-21:00",
+    "phone": "+64 9 302 0616",
+    "ref:linz:address_id": "1132274",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 5400468722,
+  "lat": -36.8490506,
+  "lon": 174.7624171,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "88",
+    "addr:postcode": "1010",
+    "addr:street": "Federal Street",
+    "addr:suburb": "Auckland Central",
+    "amenity": "restaurant",
+    "check_date:opening_hours": "2023-09-15",
+    "cuisine": "regional",
+    "delivery": "no",
+    "name": "Depot",
+    "opening_hours": "Mo-Fr 07:00+; Sa,Su 11:00+",
+    "outdoor_seating": "yes",
+    "ref:linz:address_id": "1123688",
+    "takeaway": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 5400469233,
+  "lat": -36.8471632,
+  "lon": 174.7584105,
+  "tags": {
+    "addr:housenumber": "5",
+    "addr:street": "Hardinge Street",
+    "addr:suburb": "Auckland Central",
+    "amenity": "restaurant",
+    "cuisine": "vietnamese",
+    "name": "Hello Mister",
+    "opening_hours": "Mo-Fr 10:00-16:00; Sa 10:00-14:00",
+    "phone": "+64 9 365 2566"
+  }
+},
+{
+  "type": "node",
+  "id": 5400471338,
+  "lat": -36.8469222,
+  "lon": 174.7671818,
+  "tags": {
+    "addr:housenumber": "3",
+    "addr:postcode": "1010",
+    "addr:street": "O'Connell Street",
+    "addr:suburb": "Auckland Central",
+    "amenity": "restaurant",
+    "cuisine": "japanese;soba",
+    "name": "Kajiken",
+    "opening_hours": "Mo-Sa 11:30-20:30; Su 11:30-15:30",
+    "ref:linz:address_id": "1655778"
+  }
+},
+{
+  "type": "node",
+  "id": 5400472562,
+  "lat": -36.8482089,
+  "lon": 174.7676971,
+  "tags": {
+    "addr:housenumber": "21",
+    "addr:street": "Bacon's Lane",
+    "addr:suburb": "Auckland Central",
+    "amenity": "restaurant",
+    "cuisine": "malaysian",
+    "description": "Malaysian restaurant in the heart of the city.",
+    "name": "Mamak Malaysian",
+    "outdoor_seating": "yes",
+    "ref:linz:address_id": "2038411"
+  }
+},
+{
+  "type": "node",
+  "id": 5400478996,
+  "lat": -36.8480804,
+  "lon": 174.7627761,
+  "tags": {
+    "addr:housenumber": "64A",
+    "addr:street": "Federal Street",
+    "addr:suburb": "Auckland Central",
+    "amenity": "fast_food",
+    "diet:halal": "yes",
+    "name": "Izmir Kebab and Grill",
+    "phone": "+64 9 600 3515",
+    "ref:linz:address_id": "2013514",
+    "website": "https://izmirkebabgrill.co.nz"
+  }
+},
+{
+  "type": "node",
+  "id": 5450343122,
+  "lat": -36.8472087,
+  "lon": 174.7669411,
+  "tags": {
+    "addr:housenumber": "16",
+    "addr:street": "High Street",
+    "amenity": "fast_food",
+    "name": "Vulcan Lane Bagels",
+    "opening_hours": "Mo-Fr 07:00-15:00"
+  }
+},
+{
+  "type": "node",
+  "id": 5475776226,
+  "lat": -36.8453102,
+  "lon": 174.7647081,
+  "tags": {
+    "amenity": "restaurant",
+    "check_date:opening_hours": "2025-09-03",
+    "cuisine": "japanese",
+    "diet:halal": "no",
+    "name": "Ichiban Ramen",
+    "name:en": "Ichiban Ramen",
+    "name:ja": "一番らーめん",
+    "opening_hours": "Mo 11:30-15:00,17:00-21:00; Tu-Fr 11:30-24:00; Sa 17:30-24:00"
+  }
+},
+{
+  "type": "node",
+  "id": 5475776227,
+  "lat": -36.8493381,
+  "lon": 174.7658620,
+  "tags": {
+    "amenity": "restaurant",
+    "check_date": "2025-12-28",
+    "cuisine": "japanese",
+    "diet:halal": "yes",
+    "name": "Yoshizawa",
+    "name:en": "Yoshizawa",
+    "name:ja": "吉沢",
+    "opening_hours": "Tu-Su 11:00-20:00"
+  }
+},
+{
+  "type": "node",
+  "id": 5502689857,
+  "lat": -36.8466281,
+  "lon": 174.7641174,
+  "tags": {
+    "amenity": "restaurant",
+    "name": "The Grove",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 5750573821,
+  "lat": -36.8491524,
+  "lon": 174.7623443,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "90",
+    "addr:postcode": "1010",
+    "addr:street": "Federal Street",
+    "addr:suburb": "Auckland Central",
+    "amenity": "restaurant",
+    "cuisine": "japanese",
+    "delivery": "no",
+    "name": "Masu by Nic Watt",
+    "opening_hours": "Su,Mo 17:00-21:30; Tu-Sa 17:00-22:00",
+    "outdoor_seating": "yes",
+    "ref:linz:address_id": "1123703",
+    "smoking": "no",
+    "takeaway": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 5750601134,
+  "lat": -36.8489728,
+  "lon": 174.7621539,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "87",
+    "addr:postcode": "1010",
+    "addr:street": "Federal Street",
+    "amenity": "restaurant",
+    "check_date": "2024-10-11",
+    "cuisine": "chinese",
+    "delivery": "no",
+    "name": "Huami",
+    "outdoor_seating": "no",
+    "smoking": "no",
+    "takeaway": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 5750622956,
+  "lat": -36.8489431,
+  "lon": 174.7616288,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "Corner",
+    "addr:postcode": "1010",
+    "addr:street": "Federal Street & Victoria Street",
+    "amenity": "restaurant",
+    "cuisine": "buffet",
+    "delivery": "no",
+    "level": "3",
+    "name": "Fortuna Buffet Restaurant",
+    "outdoor_seating": "no",
+    "smoking": "no",
+    "takeaway": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 5750701393,
+  "lat": -36.8486669,
+  "lon": 174.7619404,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "Corner",
+    "addr:postcode": "1010",
+    "addr:street": "Federal Street & Victoria Street",
+    "amenity": "restaurant",
+    "cuisine": "burger",
+    "delivery": "no",
+    "level": "2",
+    "name": "Andy's Burgers & Bar",
+    "outdoor_seating": "yes",
+    "smoking": "outside",
+    "takeaway": "no",
+    "website": "https://www.skycityauckland.co.nz/restaurants/andys-burgers-bar/"
+  }
+},
+{
+  "type": "node",
+  "id": 5750708108,
+  "lat": -36.8497254,
+  "lon": 174.7616529,
+  "tags": {
+    "addr:housenumber": "Corner",
+    "addr:street": "Federal Street & Victoria Street",
+    "amenity": "restaurant",
+    "cuisine": "chinese;indian;european",
+    "level": "2",
+    "min_age": "20",
+    "name": "Food Repubic",
+    "outdoor_seating": "no",
+    "smoking": "outside",
+    "website": "https://skycityauckland.co.nz/restaurants/food-republic/"
+  }
+},
+{
+  "type": "node",
+  "id": 5898166485,
+  "lat": -36.8476612,
+  "lon": 174.7591123,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "151",
+    "addr:postcode": "1010",
+    "addr:street": "Victoria Street West",
+    "amenity": "fast_food",
+    "brand": "Pita Pit",
+    "brand:wikidata": "Q7757289",
+    "brand:wikipedia": "en:Pita Pit",
+    "contact:facebook": "https://www.facebook.com/pitapitnz",
+    "contact:instagram": "https://www.instagram.com/PitaPitnz/",
+    "contact:website": "https://www.pitapit.co.nz/",
+    "cuisine": "pita",
+    "diet:vegetarian": "yes",
+    "name": "Pita Pit",
+    "takeaway": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 5902983186,
+  "lat": -36.8480513,
+  "lon": 174.7663332,
+  "tags": {
+    "amenity": "fast_food",
+    "check_date": "2024-10-22",
+    "name": "Sushi Pac",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 6127276685,
+  "lat": -36.8467377,
+  "lon": 174.7594072,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "21",
+    "addr:postcode": "1010",
+    "addr:street": "Graham Street",
+    "addr:suburb": "Auckland Central",
+    "amenity": "restaurant",
+    "cuisine": "indian",
+    "name": "Times of India",
+    "opening_hours": "Mo-Fr 12:00-14:00, 16:00-22:00; Sa 17:00-23:00",
+    "website": "https://timesofindia.co.nz/"
+  }
+},
+{
+  "type": "node",
+  "id": 6133431586,
+  "lat": -36.8506850,
+  "lon": 174.7644732,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "265",
+    "addr:postcode": "1010",
+    "addr:street": "Queen Street",
+    "amenity": "fast_food",
+    "brand": "Sal's Pizza",
+    "brand:wikidata": "Q115566078",
+    "check_date:opening_hours": "2025-09-03",
+    "cuisine": "pizza",
+    "delivery": "yes",
+    "drive_through": "no",
+    "name": "Sal’s Pizza",
+    "opening_hours": "Mo-Su 11:00-22:00",
+    "outdoor_seating": "no",
+    "phone": "+64 9 300 7257",
+    "smoking": "no",
+    "takeaway": "yes",
+    "wheelchair": "limited"
+  }
+},
+{
+  "type": "node",
+  "id": 6221574285,
+  "lat": -36.8493288,
+  "lon": 174.7639056,
+  "tags": {
+    "amenity": "fast_food",
+    "name": "Auckland Night Market",
+    "opening_hours": "Sa 17:00-00:00"
+  }
+},
+{
+  "type": "node",
+  "id": 6400027385,
+  "lat": -36.8501226,
+  "lon": 174.7646708,
+  "tags": {
+    "addr:housenumber": "239-249",
+    "addr:street": "Queen Street",
+    "amenity": "fast_food",
+    "cuisine": "vietnamese",
+    "name": "Banh Mi King",
+    "opening_hours": "Mo-Su 09:30-21:30"
+  }
+},
+{
+  "type": "node",
+  "id": 6950904685,
+  "lat": -36.8473012,
+  "lon": 174.7650663,
+  "tags": {
+    "addr:housenumber": "12 Level 1",
+    "addr:street": "Wyndham Street",
+    "amenity": "restaurant",
+    "check_date": "2023-09-18",
+    "name": "Culprit"
+  }
+},
+{
+  "type": "node",
+  "id": 7161362185,
+  "lat": -36.8484624,
+  "lon": 174.7659183,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "9",
+    "addr:street": "Durham Street East",
+    "amenity": "restaurant",
+    "name": "Mezze Bar",
+    "phone": "+64 9 307 2029",
+    "website": "https://mezzebar.co.nz/",
+    "wheelchair": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 7357557112,
+  "lat": -36.8496056,
+  "lon": 174.7589909,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "1/90",
+    "addr:postcode": "1010",
+    "addr:street": "Wellesley Street West",
+    "addr:suburb": "Auckland Central",
+    "amenity": "restaurant",
+    "cuisine": "mexican",
+    "name": "Tacoteca",
+    "opening_hours": "Su-Mo 11:30-15:00; Tu-Sa 11:30-21:30",
+    "outdoor_seating": "yes",
+    "phone": "+64 9 320 1336",
+    "website": "https://www.tacoteca.co.nz/"
+  }
+},
+{
+  "type": "node",
+  "id": 7750214085,
+  "lat": -36.8481437,
+  "lon": 174.7654122,
+  "tags": {
+    "addr:housenumber": "175",
+    "addr:postcode": "1010",
+    "addr:street": "Queen Street",
+    "alt_name": "Dunkin' Donuts",
+    "amenity": "fast_food",
+    "brand": "Dunkin'",
+    "brand:wikidata": "Q847743",
+    "brand:wikipedia": "en:Dunkin' Donuts",
+    "check_date:opening_hours": "2025-09-03",
+    "cuisine": "donut;coffee_shop",
+    "name": "Dunkin'",
+    "opening_hours": "Su-We 07:00-21:00; Th-Sa 07:00-22:00",
+    "takeaway": "yes",
+    "website": "https://www.dunkindonuts.co.nz/"
+  }
+},
+{
+  "type": "node",
+  "id": 8232349957,
+  "lat": -36.8507479,
+  "lon": 174.7652968,
+  "tags": {
+    "addr:housenumber": "33",
+    "addr:street": "Lorne Street",
+    "amenity": "fast_food",
+    "check_date": "2025-02-23",
+    "cuisine": "chinese;crepes",
+    "name": "Bing Girl"
+  }
+},
+{
+  "type": "node",
+  "id": 8232349958,
+  "lat": -36.8483948,
+  "lon": 174.7660504,
+  "tags": {
+    "addr:city": "Auckland Central",
+    "addr:housenumber": "10",
+    "addr:street": "Durham Street East",
+    "amenity": "restaurant",
+    "cuisine": "japanese",
+    "diet:meat": "yes",
+    "diet:non-vegetarian": "yes",
+    "diet:pescetarian": "yes",
+    "diet:vegetarian": "yes",
+    "name": "Go Ramen",
+    "opening_hours": "Mo-Sa 11:00-20:00",
+    "website": "https://goramen.co.nz"
+  }
+},
+{
+  "type": "node",
+  "id": 8340691584,
+  "lat": -36.8472750,
+  "lon": 174.7672588,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "12",
+    "addr:postcode": "1010",
+    "addr:street": "O'Connell Street",
+    "addr:suburb": "Auckland Central",
+    "amenity": "restaurant",
+    "building:flats": "12",
+    "check_date": "2025-09-02",
+    "cuisine": "asian",
+    "diet:vegetarian": "yes",
+    "name": "Sumthin Dumplin",
+    "opening_hours": "Mo-Fr 11:00-20:00",
+    "phone": "+64 9 300 7546",
+    "ref:linz:address_id": "1132023",
+    "website": "https://sumthindumplin.co.nz"
+  }
+},
+{
+  "type": "node",
+  "id": 8973539894,
+  "lat": -36.8478171,
+  "lon": 174.7575336,
+  "tags": {
+    "amenity": "fast_food",
+    "brand": "Subway",
+    "brand:wikidata": "Q244457",
+    "brand:wikipedia": "en:Subway (restaurant)",
+    "check_date": "2024-01-23",
+    "cuisine": "sandwich",
+    "name": "Subway",
+    "takeaway": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 9018603109,
+  "lat": -36.8510142,
+  "lon": 174.7654231,
+  "tags": {
+    "addr:street": "Lorne Street",
+    "amenity": "fast_food",
+    "contact:facebook": "SumthinDumplin",
+    "contact:instagram": "sumthindumplin",
+    "cuisine": "dumpling",
+    "diet:halal": "no",
+    "name": "Sumthin Dumplin",
+    "opening_hours": "Tu-Su 11:00-21:00",
+    "phone": "+64 9 218 9084",
+    "website": "https://sumthindumplin.co.nz/"
+  }
+},
+{
+  "type": "node",
+  "id": 9552824422,
+  "lat": -36.8469534,
+  "lon": 174.7646595,
+  "tags": {
+    "amenity": "restaurant",
+    "check_date": "2024-10-07",
+    "cuisine": "italian",
+    "name": "Mozzarella & Co."
+  }
+},
+{
+  "type": "node",
+  "id": 9816325217,
+  "lat": -36.8481771,
+  "lon": 174.7627975,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "mexican",
+    "name": "Mr Taco",
+    "opening_hours": "Mo-Fr 09:00-19:00; Sa 10:00-20:00; Su 11:00-17:00",
+    "website": "https://m.facebook.com/107637254343422/"
+  }
+},
+{
+  "type": "node",
+  "id": 9863015517,
+  "lat": -36.8472140,
+  "lon": 174.7664288,
+  "tags": {
+    "addr:housenumber": "19",
+    "addr:postcode": "1010",
+    "addr:street": "Vulcan Lane",
+    "amenity": "fast_food",
+    "name": "Better Burger",
+    "opening_hours": "Mo-Su 11:00-22:00",
+    "website": "https://www.betterburger.co.nz/"
+  }
+},
+{
+  "type": "node",
+  "id": 10062742966,
+  "lat": -36.8481857,
+  "lon": 174.7662739,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "47",
+    "addr:postcode": "1010",
+    "addr:street": "High Street",
+    "amenity": "restaurant",
+    "cuisine": "japanese",
+    "name": "The Don"
+  }
+},
+{
+  "type": "node",
+  "id": 10062750859,
+  "lat": -36.8480111,
+  "lon": 174.7666869,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "1",
+    "addr:postcode": "1010",
+    "addr:street": "Courthouse Lane",
+    "amenity": "restaurant",
+    "cuisine": "korean",
+    "name": "Twelve Restaurant"
+  }
+},
+{
+  "type": "node",
+  "id": 10553849412,
+  "lat": -36.8484287,
+  "lon": 174.7669267,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "2m/1",
+    "addr:postcode": "1010",
+    "addr:street": "Courthouse Lane",
+    "amenity": "restaurant",
+    "cuisine": "italian;italian_pizza;pizza",
+    "name": "That's Amore",
+    "opening_hours": "Tu-Su 17:00-21:30",
+    "website": "https://www.thatsamore.co.nz/"
+  }
+},
+{
+  "type": "node",
+  "id": 10736705505,
+  "lat": -36.8472748,
+  "lon": 174.7665828,
+  "tags": {
+    "amenity": "restaurant",
+    "check_date:opening_hours": "2024-03-05",
+    "cuisine": "chinese",
+    "name": "City Best 3",
+    "opening_hours:signed": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 11074305205,
+  "lat": -36.8468812,
+  "lon": 174.7630351,
+  "tags": {
+    "addr:housenumber": "41",
+    "addr:street": "Federal Street",
+    "amenity": "restaurant",
+    "name": "Mar Sushi&Don Auckland CBD",
+    "opening_hours": "Mo-Fr 11:00-18:00"
+  }
+},
+{
+  "type": "node",
+  "id": 11074317105,
+  "lat": -36.8481103,
+  "lon": 174.7647967,
+  "tags": {
+    "addr:street": "Durham Street West",
+    "amenity": "restaurant",
+    "name": "One Soju Korean restaurant"
+  }
+},
+{
+  "type": "node",
+  "id": 11082118230,
+  "lat": -36.8501727,
+  "lon": 174.7635058,
+  "tags": {
+    "amenity": "restaurant",
+    "contact:facebook": "https://facebook.com/De-Niro-473553859352142/",
+    "contact:instagram": "https://instagram.com/deniro_restaurant/",
+    "cuisine": "italian",
+    "name": "De Niro Ristorante",
+    "opening_hours": "Mo-Su 12:00-21:00",
+    "phone": "+64 9 365 1166",
+    "website": "https://www.elliottstables.co.nz/deniro",
+    "website:menu": "https://www.elliottstables.co.nz/s/deniro-menus.pdf"
+  }
+},
+{
+  "type": "node",
+  "id": 11082118231,
+  "lat": -36.8503351,
+  "lon": 174.7634401,
+  "tags": {
+    "amenity": "fast_food",
+    "contact:facebook": "https://facebook.com/BonzCajunKitchen/",
+    "contact:instagram": "https://instagram.com/bonzcajun_kitchen/",
+    "cuisine": "mexican",
+    "name": "Bonz Cajun Kitchen",
+    "opening_hours": "Mo-Su 12:00-21:00",
+    "phone": "+64 9 309 3025",
+    "website": "https://www.elliottstables.co.nz/eat/bonz-cajun-kitchen",
+    "website:menu": "https://www.elliottstables.co.nz/s/Bonz-Cajun-Menus.pdf"
+  }
+},
+{
+  "type": "node",
+  "id": 11204043264,
+  "lat": -36.8509563,
+  "lon": 174.7652047,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "asian;korean",
+    "disused:amenity": "cafe",
+    "name": "Nolbune Korean Restaurant",
+    "opening_hours": "Mo-Su 11:00-21:00"
+  }
+},
+{
+  "type": "node",
+  "id": 11204048098,
+  "lat": -36.8497494,
+  "lon": 174.7657426,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "chinese",
+    "name": "The Taste of China"
+  }
+},
+{
+  "type": "node",
+  "id": 11204049605,
+  "lat": -36.8508772,
+  "lon": 174.7652538,
+  "tags": {
+    "amenity": "fast_food",
+    "check_date:opening_hours": "2023-09-24",
+    "name": "Nice Pancake",
+    "opening_hours:signed": "no",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 11204063747,
+  "lat": -36.8509418,
+  "lon": 174.7654685,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "thai",
+    "name": "Chom Na",
+    "opening_hours": "Mo-Su 11:00-21:00"
+  }
+},
+{
+  "type": "node",
+  "id": 11204075527,
+  "lat": -36.8500718,
+  "lon": 174.7656188,
+  "tags": {
+    "amenity": "fast_food",
+    "cuisine": "chicken",
+    "name": "Nene Chicken"
+  }
+},
+{
+  "type": "node",
+  "id": 11204078683,
+  "lat": -36.8503676,
+  "lon": 174.7656881,
+  "tags": {
+    "addr:housenumber": "26",
+    "addr:street": "Lorne Street",
+    "amenity": "restaurant",
+    "cuisine": "korean",
+    "disused:shop": "yes",
+    "name": "ssam jang",
+    "opening_hours": "Tu-Su 12:00-15:00, Tu-Su 16:00-23:00",
+    "wheelchair": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 11204093039,
+  "lat": -36.8498419,
+  "lon": 174.7657069,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "chinese",
+    "name": "Cafe BBQ Duck"
+  }
+},
+{
+  "type": "node",
+  "id": 11204094537,
+  "lat": -36.8499234,
+  "lon": 174.7655004,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "chinese",
+    "name": "Biang Biang",
+    "opening_hours": "Mo 11:00-19:00, Tu,We,Su 10:45-07:00, Th-Sa 10:45-19:30"
+  }
+},
+{
+  "type": "node",
+  "id": 11204095295,
+  "lat": -36.8498563,
+  "lon": 174.7659084,
+  "tags": {
+    "air_conditioning": "yes",
+    "amenity": "restaurant",
+    "cuisine": "chinese",
+    "diet:halal": "no",
+    "name": "Bao and Noodle",
+    "opening_hours": "Mo-Sa 10:00-20:00; Su 10:00-15:00",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 11204097694,
+  "lat": -36.8485495,
+  "lon": 174.7665141,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "chinese",
+    "name": "Master Asian Eatery"
+  }
+},
+{
+  "type": "node",
+  "id": 11204101298,
+  "lat": -36.8499043,
+  "lon": 174.7656919,
+  "tags": {
+    "amenity": "fast_food",
+    "cuisine": "chicken",
+    "name": "Plus Chicken"
+  }
+},
+{
+  "type": "node",
+  "id": 11204109798,
+  "lat": -36.8495705,
+  "lon": 174.7660540,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "chinese",
+    "name": "Sue Hsiao Liu",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 11204109804,
+  "lat": -36.8485716,
+  "lon": 174.7664279,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "korean",
+    "name": "Chimak",
+    "opening_hours": "Mo-Sa 12:00-15:00, Mo-Th 17:00-22:00, Fr,Sa 17:00-23:00"
+  }
+},
+{
+  "type": "node",
+  "id": 11204117516,
+  "lat": -36.8485336,
+  "lon": 174.7664264,
+  "tags": {
+    "amenity": "restaurant",
+    "branch": "High Street",
+    "brand": "Koiya",
+    "cuisine": "japanese",
+    "email": "hello@koiya.co.nz",
+    "name": "Koiya",
+    "opening_hours": "Mo-Th 11:30-15:00,17:00-20:00; Fr 11:30-15:00,17:00-21:00; Sa 12:00-15:00,17:00-21:00; Su 12:00-15:00,17:00-20:00",
+    "website": "https://www.koiya.co.nz/"
+  }
+},
+{
+  "type": "node",
+  "id": 11204132365,
+  "lat": -36.8469050,
+  "lon": 174.7668781,
+  "tags": {
+    "amenity": "restaurant",
+    "name": "Debretts Kitchen"
+  }
+},
+{
+  "type": "node",
+  "id": 11204150262,
+  "lat": -36.8477542,
+  "lon": 174.7664753,
+  "tags": {
+    "amenity": "fast_food",
+    "cuisine": "donut",
+    "name": "Sneaky Snacky Donuts"
+  }
+},
+{
+  "type": "node",
+  "id": 11221762021,
+  "lat": -36.8508731,
+  "lon": 174.7649088,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "japanese",
+    "diet:halal": "yes",
+    "name": "Sushi & Donburi",
+    "opening_hours": "Mo,Tu 10:00-20:00; We 10:00-17:00; Th,Fr 10:00-20:00"
+  }
+},
+{
+  "type": "node",
+  "id": 11221827519,
+  "lat": -36.8493254,
+  "lon": 174.7658038,
+  "tags": {
+    "amenity": "restaurant",
+    "check_date": "2025-12-28",
+    "cuisine": "chinese",
+    "diet:halal": "yes",
+    "name": "Dumpling House",
+    "opening_hours": "Mo-Su 12:00-15:00,17:00-22:00"
+  }
+},
+{
+  "type": "node",
+  "id": 11221854162,
+  "lat": -36.8482639,
+  "lon": 174.7673840,
+  "tags": {
+    "amenity": "restaurant",
+    "contact:instagram": "https://instagram.com/ongi.nz/",
+    "cuisine": "korean",
+    "name": "온기;Ongi",
+    "name:en": "Ongi",
+    "name:ko": "온기",
+    "opening_hours": "Mo-Su 16:30-22:00+"
+  }
+},
+{
+  "type": "node",
+  "id": 11237475072,
+  "lat": -36.8485408,
+  "lon": 174.7641153,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "sushi",
+    "name": "Mr Katsu",
+    "opening_hours": "Mo-Fr 09:00-19:00; Sa,Su 09:30-18:00"
+  }
+},
+{
+  "type": "node",
+  "id": 11237558073,
+  "lat": -36.8483055,
+  "lon": 174.7632785,
+  "tags": {
+    "amenity": "fast_food",
+    "cuisine": "kebab",
+    "diet:halal": "only",
+    "name": "Kebab Time",
+    "opening_hours": "Mo 09:00-01:00, Tu 09:00-02:00, We 09:00-02:30, Th 09:00-03:00, Fr 09:00-05:00, Sa 09:30-05:00, Su 10:00-24:00"
+  }
+},
+{
+  "type": "node",
+  "id": 11237559194,
+  "lat": -36.8482859,
+  "lon": 174.7632016,
+  "tags": {
+    "amenity": "restaurant",
+    "contact:facebook": "https://facebook.com/CafeCasaVictoria/",
+    "contact:instagram": "https://instagram.com/casavictoria.nz/",
+    "cuisine": "tapas;burger",
+    "email": "bookings@casavictoria.co.nz",
+    "name": "Casa Victoria",
+    "opening_hours": "Mo-Sa 06:30-21:00; Su,PH off",
+    "phone": "+64 9 302 1881",
+    "website": "https://www.casavictoria.co.nz/"
+  }
+},
+{
+  "type": "node",
+  "id": 11237560099,
+  "lat": -36.8482450,
+  "lon": 174.7630595,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "mexican",
+    "name": "Mexican Cafe"
+  }
+},
+{
+  "type": "node",
+  "id": 11237561463,
+  "lat": -36.8482217,
+  "lon": 174.7629876,
+  "tags": {
+    "amenity": "fast_food",
+    "brand": "Hell Pizza",
+    "brand:wikidata": "Q1602607",
+    "cuisine": "pizza",
+    "name": "Hell",
+    "opening_hours": "Mo-We 11:30-22:00; Th 11:30-23:00; Fr,Sa 11:30-24:00; Su 11:30-22:00",
+    "takeaway": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 11242896437,
+  "lat": -36.8513064,
+  "lon": 174.7650321,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "sushi",
+    "diet:halal": "yes",
+    "name": "Sushipac",
+    "opening_hours": "Mo-Fr 08:30-16:00"
+  }
+},
+{
+  "type": "node",
+  "id": 11245212438,
+  "lat": -36.8501297,
+  "lon": 174.7636971,
+  "tags": {
+    "addr:housenumber": "39",
+    "addr:street": "Elliott Street",
+    "amenity": "restaurant",
+    "branch": "Auckland",
+    "brand": "Nahm",
+    "contact:facebook": "https://facebook.com/NahmAuckland/",
+    "contact:instagram": "https://instagram.com/nahmauckland/",
+    "cuisine": "thai",
+    "email": "auckland@nahm.co.nz",
+    "name": "Nahm",
+    "official_name": "Nahm Auckland",
+    "opening_hours": "Tu-Su 11:30-21:00",
+    "phone": "+64 9 309 7780",
+    "website": "https://www.nahm.co.nz/auckland"
+  }
+},
+{
+  "type": "node",
+  "id": 11254392518,
+  "lat": -36.8504055,
+  "lon": 174.7603492,
+  "tags": {
+    "amenity": "fast_food",
+    "cuisine": "kebab",
+    "diet:halal": "only",
+    "name": "Sensational Chicken",
+    "opening_hours": "Su-Tu 10:00-02:00, We,Th 10:00-03:00, Fr,Sa 10:00-05:00"
+  }
+},
+{
+  "type": "node",
+  "id": 11254409917,
+  "lat": -36.8472294,
+  "lon": 174.7618268,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "chinese",
+    "name": "Shen Ji Top Seafood Restaurant"
+  }
+},
+{
+  "type": "node",
+  "id": 11258926290,
+  "lat": -36.8483196,
+  "lon": 174.7658032,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "chinese",
+    "name": "Zhou's Alley Restaurant"
+  }
+},
+{
+  "type": "node",
+  "id": 11258939213,
+  "lat": -36.8497804,
+  "lon": 174.7633731,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "indian",
+    "name": "Spice of India"
+  }
+},
+{
+  "type": "node",
+  "id": 11258944910,
+  "lat": -36.8498558,
+  "lon": 174.7633557,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "vietnamese",
+    "name": "Nam Viet"
+  }
+},
+{
+  "type": "node",
+  "id": 11258955585,
+  "lat": -36.8496830,
+  "lon": 174.7633956,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "thai",
+    "name": "Le Gourmet Thai"
+  }
+},
+{
+  "type": "node",
+  "id": 11258959773,
+  "lat": -36.8499772,
+  "lon": 174.7634139,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "korean",
+    "name": "Bebop"
+  }
+},
+{
+  "type": "node",
+  "id": 11258963055,
+  "lat": -36.8499150,
+  "lon": 174.7636646,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "ramen",
+    "diet:halal": "no",
+    "name": "Daruma Ramen",
+    "opening_hours": "Mo-Sa 11:00-14:30"
+  }
+},
+{
+  "type": "node",
+  "id": 11258963452,
+  "lat": -36.8499212,
+  "lon": 174.7633015,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "japanese",
+    "name": "Umi Sushi"
+  }
+},
+{
+  "type": "node",
+  "id": 11380750701,
+  "lat": -36.8519661,
+  "lon": 174.7642619,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "kebab;middle_eastern",
+    "name": "Star Kebab",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 11380779391,
+  "lat": -36.8519917,
+  "lon": 174.7642516,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "indian",
+    "name": "Curry on Queen",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 11380782896,
+  "lat": -36.8518780,
+  "lon": 174.7643205,
+  "tags": {
+    "amenity": "fast_food",
+    "brand": "Potato Corner",
+    "brand:wikidata": "Q60741625",
+    "cuisine": "fries",
+    "name": "Potato Corner",
+    "takeaway": "yes",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 11380795788,
+  "lat": -36.8519060,
+  "lon": 174.7642723,
+  "tags": {
+    "amenity": "restaurant",
+    "name": "Banh Mi 77",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 11380813110,
+  "lat": -36.8519349,
+  "lon": 174.7642598,
+  "tags": {
+    "amenity": "fast_food",
+    "cuisine": "chicken;korean",
+    "name": "Korean Chicken",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 11380819239,
+  "lat": -36.8481049,
+  "lon": 174.7658698,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "sushi",
+    "name": "Fat Salmon Sushi"
+  }
+},
+{
+  "type": "node",
+  "id": 11423863637,
+  "lat": -36.8501631,
+  "lon": 174.7634643,
+  "tags": {
+    "amenity": "fast_food",
+    "contact:facebook": "https://facebook.com/baobabybaonz/",
+    "contact:instagram": "https://instagram.com/bao_baby_bao/",
+    "cuisine": "asian",
+    "email": "baobabybaoauckland@gmail.com",
+    "name": "Bao Baby Bao",
+    "opening_hours": "Mo-Su 12:00-21:00",
+    "phone": "+64 22 657 7988",
+    "website": "https://www.baobabybaonz.com/",
+    "website:menu": "https://www.baobabybaonz.com/our-story"
+  }
+},
+{
+  "type": "node",
+  "id": 11490289642,
+  "lat": -36.8474305,
+  "lon": 174.7616400,
+  "tags": {
+    "amenity": "restaurant",
+    "check_date:opening_hours": "2024-01-05",
+    "cuisine": "sushi",
+    "name": "Moto",
+    "opening_hours:signed": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 11529349785,
+  "lat": -36.8486070,
+  "lon": 174.7605989,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "85",
+    "addr:postcode": "0610",
+    "addr:street": "Hobson Street",
+    "amenity": "restaurant",
+    "cuisine": "seafood;steak_house",
+    "name": "The Grill",
+    "website": "https://skycityauckland.co.nz/restaurants/the-grill/"
+  }
+},
+{
+  "type": "node",
+  "id": 11530102664,
+  "lat": -36.8513311,
+  "lon": 174.7603024,
+  "tags": {
+    "addr:housenumber": "152",
+    "addr:street": "Hobson Street",
+    "amenity": "restaurant",
+    "name": "Xian Noodles"
+  }
+},
+{
+  "type": "node",
+  "id": 11590999799,
+  "lat": -36.8485165,
+  "lon": 174.7629834,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "japanese",
+    "diet:halal": "yes",
+    "name": "Fuga Japanese Brasserie",
+    "name:en": "Fuga Japanese Brasserie",
+    "name:ja": "ふうが",
+    "opening_hours": "Mo,Tu,Th-Sa 12:00-14:30,18:00-22:00"
+  }
+},
+{
+  "type": "node",
+  "id": 12107161753,
+  "lat": -36.8502747,
+  "lon": 174.7633217,
+  "tags": {
+    "amenity": "restaurant",
+    "contact:instagram": "https://instagram.com/jungle8nz/",
+    "cuisine": "asian",
+    "name": "Jungle 8",
+    "opening_hours": "Mo off; Tu-Th 17:00-21:00+; Fr-Su 12:00-21:00+",
+    "phone": "+64 210 288 1598",
+    "website": "https://www.jungle8.co.nz/",
+    "website:menu": "https://www.jungle8.co.nz/menu"
+  }
+},
+{
+  "type": "node",
+  "id": 12107161754,
+  "lat": -36.8503156,
+  "lon": 174.7633490,
+  "tags": {
+    "amenity": "fast_food",
+    "branch": "Elliott Stables",
+    "brand": "Koiya",
+    "contact:instagram": "https://instagram.com/koiya_auckland/",
+    "cuisine": "japanese",
+    "email": "hello@koiya.co.nz",
+    "name": "Koiya",
+    "opening_hours": "Mo-Su 12:00-21:00",
+    "phone": "+64 9 217 8670",
+    "website": "https://www.koiya.co.nz/",
+    "website:menu": "https://www.koiya.co.nz/pdf/elliott_stables/MENU%20-%20202403.pdf"
+  }
+},
+{
+  "type": "node",
+  "id": 12107161755,
+  "lat": -36.8503264,
+  "lon": 174.7633980,
+  "tags": {
+    "amenity": "fast_food",
+    "contact:instagram": "https://instagram.com/saigonsocialnz",
+    "cuisine": "vietnamese",
+    "name": "Saigon Social",
+    "opening_hours": "Mo-Su 12:00-21:00",
+    "phone": "+64 21 104 4386",
+    "website": "https://www.elliottstables.co.nz/saigonsocial",
+    "website:menu": "https://www.elliottstables.co.nz/s/Untitled-design-23.png"
+  }
+},
+{
+  "type": "node",
+  "id": 12107161758,
+  "lat": -36.8503255,
+  "lon": 174.7635331,
+  "tags": {
+    "amenity": "fast_food",
+    "contact:instagram": "https//instagram.com/lepaknz/",
+    "cuisine": "malaysian",
+    "name": "Lepak",
+    "opening_hours": "Mo-Su 12:00-21:00",
+    "phone": "+64 22 652 6955",
+    "website": "https://www.elliottstables.co.nz/lepakmalay",
+    "website:menu": "https://www.elliottstables.co.nz/s/Lepak-Menus.pdf"
+  }
+},
+{
+  "type": "node",
+  "id": 12107161759,
+  "lat": -36.8502844,
+  "lon": 174.7636360,
+  "tags": {
+    "amenity": "fast_food",
+    "branch": "Elliott Stables",
+    "brand": "Lowbrow",
+    "contact:facebook": "https://facebook.com/lowbrow.nz/",
+    "contact:instagram": "https://instagram.com/lowbrow.nz",
+    "email": "hello@lowbrow.co.nz",
+    "name": "Lowbrow",
+    "opening_hours": "Mo-Su 11:30-21:00",
+    "phone": "+64 9 300 6410",
+    "website": "https://www.lowbrow.co.nz/",
+    "website:menu": "https://www.lowbrow.co.nz/goodfood"
+  }
+},
+{
+  "type": "node",
+  "id": 12195824883,
+  "lat": -36.8501117,
+  "lon": 174.7636555,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "21-25",
+    "addr:postcode": "1010",
+    "addr:street": "Elliott Street",
+    "addr:suburb": "Auckland Central",
+    "addr:unit": "F1.02",
+    "amenity": "restaurant",
+    "contact:facebook": "https://www.facebook.com/japanesediningyou/",
+    "cuisine": "japanese",
+    "diet:halal": "yes",
+    "name": "Japanese Dining You",
+    "opening_hours": "Mo-Fr 11:00-19:00; Sa 11:30-17:00",
+    "outdoor_seating": "no",
+    "phone": "+64 9 309 3378"
+  }
+},
+{
+  "type": "node",
+  "id": 12242485321,
+  "lat": -36.8509923,
+  "lon": 174.7605633,
+  "tags": {
+    "addr:housenumber": "148",
+    "addr:street": "Hobson Street",
+    "amenity": "restaurant",
+    "cuisine": "chinese",
+    "name": "Kaodao BBQ - Chinese Rice Noodles"
+  }
+},
+{
+  "type": "node",
+  "id": 12245713258,
+  "lat": -36.8471179,
+  "lon": 174.7584006,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "5",
+    "addr:postcode": "1010",
+    "addr:street": "Hardinge Street",
+    "addr:suburb": "Auckland Central",
+    "amenity": "restaurant",
+    "cuisine": "pizza",
+    "name": "Toto Pizza",
+    "phone:NZ": "0800 868 677",
+    "website": "https://www.totopizza.co.nz"
+  }
+},
+{
+  "type": "node",
+  "id": 12245713259,
+  "lat": -36.8476705,
+  "lon": 174.7589832,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "151",
+    "addr:postcode": "1010",
+    "addr:street": "Victoria Street West",
+    "addr:suburb": "Auckland Central",
+    "amenity": "restaurant",
+    "name": "Brew'd Hawt Chicken",
+    "website": "https://www.brewdhawt.co.nz/"
+  }
+},
+{
+  "type": "node",
+  "id": 12245713260,
+  "lat": -36.8476451,
+  "lon": 174.7591532,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "151",
+    "addr:postcode": "1010",
+    "addr:street": "Victoria Street West",
+    "addr:suburb": "Auckland Central",
+    "amenity": "restaurant",
+    "name": "SEVENPOKE",
+    "website": "https://www.sevenpoke.com/"
+  }
+},
+{
+  "type": "node",
+  "id": 12277568796,
+  "lat": -36.8482404,
+  "lon": 174.7662612,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "korean",
+    "name": "Bannsang"
+  }
+},
+{
+  "type": "node",
+  "id": 12373527426,
+  "lat": -36.8520201,
+  "lon": 174.7647613,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "57",
+    "addr:postcode": "1010",
+    "addr:street": "Lorne Street",
+    "addr:suburb": "Auckland Central",
+    "amenity": "restaurant",
+    "cuisine": "indian",
+    "diet:gluten_free": "yes",
+    "diet:vegan": "yes",
+    "diet:vegetarian": "yes",
+    "name": "Dosa Corner",
+    "opening_hours": "Mo-Sa 11:00-19:00"
+  }
+},
+{
+  "type": "node",
+  "id": 12373539822,
+  "lat": -36.8520647,
+  "lon": 174.7647256,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "1",
+    "addr:postcode": "1010",
+    "addr:street": "Rutland Street",
+    "addr:suburb": "Auckland Central",
+    "amenity": "restaurant",
+    "cuisine": "indian",
+    "diet:gluten_free": "yes",
+    "diet:vegetarian": "yes",
+    "name": "Choolaah Indian Takeaway",
+    "opening_hours": "Mo-Fr 11:00-19:00; Sa 12:00-19:00",
+    "outdoor_seating": "yes",
+    "takeaway": "yes",
+    "toilets": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 12487391032,
+  "lat": -36.8476416,
+  "lon": 174.7616460,
+  "tags": {
+    "addr:housenumber": "51 - 61",
+    "addr:street": "Hobson Street",
+    "amenity": "fast_food",
+    "diet:halal": "yes",
+    "name": "Akbar Durbar Indian Takeaway",
+    "phone": "+64 9 309 5752"
+  }
+},
+{
+  "type": "node",
+  "id": 12487391736,
+  "lat": -36.8495544,
+  "lon": 174.7642892,
+  "tags": {
+    "addr:housenumber": "12",
+    "addr:street": "Darby Street",
+    "amenity": "fast_food",
+    "diet:halal": "yes",
+    "name": "Celine Mediterranean Cuisine",
+    "phone": "+64 9 373 2450"
+  }
+},
+{
+  "type": "node",
+  "id": 12487391737,
+  "lat": -36.8460221,
+  "lon": 174.7650544,
+  "tags": {
+    "addr:housenumber": "17",
+    "addr:street": "Swanson Street",
+    "amenity": "fast_food",
+    "diet:halal": "yes",
+    "email": "thechamate@gmail.com",
+    "name": "Chamate Restaurant",
+    "opening_hours": "Mo-Th 11:00-21:30; Fr-Sa 11:00-23:00",
+    "phone": "+64 9 302 7788",
+    "website": "https://www.thechamate.com",
+    "website:menu": "https://www.thechamate.com/menu"
+  }
+},
+{
+  "type": "node",
+  "id": 12523108801,
+  "lat": -36.8473098,
+  "lon": 174.7613511,
+  "tags": {
+    "addr:housenumber": "51E",
+    "addr:street": "Hobson Street",
+    "amenity": "fast_food",
+    "brand": "Saravanaa Bhavan",
+    "brand:wikidata": "Q3528082",
+    "cuisine": "indian;south_indian",
+    "name": "Saravanaa Bhavan",
+    "phone": "+64 9 218 8012",
+    "takeaway": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 12585430408,
+  "lat": -36.8507696,
+  "lon": 174.7655689,
+  "tags": {
+    "addr:street": "Lorne Street",
+    "air_conditioning": "yes",
+    "amenity": "fast_food",
+    "diet:halal": "no",
+    "email": "patchlornest@gmail.com",
+    "name": "Patch",
+    "opening_hours": "Mo-Su 11:00-22:00",
+    "phone": "+64 9 300 3237",
+    "toilets": "yes",
+    "toilets:wheelchair": "designated"
+  }
+},
+{
+  "type": "node",
+  "id": 12585431004,
+  "lat": -36.8509185,
+  "lon": 174.7652342,
+  "tags": {
+    "amenity": "fast_food",
+    "cuisine": "asian;chinese",
+    "name": "Little Panda Takeaway"
+  }
+},
+{
+  "type": "node",
+  "id": 12624420089,
+  "lat": -36.8510660,
+  "lon": 174.7656550,
+  "tags": {
+    "air_conditioning": "no",
+    "amenity": "restaurant",
+    "cuisine": "chinese;noodle",
+    "level": "0",
+    "name": "Eden noodles",
+    "opening_hours": "Mo-Su,PH 11:00-21:00",
+    "phone": "+64 27 896 7777",
+    "takeaway": "yes",
+    "wheelchair": "limited"
+  }
+},
+{
+  "type": "node",
+  "id": 12662175237,
+  "lat": -36.8452219,
+  "lon": 174.7596160,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "4",
+    "addr:postcode": "1010",
+    "addr:street": "Viaduct Harbour Avenue",
+    "addr:suburb": "Auckland Central",
+    "amenity": "restaurant",
+    "name": "Esther",
+    "phone": "+64 9 379 9123",
+    "website": "https://www.estherrestaurant.com/"
+  }
+},
+{
+  "type": "node",
+  "id": 12874658111,
+  "lat": -36.8504634,
+  "lon": 174.7634723,
+  "tags": {
+    "addr:housenumber": "17",
+    "addr:street": "Wellesley Street West",
+    "amenity": "restaurant",
+    "cuisine": "vietnamese",
+    "name": "Tem"
+  }
+},
+{
+  "type": "node",
+  "id": 13320073396,
+  "lat": -36.8484119,
+  "lon": 174.7627529,
+  "tags": {
+    "amenity": "restaurant",
+    "check_date": "2025-11-21",
+    "name": "Bagel Love"
+  }
+},
+{
+  "type": "node",
+  "id": 13323226101,
+  "lat": -36.8476355,
+  "lon": 174.7672955,
+  "tags": {
+    "addr:housenumber": "2",
+    "addr:postcode": "1010",
+    "addr:street": "Chancery Street",
+    "amenity": "restaurant",
+    "cuisine": "french;italian;pasta",
+    "name": "Gilt",
+    "opening_hours": "Mo-Sa 11:30-22:00",
+    "outdoor_seating": "no",
+    "phone": "+64 9 300 3126",
+    "website": "https://giltbrasserie.nz/"
+  }
+},
+{
+  "type": "node",
+  "id": 13366029809,
+  "lat": -36.8480834,
+  "lon": 174.7674454,
+  "tags": {
+    "amenity": "restaurant",
+    "contact:facebook": "https://facebook.com/people/Bonjiri/100075639260007/",
+    "contact:instagram": "https://instagram.com/bonjiri.chancery",
+    "cuisine": "japanese",
+    "email": "bonjiribar@gmail.com",
+    "name": "Bonjiri Yakitori",
+    "name:en": "Bonjiri Yakitori",
+    "name:ja": "ぼんじり焼鳥",
+    "opening_hours": "Tu-Sa 17:00-01:00",
+    "phone": "+64 9 218 5756",
+    "website": "https://bonjiri.co.nz/"
+  }
+},
+{
+  "type": "node",
+  "id": 13370784042,
+  "lat": -36.8479800,
+  "lon": 174.7673088,
+  "tags": {
+    "amenity": "fast_food",
+    "contact:facebook": "https://facebook.com/p/Vie-Cafe-Vietnamese-Street-Food-100093426124339/",
+    "contact:instagram": "https://instagram.com/viecafenz/",
+    "cuisine": "vietnamese",
+    "name": "Vie",
+    "opening_hours": "Mo-Fr 11:00-22:00; Sa,Su 11:00-21:00",
+    "phone": "+64 22 043 8089"
+  }
+},
+{
+  "type": "node",
+  "id": 13556486133,
+  "lat": -36.8485421,
+  "lon": 174.7630864,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:postcode": "1010",
+    "addr:suburb": "CBD",
+    "amenity": "fast_food",
+    "brand": "Subway",
+    "brand:wikidata": "Q244457",
+    "brand:wikipedia": "en:Subway (restaurant)",
+    "check_date": "2026-02-12",
+    "contact:phone": "+64 9 303 4085",
+    "contact:website": "https://www.subway.com/en-nz",
+    "cuisine": "sandwich",
+    "level": "0",
+    "name": "Subway",
+    "opening_hours": "Mo-Su 07:00-21:00",
+    "takeaway": "yes",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 13556486134,
+  "lat": -36.8479312,
+  "lon": 174.7619984,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "chinese",
+    "level": "0",
+    "name": "Roast House 旺角烧腊",
+    "toilets": "yes",
+    "toilets:access": "customers",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 13663753747,
+  "lat": -36.8499748,
+  "lon": 174.7644303,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "2d/239",
+    "addr:postcode": "1010",
+    "addr:street": "Queen Street",
+    "addr:suburb": "Auckland Central",
+    "amenity": "restaurant",
+    "cuisine": "chinese",
+    "name": "Lucky Kitchen"
+  }
+},
+{
+  "type": "node",
+  "id": 13663753754,
+  "lat": -36.8499143,
+  "lon": 174.7640727,
+  "tags": {
+    "amenity": "restaurant",
+    "brand": "St Pierre's Sushi",
+    "brand:wikidata": "Q111018464",
+    "cuisine": "sushi",
+    "name": "St Pierre's Sushi"
+  }
+},
+{
+  "type": "node",
+  "id": 13680780583,
+  "lat": -36.8499248,
+  "lon": 174.7642401,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "2A/239",
+    "addr:postcode": "1010",
+    "addr:street": "Queen Street",
+    "addr:suburb": "Auckland Central",
+    "amenity": "restaurant",
+    "cuisine": "chinese;hotpot",
+    "name": "Guanzhou Hot Pot"
+  }
+},
+{
+  "type": "node",
+  "id": 13680780590,
+  "lat": -36.8500177,
+  "lon": 174.7640109,
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "2M/239",
+    "addr:postcode": "1010",
+    "addr:street": "Queen Street",
+    "addr:suburb": "Auckland Central",
+    "amenity": "restaurant",
+    "cuisine": "chinese;sichuan",
+    "name": "Chuanshang",
+    "name:en": "Chuanshang",
+    "name:zh": "川尚"
+  }
+},
+{
+  "type": "node",
+  "id": 13710081094,
+  "lat": -36.8503490,
+  "lon": 174.7634832,
+  "tags": {
+    "amenity": "fast_food",
+    "contact:instagram": "https://instagram.com/tacoamaiz",
+    "cuisine": "mexican",
+    "name": "Taco Amaiz",
+    "opening_hours": "Mo-Su 12:00-21:00",
+    "phone": "+64 210 260 2278",
+    "website": "https://www.elliottstables.co.nz/taco-amaiz-taquerias"
+  }
+},
+{
+  "type": "node",
+  "id": 13710081095,
+  "lat": -36.8502070,
+  "lon": 174.7633498,
+  "tags": {
+    "amenity": "fast_food",
+    "contact:instagram": "https://instagram.com/birdonawirenz",
+    "cuisine": "chicken",
+    "name": "Bird on a Wire",
+    "opening_hours": "Mo-Su 12:00-21:00",
+    "website": "https://www.elliottstables.co.nz/birdonawire"
+  }
+},
+{
+  "type": "node",
+  "id": 13710081096,
+  "lat": -36.8501882,
+  "lon": 174.7635764,
+  "tags": {
+    "amenity": "fast_food",
+    "branch": "Elliott Stables",
+    "brand": "Zeta Greek Kitchen",
+    "cuisine": "greek",
+    "email": "zetagreekkitchen@gmail.com",
+    "name": "Zeta Greek Kitchen",
+    "opening_hours": "Mo-Su 12:00-21:00",
+    "phone": "+64 9 600 2598",
+    "website": "https://www.zetagreekkitchen.co.nz/",
+    "website:menu": "https://www.zetagreekkitchen.co.nz/menu"
+  }
+},
+{
+  "type": "node",
+  "id": 13710144756,
+  "lat": -36.8465838,
+  "lon": 174.7617978,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "indian",
+    "name": "Salim Hassan's King's Park",
+    "opening_hours": "Mo-Su 11:00-22:00"
+  }
+},
+{
+  "type": "node",
+  "id": 13715117901,
+  "lat": -36.8512183,
+  "lon": 174.7650472,
+  "tags": {
+    "addr:street": "Lorne Street",
+    "amenity": "restaurant",
+    "cuisine": "chinese",
+    "name": "Best Chef"
+  }
+},
+{
+  "type": "node",
+  "id": 13715117902,
+  "lat": -36.8510806,
+  "lon": 174.7657087,
+  "tags": {
+    "addr:street": "Wellesley Street East",
+    "amenity": "restaurant",
+    "cuisine": "chinese",
+    "name": "Tan Huo Kung Fua La Tang"
+  }
+},
+{
+  "type": "node",
+  "id": 13715117903,
+  "lat": -36.8510395,
+  "lon": 174.7654748,
+  "tags": {
+    "addr:street": "Wellesley Street East",
+    "amenity": "fast_food",
+    "name": "X Burger",
+    "opening_hours": "Mo-Fr 10:30-20:30"
+  }
+},
+{
+  "type": "node",
+  "id": 13715117904,
+  "lat": -36.8520866,
+  "lon": 174.7645956,
+  "tags": {
+    "amenity": "fast_food",
+    "name": "Street Style Taco Burrito"
+  }
+},
+{
+  "type": "node",
+  "id": 13715118101,
+  "lat": -36.8520061,
+  "lon": 174.7642700,
+  "tags": {
+    "addr:housenumber": "350",
+    "addr:street": "Queen Street",
+    "amenity": "fast_food",
+    "name": "Yummy Jaibing"
+  }
+},
+{
+  "type": "node",
+  "id": 13722062985,
+  "lat": -36.8520443,
+  "lon": 174.7642319,
+  "tags": {
+    "addr:postcode": "1010",
+    "addr:street": "Queen Street",
+    "amenity": "restaurant",
+    "check_date": "2026-06-19",
+    "cuisine": "burger;soft_serve",
+    "diet:halal": "yes",
+    "name": "flip",
+    "outdoor_seating": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 13764868001,
+  "lat": -36.8518032,
+  "lon": 174.7634418,
+  "tags": {
+    "addr:housenumber": "2",
+    "addr:street": "Aotea Square",
+    "amenity": "restaurant",
+    "name": "Jack's Fried Chicken"
+  }
+},
+{
+  "type": "node",
+  "id": 13788687401,
+  "lat": -36.8478237,
+  "lon": 174.7576096,
+  "tags": {
+    "addr:housenumber": "167",
+    "addr:street": "Victoria Street West",
+    "amenity": "fast_food",
+    "cuisine": "japanese",
+    "name": "Victoria Sushi"
+  }
+},
+{
+  "type": "node",
+  "id": 13807262802,
+  "lat": -36.8503115,
+  "lon": 174.7630694,
+  "tags": {
+    "addr:housenumber": "31",
+    "addr:street": "Wellesley Street West",
+    "amenity": "fast_food",
+    "name": "FreshRoots"
+  }
+},
+{
+  "type": "node",
+  "id": 13807263101,
+  "lat": -36.8503956,
+  "lon": 174.7632852,
+  "tags": {
+    "addr:housenumber": "23",
+    "addr:street": "Wellesley Street West",
+    "amenity": "fast_food",
+    "name": "Barrel & Burger"
+  }
+},
+{
+  "type": "node",
+  "id": 13807263201,
+  "lat": -36.8508698,
+  "lon": 174.7637051,
+  "tags": {
+    "addr:housenumber": "10",
+    "addr:street": "Wellesley Street West",
+    "amenity": "fast_food",
+    "name": "Ekiben"
+  }
+},
+{
+  "type": "node",
+  "id": 13807286402,
+  "lat": -36.8511562,
+  "lon": 174.7640987,
+  "tags": {
+    "addr:housenumber": "269",
+    "addr:street": "Queen Street",
+    "amenity": "fast_food",
+    "cuisine": "japanese",
+    "name": "LV Sushi"
+  }
+},
+{
+  "type": "node",
+  "id": 13833347153,
+  "lat": -36.8495520,
+  "lon": 174.7665712,
+  "tags": {
+    "amenity": "restaurant",
+    "cuisine": "french",
+    "name": "Angeline",
+    "website": "https://angeline.co.nz"
+  }
+},
+{
+  "type": "node",
+  "id": 13937022405,
+  "lat": -36.8464452,
+  "lon": 174.7669671,
+  "tags": {
+    "addr:street": "Shortland Street",
+    "amenity": "restaurant",
+    "cuisine": "korean",
+    "name": "Hanane"
+  }
+},
+{
+  "type": "node",
+  "id": 13937022702,
+  "lat": -36.8467427,
+  "lon": 174.7670825,
+  "tags": {
+    "addr:housenumber": "2",
+    "addr:street": "High Street",
+    "amenity": "fast_food",
+    "name": "Yogo Bay"
+  }
+},
+{
+  "type": "node",
+  "id": 13937023002,
+  "lat": -36.8467305,
+  "lon": 174.7670395,
+  "tags": {
+    "addr:housenumber": "2",
+    "addr:street": "High Street",
+    "amenity": "fast_food",
+    "name": "Fitzroy Deli"
+  }
+},
+{
+  "type": "node",
+  "id": 13937654903,
+  "lat": -36.8514486,
+  "lon": 174.7602520,
+  "tags": {
+    "addr:housenumber": "162",
+    "addr:street": "Hobson Street",
+    "amenity": "fast_food",
+    "name": "Sushi Laboratory"
+  }
+},
+{
+  "type": "node",
+  "id": 13951073701,
+  "lat": -36.8510480,
+  "lon": 174.7641461,
+  "tags": {
+    "addr:housenumber": "275",
+    "addr:street": "Queen Street",
+    "amenity": "fast_food",
+    "name": "Eat Souvlaki"
+  }
+},
+{
+  "type": "node",
+  "id": 13989136204,
+  "lat": -36.8471458,
+  "lon": 174.7600648,
+  "tags": {
+    "addr:housenumber": "29",
+    "addr:street": "Nelson Street",
+    "amenity": "restaurant",
+    "name": "Balik Ko Bayo"
+  }
+},
+{
+  "type": "node",
+  "id": 13989136403,
+  "lat": -36.8473028,
+  "lon": 174.7600608,
+  "tags": {
+    "addr:housenumber": "31",
+    "addr:street": "Nelson Street",
+    "amenity": "restaurant",
+    "name": "Filipino Home Cooked BBQ"
+  }
+},
+{
+  "type": "node",
+  "id": 14023506201,
+  "lat": -36.8521632,
+  "lon": 174.7653583,
+  "tags": {
+    "addr:housenumber": "25",
+    "addr:postcode": "1010",
+    "addr:street": "Rutland Street",
+    "amenity": "restaurant",
+    "cuisine": "chinese;malaysian",
+    "name": "Ha Chak"
+  }
+},
+{
+  "type": "node",
+  "id": 14141618502,
+  "lat": -36.8504520,
+  "lon": 174.7654409,
+  "tags": {
+    "addr:housenumber": "33",
+    "addr:street": "Lorne Street",
+    "amenity": "restaurant",
+    "check_date": "2026-09-02",
+    "check_date:opening_hours": "2026-09-02",
+    "cuisine": "asian",
+    "level": "15",
+    "name": "Aka Rooftop - Asian Bar and Kitchen",
+    "opening_hours": "Mo-Su 11:30-00:00",
+    "website": "https://akarooftop.co.nz/",
+    "website:menu": "https://akarooftop.co.nz/menu/"
+  }
+},
+{
+  "type": "way",
+  "id": 697464068,
+  "center": {
+    "lat": -36.8484658,
+    "lon": 174.7621831
+  },
+  "tags": {
+    "amenity": "restaurant",
+    "building:colour": "#9BA9A9",
+    "building:material": "glass",
+    "building:part": "yes",
+    "delivery": "no",
+    "ele": "190",
+    "height": "194",
+    "level": "52",
+    "min_height": "187",
+    "name": "Orbit 360° Dining",
+    "outdoor_seating": "no",
+    "roof:shape": "flat",
+    "smoking": "no",
+    "takeaway": "no"
+  }
+},
+{
+  "type": "way",
+  "id": 947693739,
+  "center": {
+    "lat": -36.8489845,
+    "lon": 174.7642151
+  },
+  "tags": {
+    "amenity": "fast_food",
+    "building": "container",
+    "diet:halal": "only",
+    "name": "Kebabzilla"
+  }
+},
+{
+  "type": "way",
+  "id": 947693740,
+  "center": {
+    "lat": -36.8489432,
+    "lon": 174.7642336
+  },
+  "tags": {
+    "amenity": "fast_food",
+    "building": "container",
+    "name": "Yooa & Tako"
+  }
+},
+{
+  "type": "way",
+  "id": 947693741,
+  "center": {
+    "lat": -36.8489044,
+    "lon": 174.7642540
+  },
+  "tags": {
+    "amenity": "fast_food",
+    "building": "container",
+    "diet:halal": "yes",
+    "name": "Toastie"
+  }
+},
+{
+  "type": "way",
+  "id": 947693744,
+  "center": {
+    "lat": -36.8494082,
+    "lon": 174.7639957
+  },
+  "tags": {
+    "amenity": "fast_food",
+    "building": "container"
+  }
+},
+{
+  "type": "way",
+  "id": 947693745,
+  "center": {
+    "lat": -36.8494398,
+    "lon": 174.7640215
+  },
+  "tags": {
+    "amenity": "fast_food",
+    "building": "container",
+    "diet:halal": "no",
+    "name": "Vietnamese Street Food",
+    "opening_hours": "Mo-Fr 09:00-18:00; Sa 09:00-16:00"
+  }
+},
+{
+  "type": "way",
+  "id": 1173272341,
+  "center": {
+    "lat": -36.8484660,
+    "lon": 174.7621825
+  },
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "Corner",
+    "addr:postcode": "1010",
+    "addr:street": "Federal Street & Victoria Street",
+    "amenity": "restaurant",
+    "building:colour": "#9BA9A9",
+    "building:material": "glass",
+    "building:part": "yes",
+    "cuisine": "regional",
+    "delivery": "no",
+    "ele": "195",
+    "height": "198",
+    "level": "53",
+    "min_height": "194",
+    "name": "The Sugar Club",
+    "outdoor_seating": "no",
+    "roof:shape": "flat",
+    "smoking": "no",
+    "takeaway": "no"
+  }
+},
+{
+  "type": "way",
+  "id": 1362066905,
+  "center": {
+    "lat": -36.8497659,
+    "lon": 174.7641039
+  },
+  "tags": {
+    "addr:city": "Auckland",
+    "addr:housenumber": "13",
+    "addr:postcode": "1010",
+    "addr:street": "The Strand Arcade",
+    "addr:suburb": "Auckland Central",
+    "amenity": "restaurant",
+    "check_date": "2025-03-02",
+    "cuisine": "ethiopian",
+    "level": "0",
+    "name": "Addis Cafe and Ethiopian Restaurant",
+    "opening_hours": "12:00-20:00",
+    "outdoor_seating": "no",
+    "payment:cash": "yes",
+    "payment:credit_cards": "yes",
+    "payment:debit_cards": "yes",
+    "takeaway": "yes",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "way",
+  "id": 1457361927,
+  "center": {
+    "lat": -36.8480749,
+    "lon": 174.7676977
+  },
+  "tags": {
+    "amenity": "restaurant",
+    "contact:facebook": "https://facebook.com/chancerybistronz/",
+    "contact:instagram": "https://instagram.com/chancerybistroakl/",
+    "email": "daven.naidu@chancerybistro.com",
+    "name": "Chancery Bistro",
+    "opening_hours": "Mo-Su 10:30-02:30",
+    "phone": "+64 9 356 7028",
+    "website": "https://www.chancerybistro.com/"
+  }
+}
+
+  ]
+}
