@@ -9,4 +9,15 @@ name = "fat-horses"
 path = "src/main.rs"
 
 [dependencies]
+anyhow = "1.0.104"
+app.workspace = true
+chrono = "0.4.45"
+clap = { version = "4.6.7", features = ["derive"] }
 domain.workspace = true
+places.workspace = true
+race.workspace = true
+rand = "0.10.3"
+store.workspace = true
+tokio = { version = "1.53.1", features = ["macros", "rt-multi-thread", "time"] }
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter", "fmt"] }

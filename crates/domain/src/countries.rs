@@ -8,6 +8,9 @@ use serde::{Deserialize, Serialize};
 pub const DISHES_MIN: usize = 3;
 pub const DISHES_MAX: usize = 12;
 
+/// `data/countries.json` as built into the binary.
+pub const BUNDLED_JSON: &str = include_str!("../../../data/countries.json");
+
 /// The whole `data/countries.json` file.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CountriesFile {
@@ -68,6 +71,11 @@ pub enum ValidationError {
 }
 
 impl CountriesFile {
+    /// The bundled countries file. Its validity is checked by a test.
+    pub fn bundled() -> Self {
+        Self::from_json(BUNDLED_JSON).expect("bundled data/countries.json is valid")
+    }
+
     /// Parse and validate a countries file.
     pub fn from_json(json: &str) -> Result<Self, LoadError> {
         let file: CountriesFile = serde_json::from_str(json)?;

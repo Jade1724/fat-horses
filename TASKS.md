@@ -74,7 +74,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
   Needs: T2.4–T2.11, T3.4, T3.7.
 - [ ] **T4.2 CLI `pick`.** `fat-horses pick "<address>" [--radius] [--min-population] [--include-visited] [--fake-llm]` runs the steps in-process with live clients and the JSON-file store, printing the race card, waiting and polling, then the winner and matches.
   Needs: T3.1, T3.2, T3.3, T3.5, T4.1. Done when: a real pick runs end to end (owner runs it once and confirms in `docs/spikes/cli-e2e.md`).
-- [ ] **T4.3 CLI `visit`, `skip`, `passport`, `history`.** Tests for output formatting against the in-memory store.
+- [x] **T4.3 CLI `visit`, `skip`, `passport`, `history`.** Tests for output formatting against the in-memory store.
   Needs: T3.5.
 - [ ] **T4.4 HTTP API handlers (§5, F11.1) in `crates/app`.** Request validation, error codes, API-key check (constant time). Tested with in-memory stores and fake request objects.
   Needs: T4.1.

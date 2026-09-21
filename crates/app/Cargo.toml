@@ -8,8 +8,11 @@ publish.workspace = true
 chrono = "0.4.45"
 domain.workspace = true
 rand = "0.10.3"
+serde = { version = "1.0.229", features = ["derive"] }
+thiserror = "2.0.20"
 tokio = { version = "1.53.1", features = ["time"] }
 tracing = "0.1.44"
+ulid = "3.0.0"
 
 [dev-dependencies]
 fat-horses-store = { path = "../store" }
