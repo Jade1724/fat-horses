@@ -19,7 +19,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 
 ## M1 Spikes (findings go to `docs/spikes/`)
 
-- [ ] **T1.1 TAB NZ data spike.** Find the JSON endpoints TAB NZ's website uses for: upcoming meetings/races (with race type), a race card with runners and scratchings, and results (interim/official, dead heat, abandoned if visible). Record 3–6 real responses as fixtures in `crates/race/tests/fixtures/`. Write `docs/spikes/tab-nz.md`: endpoints, fields used, how each F3/F5 case appears, rate-limit notes, and the terms-of-use text you found.
+- [x] **T1.1 TAB NZ data spike.** Find the JSON endpoints TAB NZ's website uses for: upcoming meetings/races (with race type), a race card with runners and scratchings, and results (interim/official, dead heat, abandoned if visible). Record 3–6 real responses as fixtures in `crates/race/tests/fixtures/`. Write `docs/spikes/tab-nz.md`: endpoints, fields used, how each F3/F5 case appears, rate-limit notes, and the terms-of-use text you found.
   Done when: the doc and fixtures exist.
 - [ ] **T1.2 [human] Review TAB NZ terms.** The owner reads `docs/spikes/tab-nz.md` and confirms automated read-only use is acceptable, or picks another source.
   Needs: T1.1.

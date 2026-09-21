@@ -1,0 +1,2117 @@
+{
+ "header": {
+  "title": "Event Details: f0eb3cef-e900-48bd-be5c-fe7b0330239f",
+  "generated_time": "2026-09-21T10:11:25.797741288Z",
+  "url": "/affiliates/v1/racing/events/f0eb3cef-e900-48bd-be5c-fe7b0330239f"
+ },
+ "params": {
+  "enc": "json",
+  "id": "f0eb3cef-e900-48bd-be5c-fe7b0330239f",
+  "present_overlay": false,
+  "with_big_bets": false,
+  "with_live_bets": false,
+  "with_money_tracker": false,
+  "with_biggest_bet": false,
+  "will_pays": false,
+  "with_tote_trends_data": false,
+  "bet_type_filter": "",
+  "bets_limit": 10
+ },
+ "data": {
+  "race": {
+   "event_id": "f0eb3cef-e900-48bd-be5c-fe7b0330239f",
+   "meeting_name": "Scottsville",
+   "display_meeting_name": "Scottsville",
+   "meeting_id": "4eb08653-e361-5f9c-9d39-cc652eb63473",
+   "status": "Interim",
+   "description": "Gallop Tv Mdn Plate",
+   "advertised_start": 1789985220,
+   "actual_start": 1789985384,
+   "advertised_start_string": "2026-09-21 10:07:00 +0000 UTC",
+   "actual_start_string": "2026-09-21 10:09:44 +0000 UTC",
+   "race_date_nz": "2026-09-21",
+   "start_time_nz": "22:07:00 NZST",
+   "race_number": 1,
+   "type": "T",
+   "start_type": "",
+   "country": "SAF",
+   "state": "ZAF",
+   "distance": 1200,
+   "weather": "Overcast",
+   "form_guide": "",
+   "comment": "ONE PEPPER (2) wound up strongly last time out to finish a neck adrift in second over 1200m at this track when returning from a spell. Should be prominent from the outset. Placed 3/3 so far including 2/2 course and distance. Take catching. SENSEI OF SPIN (3) is a three-year-old gelding facing the starter for the first time. Out of Group 3 winner Sarasota. Is one of the main hopes. A M C ROY ON FIRE (7) just missed last time out when third over 1000m at this track. The extra journey should play into his hands. Poses a serious threat. ESCAPE VELOCITY (6) is a three-year-old colt on debut from the stable of Stuart Ferrie. By Malmoos from Arcetri Pink. Watch the market closely.",
+   "silk_base_url": "drr38safykj6s.cloudfront.net",
+   "track_condition": "Soft",
+   "track_direction": "Right",
+   "silk_url": "https://cdn.prod.pricekinetics.com/silks/sprites/cerberus/betmakers-cmFjZToyMTMxMTI0_SPRITE_64x64.png",
+   "entrant_count": 18,
+   "field_size": 16,
+   "positions_paid": 3,
+   "video_channels": [
+    "Trackside2"
+   ],
+   "video_channels_meta": {
+    "Live2": {
+     "RaceNo": 1,
+     "RaceType": "T",
+     "SlotType": "",
+     "SlotTitle": "",
+     "VenueName": "Scottsville",
+     "CrossPoint": 69,
+     "RacePriority": "2",
+     "SlotDuration": "",
+     "SchedulerNote": "..",
+     "CrossPointName": "SKY 11 - Sth Africa",
+     "SlotDescription": "",
+     "UtcRaceStartTime": "2026-09-21T10:07:00Z",
+     "VenueCountryCode": "SAF",
+     "VenueProviderName": "SKY",
+     "DisplayRaceStartTime": "2026-09-21T20:07:00",
+     "SchedulerNotePriority": "None"
+    }
+   },
+   "tips": [
+    "b44a7377-e0be-4cab-9571-c0f1a3ac1a71",
+    "c561dc4f-6ec9-4118-8ee8-3fb9bf71506a",
+    "b6ffa4c1-8672-483d-8e48-fe3fe5e85352"
+   ],
+   "rail_position": "",
+   "group": "",
+   "prize_monies": {
+    "1st": 8662,
+    "2nd": 2684,
+    "3rd": 1342,
+    "4th": 610,
+    "5th": 244,
+    "total_value": 14673
+   },
+   "track_home_straight": 0
+  },
+  "results": [
+   {
+    "position": 1,
+    "name": "Hadrian's Wall",
+    "barrier": 5,
+    "runner_number": 5,
+    "margin_length": 0,
+    "entrant_id": "74b76cff-abcb-4071-924a-234773849dfe"
+   }
+  ],
+  "favourite": {
+   "entrant_id": "c561dc4f-6ec9-4118-8ee8-3fb9bf71506a",
+   "market_name": "Final Field",
+   "primary_market": true,
+   "name": "A M C Roy On Fire",
+   "is_scratched": false,
+   "gear": "alumites",
+   "odds": {
+    "fixed_win": 2.6,
+    "fixed_place": 1.4,
+    "pool_win": 3.1,
+    "pool_place": 1.3
+   },
+   "scratch_time": 0,
+   "barrier": 7,
+   "runner_number": 7,
+   "prize_money": "2988",
+   "age": 3,
+   "sex": "G",
+   "colour": "CH",
+   "silk_colours": "WHITE, ORANGE MALTESE CROSS, LT GREEN SLEEVES, ORANGE CAP",
+   "silk_url_64x64": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/a-m-c-roy-on-fire_64x64.png",
+   "silk_url_128x128": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/a-m-c-roy-on-fire_128x128.png",
+   "alt_silk_url_64x64": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_7_64x64.png",
+   "alt_silk_url_128x128": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_7_128x128.png",
+   "form_comment": null,
+   "class_level": "",
+   "jockey": "Athandiwe Mgudlwa",
+   "apprentice_indicator": "",
+   "allowance_weight": "",
+   "owners": "Mr Roy Moodley",
+   "country": "SAF",
+   "trainer_name": "Darryl Moore",
+   "last_twenty_starts": "33",
+   "sire": "WILLOW MAGIC (AUS)",
+   "dam": "NITROGEN (SAF)",
+   "breeding": "3 g WILLOW MAGIC (AUS)-NITROGEN (SAF)",
+   "weight": {
+    "allocated": "58",
+    "total": "58"
+   },
+   "favourite": false,
+   "mover": false,
+   "speedmap": {
+    "settling_lengths": 6,
+    "entrant_id": "c561dc4f-6ec9-4118-8ee8-3fb9bf71506a"
+   },
+   "form_indicators": null,
+   "past_performances": null,
+   "jockey_past_performances": null,
+   "fresh_90": {
+    "number_of_starts": 1,
+    "number_of_wins": 0,
+    "number_of_placings": 1,
+    "number_of_seconds": 0,
+    "number_of_thirds": 1,
+    "winning_distance": 0
+   },
+   "trainer_location": "",
+   "horse_id": 2432533,
+   "dam_sire": "Tiger Ridge"
+  },
+  "runners": [
+   {
+    "entrant_id": "a8889f22-cbcd-4ea1-a2a9-d53d445446b7",
+    "market_name": "Final Field",
+    "primary_market": true,
+    "name": "Naval Officer",
+    "is_scratched": false,
+    "gear": "alumites, blinkers",
+    "odds": {
+     "fixed_win": 26,
+     "fixed_place": 5.5,
+     "pool_win": 30.5,
+     "pool_place": 4.7
+    },
+    "scratch_time": 0,
+    "barrier": 1,
+    "runner_number": 1,
+    "prize_money": "642",
+    "age": 5,
+    "sex": "G",
+    "colour": "B",
+    "silk_colours": "WHITE,MEDIUM BLUE STARS,MEDIUM BLUE SEAMS SLEEVES,MEDIUM BLUE STARS CAP",
+    "silk_url_64x64": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/naval-officer_64x64.png",
+    "silk_url_128x128": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/naval-officer_128x128.png",
+    "alt_silk_url_64x64": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_1_64x64.png",
+    "alt_silk_url_128x128": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_1_128x128.png",
+    "form_comment": null,
+    "class_level": "",
+    "jockey": "A Mosaheb",
+    "apprentice_indicator": "A",
+    "allowance_weight": "2.5",
+    "owners": "Miss Trinisha Pillay",
+    "country": "SAF",
+    "trainer_name": "Kumaran Naidoo",
+    "last_twenty_starts": "56965x",
+    "sire": "THE UNITED STATES (IRE)",
+    "dam": "LOVE TO SAIL (SAF)",
+    "breeding": "5 g THE UNITED STATES (IRE)-LOVE TO SAIL (SAF)",
+    "weight": {
+     "allocated": "60",
+     "total": "60"
+    },
+    "favourite": false,
+    "mover": false,
+    "speedmap": {
+     "settling_lengths": 5,
+     "entrant_id": "a8889f22-cbcd-4ea1-a2a9-d53d445446b7",
+     "label": "Midfield"
+    },
+    "form_indicators": null,
+    "past_performances": null,
+    "jockey_past_performances": null,
+    "fresh_90": {
+     "number_of_starts": 1,
+     "number_of_wins": 0,
+     "number_of_placings": 0,
+     "number_of_seconds": 0,
+     "number_of_thirds": 0,
+     "winning_distance": 0
+    },
+    "trainer_location": "",
+    "horse_id": 2365900,
+    "dam_sire": "Sail From Seattle",
+    "meta": null,
+    "flucs": [
+     12,
+     13,
+     26
+    ],
+    "scr_time": null,
+    "competitor_id": "",
+    "ride_guide_exists": false,
+    "ride_guide_thumbnail": "",
+    "ride_guide_file": "",
+    "flucs_with_timestamp": {
+     "last_six": [
+      {
+       "timestamp": "2026-09-21T08:41:39.362790591Z",
+       "fluc": 12
+      },
+      {
+       "timestamp": "2026-09-21T09:43:07.669916887Z",
+       "fluc": 13
+      },
+      {
+       "timestamp": "2026-09-21T10:08:43.529638863Z",
+       "fluc": 26
+      }
+     ],
+     "open": {
+      "timestamp": "2026-09-21T08:41:39.362790591Z",
+      "fluc": 12
+     },
+     "high": {
+      "timestamp": "2026-09-21T10:08:43.529638863Z",
+      "fluc": 26
+     },
+     "low": {
+      "timestamp": "2026-09-21T08:41:39.362790591Z",
+      "fluc": 12
+     },
+     "nine_am": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     }
+    }
+   },
+   {
+    "entrant_id": "a041de7b-860a-4f13-9b8e-b238ff5264d0",
+    "market_name": "Final Field",
+    "primary_market": true,
+    "name": "One Pepper",
+    "is_scratched": true,
+    "gear": "alumites",
+    "odds": {
+     "fixed_win": 0,
+     "fixed_place": 0,
+     "pool_win": 22.8,
+     "pool_place": 3.9
+    },
+    "scratch_time": 1789970292,
+    "barrier": 2,
+    "runner_number": 2,
+    "prize_money": "5717",
+    "age": 3,
+    "sex": "G",
+    "colour": "B",
+    "silk_colours": "WHITE, BLACK FLEUR DE LYS, RED SLEEVES, BLACK CUFF, COLLAR,CAP, WHITE STRIPES",
+    "silk_url_64x64": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/one-pepper_64x64.png",
+    "silk_url_128x128": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/one-pepper_128x128.png",
+    "alt_silk_url_64x64": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_2_64x64.png",
+    "alt_silk_url_128x128": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_2_128x128.png",
+    "form_comment": null,
+    "class_level": "",
+    "jockey": "Keagan De Melo",
+    "apprentice_indicator": "",
+    "allowance_weight": "",
+    "owners": "Wernars Family, Mr Sterling M Miller & Drakenstein Stud (Nom: Mrs G A Rupert)",
+    "country": "SAF",
+    "trainer_name": "Adam Azzie",
+    "last_twenty_starts": "33x2",
+    "sire": "ONE WORLD (SAF)",
+    "dam": "GREEN PEPPER (SAF)",
+    "breeding": "3 g ONE WORLD (SAF)-GREEN PEPPER (SAF)",
+    "weight": {
+     "allocated": "58",
+     "total": "58"
+    },
+    "favourite": false,
+    "mover": false,
+    "speedmap": {
+     "settling_lengths": 1,
+     "entrant_id": "a041de7b-860a-4f13-9b8e-b238ff5264d0",
+     "label": "invalid settling lengths"
+    },
+    "form_indicators": null,
+    "past_performances": null,
+    "jockey_past_performances": null,
+    "fresh_90": {
+     "number_of_starts": 2,
+     "number_of_wins": 0,
+     "number_of_placings": 2,
+     "number_of_seconds": 1,
+     "number_of_thirds": 1,
+     "winning_distance": 0
+    },
+    "trainer_location": "",
+    "horse_id": 2394256,
+    "dam_sire": "Gimmethegreenlight",
+    "meta": null,
+    "flucs": [],
+    "scr_time": "2026-09-21T05:58:12Z",
+    "competitor_id": "",
+    "ride_guide_exists": false,
+    "ride_guide_thumbnail": "",
+    "ride_guide_file": "",
+    "flucs_with_timestamp": {
+     "last_six": [],
+     "open": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     },
+     "high": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     },
+     "low": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     },
+     "nine_am": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     }
+    }
+   },
+   {
+    "entrant_id": "b44a7377-e0be-4cab-9571-c0f1a3ac1a71",
+    "market_name": "Final Field",
+    "primary_market": true,
+    "name": "Sensei Of Spin",
+    "is_scratched": false,
+    "gear": "alumites",
+    "odds": {
+     "fixed_win": 5,
+     "fixed_place": 1.9,
+     "pool_win": 5.2,
+     "pool_place": 1.9
+    },
+    "scratch_time": 0,
+    "barrier": 3,
+    "runner_number": 3,
+    "prize_money": "0",
+    "age": 3,
+    "sex": "G",
+    "colour": "B",
+    "silk_colours": "YELLOW, PURPLE STARS, STARS SLEEVES, YELLOW CAP, PURPLE STAR",
+    "silk_url_64x64": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/sensei-of-spin_64x64.png",
+    "silk_url_128x128": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/sensei-of-spin_128x128.png",
+    "alt_silk_url_64x64": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_3_64x64.png",
+    "alt_silk_url_128x128": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_3_128x128.png",
+    "form_comment": null,
+    "class_level": "",
+    "jockey": "Gavin Lerena",
+    "apprentice_indicator": "",
+    "allowance_weight": "",
+    "owners": "Hollywood Racing (Nom: Mr A Delpech)",
+    "country": "SAF",
+    "trainer_name": "Mike & Mathew De Kock",
+    "last_twenty_starts": "",
+    "sire": "HAWWAAM (SAF)",
+    "dam": "SARASOTA (SAF)",
+    "breeding": "3 g HAWWAAM (SAF)-SARASOTA (SAF)",
+    "weight": {
+     "allocated": "58",
+     "total": "58"
+    },
+    "favourite": false,
+    "mover": false,
+    "speedmap": {},
+    "form_indicators": null,
+    "past_performances": null,
+    "jockey_past_performances": null,
+    "fresh_90": {
+     "number_of_starts": 0,
+     "number_of_wins": 0,
+     "number_of_placings": 0,
+     "number_of_seconds": 0,
+     "number_of_thirds": 0,
+     "winning_distance": 0
+    },
+    "trainer_location": "",
+    "horse_id": 2460549,
+    "dam_sire": "Kahal",
+    "meta": null,
+    "flucs": [
+     3.8,
+     4.2,
+     6,
+     5
+    ],
+    "scr_time": null,
+    "competitor_id": "",
+    "ride_guide_exists": false,
+    "ride_guide_thumbnail": "",
+    "ride_guide_file": "",
+    "flucs_with_timestamp": {
+     "last_six": [
+      {
+       "timestamp": "2026-09-21T08:41:39.359778477Z",
+       "fluc": 3.8
+      },
+      {
+       "timestamp": "2026-09-21T09:40:52.568827105Z",
+       "fluc": 4.2
+      },
+      {
+       "timestamp": "2026-09-21T10:00:46.118475304Z",
+       "fluc": 6
+      },
+      {
+       "timestamp": "2026-09-21T10:05:52.669350507Z",
+       "fluc": 5
+      }
+     ],
+     "open": {
+      "timestamp": "2026-09-21T08:41:39.359778477Z",
+      "fluc": 3.8
+     },
+     "high": {
+      "timestamp": "2026-09-21T10:00:46.118475304Z",
+      "fluc": 6
+     },
+     "low": {
+      "timestamp": "2026-09-21T08:41:39.359778477Z",
+      "fluc": 3.8
+     },
+     "nine_am": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     }
+    }
+   },
+   {
+    "entrant_id": "01ed64c2-1a38-449b-811b-029ad0357363",
+    "market_name": "Final Field",
+    "primary_market": true,
+    "name": "Whitehall",
+    "is_scratched": false,
+    "gear": "alumites",
+    "odds": {
+     "fixed_win": 41,
+     "fixed_place": 8,
+     "pool_win": 58.4,
+     "pool_place": 5.5
+    },
+    "scratch_time": 0,
+    "barrier": 4,
+    "runner_number": 4,
+    "prize_money": "0",
+    "age": 3,
+    "sex": "G",
+    "colour": "B",
+    "silk_colours": "WHITE, BLACK HOOPS SLEEVES, HOOPS CAP",
+    "silk_url_64x64": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/whitehall_64x64.png",
+    "silk_url_128x128": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/whitehall_128x128.png",
+    "alt_silk_url_64x64": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_4_64x64.png",
+    "alt_silk_url_128x128": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_4_128x128.png",
+    "form_comment": null,
+    "class_level": "",
+    "jockey": "Qiniso Ngcobo",
+    "apprentice_indicator": "A",
+    "allowance_weight": "4",
+    "owners": "ClassicRacing(Pty)Ltd(Nom:Mr Willie Pieters)(WG Butler,JP Du Sart,MB Fraser,LGallino&J Thulsi)Messrs K Narainsamy,Pramodh Ora,G Tselentis&Mrs KK Crump",
+    "country": "SAF",
+    "trainer_name": "Darryl Moore",
+    "last_twenty_starts": "",
+    "sire": "SKITT SKIZZLE (SAF)",
+    "dam": "MISS HOLLY (SAF)",
+    "breeding": "3 g SKITT SKIZZLE (SAF)-MISS HOLLY (SAF)",
+    "weight": {
+     "allocated": "58",
+     "total": "58"
+    },
+    "favourite": false,
+    "mover": false,
+    "speedmap": {},
+    "form_indicators": null,
+    "past_performances": null,
+    "jockey_past_performances": null,
+    "fresh_90": {
+     "number_of_starts": 0,
+     "number_of_wins": 0,
+     "number_of_placings": 0,
+     "number_of_seconds": 0,
+     "number_of_thirds": 0,
+     "winning_distance": 0
+    },
+    "trainer_location": "",
+    "horse_id": 2460543,
+    "dam_sire": "Dynasty",
+    "meta": null,
+    "flucs": [
+     15,
+     17,
+     46,
+     41
+    ],
+    "scr_time": null,
+    "competitor_id": "",
+    "ride_guide_exists": false,
+    "ride_guide_thumbnail": "",
+    "ride_guide_file": "",
+    "flucs_with_timestamp": {
+     "last_six": [
+      {
+       "timestamp": "2026-09-21T08:41:39.36586297Z",
+       "fluc": 15
+      },
+      {
+       "timestamp": "2026-09-21T09:40:52.566130238Z",
+       "fluc": 17
+      },
+      {
+       "timestamp": "2026-09-21T10:07:35.614727402Z",
+       "fluc": 46
+      },
+      {
+       "timestamp": "2026-09-21T10:09:05.916313628Z",
+       "fluc": 41
+      }
+     ],
+     "open": {
+      "timestamp": "2026-09-21T08:41:39.36586297Z",
+      "fluc": 15
+     },
+     "high": {
+      "timestamp": "2026-09-21T10:07:35.614727402Z",
+      "fluc": 46
+     },
+     "low": {
+      "timestamp": "2026-09-21T08:41:39.36586297Z",
+      "fluc": 15
+     },
+     "nine_am": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     }
+    }
+   },
+   {
+    "entrant_id": "74b76cff-abcb-4071-924a-234773849dfe",
+    "market_name": "Final Field",
+    "primary_market": true,
+    "name": "Hadrian's Wall",
+    "is_scratched": false,
+    "gear": "alumites, hood",
+    "odds": {
+     "fixed_win": 46,
+     "fixed_place": 8.5,
+     "pool_win": 41.2,
+     "pool_place": 3
+    },
+    "scratch_time": 0,
+    "barrier": 5,
+    "runner_number": 5,
+    "prize_money": "1742",
+    "age": 4,
+    "sex": "H",
+    "colour": "B",
+    "silk_colours": "NAVY, GOLD STAR, RED SLEEVES, GOLD STARS, RED CAP, GOLD STAR",
+    "silk_url_64x64": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/hadrian-s-wall_64x64.png",
+    "silk_url_128x128": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/hadrian-s-wall_128x128.png",
+    "alt_silk_url_64x64": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_5_64x64.png",
+    "alt_silk_url_128x128": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_5_128x128.png",
+    "form_comment": null,
+    "class_level": "",
+    "jockey": "Chad Little",
+    "apprentice_indicator": "",
+    "allowance_weight": "",
+    "owners": "Rajin & Mala Naidoo, Messrs B B Campbell, Douglas Campbell, L Pillay, J Sarjooparsad & Guthrie Bloodstock Racing (Pty) Ltd (Nom: Mr G R Guthrie)",
+    "country": "SAF",
+    "trainer_name": "Doug Campbell",
+    "last_twenty_starts": "0x44965",
+    "sire": "SKITT SKIZZLE (SAF)",
+    "dam": "COVENTINA (SAF)",
+    "breeding": "4 h SKITT SKIZZLE (SAF)-COVENTINA (SAF)",
+    "weight": {
+     "allocated": "60",
+     "total": "60"
+    },
+    "favourite": false,
+    "mover": false,
+    "speedmap": {
+     "settling_lengths": 1,
+     "entrant_id": "74b76cff-abcb-4071-924a-234773849dfe",
+     "label": "Backmarker"
+    },
+    "form_indicators": null,
+    "past_performances": null,
+    "jockey_past_performances": null,
+    "fresh_90": {
+     "number_of_starts": 2,
+     "number_of_wins": 0,
+     "number_of_placings": 0,
+     "number_of_seconds": 0,
+     "number_of_thirds": 0,
+     "winning_distance": 0
+    },
+    "trainer_location": "",
+    "horse_id": 2357408,
+    "dam_sire": "Nysaean",
+    "meta": null,
+    "flucs": [
+     26,
+     18,
+     46
+    ],
+    "scr_time": null,
+    "competitor_id": "",
+    "ride_guide_exists": false,
+    "ride_guide_thumbnail": "",
+    "ride_guide_file": "",
+    "flucs_with_timestamp": {
+     "last_six": [
+      {
+       "timestamp": "2026-09-21T08:41:39.361584684Z",
+       "fluc": 26
+      },
+      {
+       "timestamp": "2026-09-21T09:41:06.57647562Z",
+       "fluc": 18
+      },
+      {
+       "timestamp": "2026-09-21T10:07:39.301251373Z",
+       "fluc": 46
+      }
+     ],
+     "open": {
+      "timestamp": "2026-09-21T08:41:39.361584684Z",
+      "fluc": 26
+     },
+     "high": {
+      "timestamp": "2026-09-21T10:07:39.301251373Z",
+      "fluc": 46
+     },
+     "low": {
+      "timestamp": "2026-09-21T09:41:06.57647562Z",
+      "fluc": 18
+     },
+     "nine_am": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     }
+    }
+   },
+   {
+    "entrant_id": "b6ffa4c1-8672-483d-8e48-fe3fe5e85352",
+    "market_name": "Final Field",
+    "primary_market": true,
+    "name": "Escape Velocity",
+    "is_scratched": false,
+    "gear": "alumites",
+    "odds": {
+     "fixed_win": 13,
+     "fixed_place": 3.5,
+     "pool_win": 19.3,
+     "pool_place": 2.4
+    },
+    "scratch_time": 0,
+    "barrier": 6,
+    "runner_number": 6,
+    "prize_money": "0",
+    "age": 3,
+    "sex": "C",
+    "colour": "B",
+    "silk_colours": "YELLOW, PURPLE STARS, STARS SLEEVES, YELLOW CAP, PURPLE STAR",
+    "silk_url_64x64": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/escape-velocity_64x64.png",
+    "silk_url_128x128": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/escape-velocity_128x128.png",
+    "alt_silk_url_64x64": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_6_64x64.png",
+    "alt_silk_url_128x128": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_6_128x128.png",
+    "form_comment": null,
+    "class_level": "",
+    "jockey": "Sean Veale",
+    "apprentice_indicator": "",
+    "allowance_weight": "",
+    "owners": "Hollywood Racing (Nom: Mr A Delpech)",
+    "country": "SAF",
+    "trainer_name": "Stuart Ferrie",
+    "last_twenty_starts": "",
+    "sire": "MALMOOS (SAF)",
+    "dam": "ARCETRI PINK (AUS)",
+    "breeding": "3 c MALMOOS (SAF)-ARCETRI PINK (AUS)",
+    "weight": {
+     "allocated": "58",
+     "total": "58"
+    },
+    "favourite": false,
+    "mover": false,
+    "speedmap": {},
+    "form_indicators": null,
+    "past_performances": null,
+    "jockey_past_performances": null,
+    "fresh_90": {
+     "number_of_starts": 0,
+     "number_of_wins": 0,
+     "number_of_placings": 0,
+     "number_of_seconds": 0,
+     "number_of_thirds": 0,
+     "winning_distance": 0
+    },
+    "trainer_location": "",
+    "horse_id": 2460544,
+    "dam_sire": "Rock Of Gibraltar",
+    "meta": null,
+    "flucs": [
+     8.5,
+     16,
+     13
+    ],
+    "scr_time": null,
+    "competitor_id": "",
+    "ride_guide_exists": false,
+    "ride_guide_thumbnail": "",
+    "ride_guide_file": "",
+    "flucs_with_timestamp": {
+     "last_six": [
+      {
+       "timestamp": "2026-09-21T08:41:39.365764798Z",
+       "fluc": 8.5
+      },
+      {
+       "timestamp": "2026-09-21T10:03:34.065738698Z",
+       "fluc": 16
+      },
+      {
+       "timestamp": "2026-09-21T10:08:12.760895837Z",
+       "fluc": 13
+      }
+     ],
+     "open": {
+      "timestamp": "2026-09-21T08:41:39.365764798Z",
+      "fluc": 8.5
+     },
+     "high": {
+      "timestamp": "2026-09-21T10:03:34.065738698Z",
+      "fluc": 16
+     },
+     "low": {
+      "timestamp": "2026-09-21T08:41:39.365764798Z",
+      "fluc": 8.5
+     },
+     "nine_am": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     }
+    }
+   },
+   {
+    "entrant_id": "c561dc4f-6ec9-4118-8ee8-3fb9bf71506a",
+    "market_name": "Final Field",
+    "primary_market": true,
+    "name": "A M C Roy On Fire",
+    "is_scratched": false,
+    "gear": "alumites",
+    "odds": {
+     "fixed_win": 2.6,
+     "fixed_place": 1.4,
+     "pool_win": 3.1,
+     "pool_place": 1.3
+    },
+    "scratch_time": 0,
+    "barrier": 7,
+    "runner_number": 7,
+    "prize_money": "2988",
+    "age": 3,
+    "sex": "G",
+    "colour": "CH",
+    "silk_colours": "WHITE, ORANGE MALTESE CROSS, LT GREEN SLEEVES, ORANGE CAP",
+    "silk_url_64x64": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/a-m-c-roy-on-fire_64x64.png",
+    "silk_url_128x128": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/a-m-c-roy-on-fire_128x128.png",
+    "alt_silk_url_64x64": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_7_64x64.png",
+    "alt_silk_url_128x128": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_7_128x128.png",
+    "form_comment": null,
+    "class_level": "",
+    "jockey": "Athandiwe Mgudlwa",
+    "apprentice_indicator": "",
+    "allowance_weight": "",
+    "owners": "Mr Roy Moodley",
+    "country": "SAF",
+    "trainer_name": "Darryl Moore",
+    "last_twenty_starts": "33",
+    "sire": "WILLOW MAGIC (AUS)",
+    "dam": "NITROGEN (SAF)",
+    "breeding": "3 g WILLOW MAGIC (AUS)-NITROGEN (SAF)",
+    "weight": {
+     "allocated": "58",
+     "total": "58"
+    },
+    "favourite": true,
+    "mover": false,
+    "speedmap": {
+     "settling_lengths": 6,
+     "entrant_id": "c561dc4f-6ec9-4118-8ee8-3fb9bf71506a",
+     "label": "Off Pace"
+    },
+    "form_indicators": null,
+    "past_performances": null,
+    "jockey_past_performances": null,
+    "fresh_90": {
+     "number_of_starts": 1,
+     "number_of_wins": 0,
+     "number_of_placings": 1,
+     "number_of_seconds": 0,
+     "number_of_thirds": 1,
+     "winning_distance": 0
+    },
+    "trainer_location": "",
+    "horse_id": 2432533,
+    "dam_sire": "Tiger Ridge",
+    "meta": null,
+    "flucs": [
+     3.8,
+     3.5,
+     2.4,
+     2.6
+    ],
+    "scr_time": null,
+    "competitor_id": "",
+    "ride_guide_exists": false,
+    "ride_guide_thumbnail": "",
+    "ride_guide_file": "",
+    "flucs_with_timestamp": {
+     "last_six": [
+      {
+       "timestamp": "2026-09-21T08:41:39.359544939Z",
+       "fluc": 3.8
+      },
+      {
+       "timestamp": "2026-09-21T09:37:49.863849235Z",
+       "fluc": 3.5
+      },
+      {
+       "timestamp": "2026-09-21T10:00:19.468007648Z",
+       "fluc": 2.4
+      },
+      {
+       "timestamp": "2026-09-21T10:05:56.898632839Z",
+       "fluc": 2.6
+      }
+     ],
+     "open": {
+      "timestamp": "2026-09-21T08:41:39.359544939Z",
+      "fluc": 3.8
+     },
+     "high": {
+      "timestamp": "2026-09-21T08:41:39.359544939Z",
+      "fluc": 3.8
+     },
+     "low": {
+      "timestamp": "2026-09-21T10:00:19.468007648Z",
+      "fluc": 2.4
+     },
+     "nine_am": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     }
+    }
+   },
+   {
+    "entrant_id": "97e074de-2186-469d-b68d-7b87a104c7f5",
+    "market_name": "Final Field",
+    "primary_market": true,
+    "name": "Yannis",
+    "is_scratched": false,
+    "gear": "alumites",
+    "odds": {
+     "fixed_win": 41,
+     "fixed_place": 8,
+     "pool_win": 48.8,
+     "pool_place": 6.1
+    },
+    "scratch_time": 0,
+    "barrier": 8,
+    "runner_number": 8,
+    "prize_money": "0",
+    "age": 3,
+    "sex": "C",
+    "colour": "GR",
+    "silk_colours": "YELLOW, PURPLE STARS, STARS SLEEVES, YELLOW CAP, PURPLE STAR",
+    "silk_url_64x64": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/yannis_64x64.png",
+    "silk_url_128x128": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/yannis_128x128.png",
+    "alt_silk_url_64x64": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_8_64x64.png",
+    "alt_silk_url_128x128": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_8_128x128.png",
+    "form_comment": null,
+    "class_level": "",
+    "jockey": "Cole Dicken",
+    "apprentice_indicator": "",
+    "allowance_weight": "",
+    "owners": "Hollywood Racing (Nom: Mr A Delpech)",
+    "country": "SAF",
+    "trainer_name": "Mike & Mathew De Kock",
+    "last_twenty_starts": "",
+    "sire": "ERUPT (IRE)",
+    "dam": "KALAMI (SAF)",
+    "breeding": "3 c ERUPT (IRE)-KALAMI (SAF)",
+    "weight": {
+     "allocated": "58",
+     "total": "58"
+    },
+    "favourite": false,
+    "mover": false,
+    "speedmap": {},
+    "form_indicators": null,
+    "past_performances": null,
+    "jockey_past_performances": null,
+    "fresh_90": {
+     "number_of_starts": 0,
+     "number_of_wins": 0,
+     "number_of_placings": 0,
+     "number_of_seconds": 0,
+     "number_of_thirds": 0,
+     "winning_distance": 0
+    },
+    "trainer_location": "",
+    "horse_id": 2460545,
+    "dam_sire": "Daylami",
+    "meta": null,
+    "flucs": [
+     21,
+     26,
+     71,
+     41
+    ],
+    "scr_time": null,
+    "competitor_id": "",
+    "ride_guide_exists": false,
+    "ride_guide_thumbnail": "",
+    "ride_guide_file": "",
+    "flucs_with_timestamp": {
+     "last_six": [
+      {
+       "timestamp": "2026-09-21T08:41:39.362782169Z",
+       "fluc": 21
+      },
+      {
+       "timestamp": "2026-09-21T09:40:52.563264188Z",
+       "fluc": 26
+      },
+      {
+       "timestamp": "2026-09-21T10:01:19.667521082Z",
+       "fluc": 71
+      },
+      {
+       "timestamp": "2026-09-21T10:09:23.418062238Z",
+       "fluc": 41
+      }
+     ],
+     "open": {
+      "timestamp": "2026-09-21T08:41:39.362782169Z",
+      "fluc": 21
+     },
+     "high": {
+      "timestamp": "2026-09-21T10:01:19.667521082Z",
+      "fluc": 71
+     },
+     "low": {
+      "timestamp": "2026-09-21T08:41:39.362782169Z",
+      "fluc": 21
+     },
+     "nine_am": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     }
+    }
+   },
+   {
+    "entrant_id": "c80d22b6-ed63-44de-98b3-3a242100a62a",
+    "market_name": "Final Field",
+    "primary_market": true,
+    "name": "The Judge",
+    "is_scratched": false,
+    "gear": "alumites, hood",
+    "odds": {
+     "fixed_win": 4.2,
+     "fixed_place": 1.75,
+     "pool_win": 4.1,
+     "pool_place": 1.3
+    },
+    "scratch_time": 0,
+    "barrier": 9,
+    "runner_number": 9,
+    "prize_money": "1863",
+    "age": 3,
+    "sex": "G",
+    "colour": "B",
+    "silk_colours": "WHITE, BLACK CIRCLE, TREE, CUFFS, COLLAR, PEAK",
+    "silk_url_64x64": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/the-judge_64x64.png",
+    "silk_url_128x128": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/the-judge_128x128.png",
+    "alt_silk_url_64x64": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_9_64x64.png",
+    "alt_silk_url_128x128": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_9_128x128.png",
+    "form_comment": null,
+    "class_level": "",
+    "jockey": "Muzi Yeni",
+    "apprentice_indicator": "",
+    "allowance_weight": "",
+    "owners": "Mr C T Holmes & Mrs S Viljoen",
+    "country": "SAF",
+    "trainer_name": "Kelly Mitchley",
+    "last_twenty_starts": "3749x4",
+    "sire": "HAWWAAM (SAF)",
+    "dam": "VIA SACRA (SAF)",
+    "breeding": "3 g HAWWAAM (SAF)-VIA SACRA (SAF)",
+    "weight": {
+     "allocated": "58",
+     "total": "58"
+    },
+    "favourite": false,
+    "mover": false,
+    "speedmap": {
+     "settling_lengths": 9,
+     "entrant_id": "c80d22b6-ed63-44de-98b3-3a242100a62a",
+     "label": "Leader"
+    },
+    "form_indicators": null,
+    "past_performances": null,
+    "jockey_past_performances": null,
+    "fresh_90": {
+     "number_of_starts": 1,
+     "number_of_wins": 0,
+     "number_of_placings": 1,
+     "number_of_seconds": 0,
+     "number_of_thirds": 1,
+     "winning_distance": 0
+    },
+    "trainer_location": "",
+    "horse_id": 2391064,
+    "dam_sire": "Pathfork",
+    "meta": null,
+    "flucs": [
+     9.5,
+     8,
+     4,
+     4.2
+    ],
+    "scr_time": null,
+    "competitor_id": "",
+    "ride_guide_exists": false,
+    "ride_guide_thumbnail": "",
+    "ride_guide_file": "",
+    "flucs_with_timestamp": {
+     "last_six": [
+      {
+       "timestamp": "2026-09-21T08:41:39.36412024Z",
+       "fluc": 9.5
+      },
+      {
+       "timestamp": "2026-09-21T09:41:22.674045637Z",
+       "fluc": 8
+      },
+      {
+       "timestamp": "2026-09-21T09:55:26.169692818Z",
+       "fluc": 4
+      },
+      {
+       "timestamp": "2026-09-21T09:55:26.865990604Z",
+       "fluc": 4.2
+      }
+     ],
+     "open": {
+      "timestamp": "2026-09-21T08:41:39.36412024Z",
+      "fluc": 9.5
+     },
+     "high": {
+      "timestamp": "2026-09-21T08:41:39.36412024Z",
+      "fluc": 9.5
+     },
+     "low": {
+      "timestamp": "2026-09-21T09:55:26.169692818Z",
+      "fluc": 4
+     },
+     "nine_am": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     }
+    }
+   },
+   {
+    "entrant_id": "365274a5-92d2-461b-97bd-9c8fd0ed4436",
+    "market_name": "Final Field",
+    "primary_market": true,
+    "name": "Head In The Clouds",
+    "is_scratched": false,
+    "gear": "alumites",
+    "odds": {
+     "fixed_win": 41,
+     "fixed_place": 8,
+     "pool_win": 51.5,
+     "pool_place": 6.8
+    },
+    "scratch_time": 0,
+    "barrier": 10,
+    "runner_number": 10,
+    "prize_money": "0",
+    "age": 3,
+    "sex": "G",
+    "colour": "B",
+    "silk_colours": "PINK SHERBET, CREAM SLEEVES, LIME CAP",
+    "silk_url_64x64": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/head-in-the-clouds_64x64.png",
+    "silk_url_128x128": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/head-in-the-clouds_128x128.png",
+    "alt_silk_url_64x64": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_10_64x64.png",
+    "alt_silk_url_128x128": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_10_128x128.png",
+    "form_comment": null,
+    "class_level": "",
+    "jockey": "Jabu Jacobs",
+    "apprentice_indicator": "",
+    "allowance_weight": "",
+    "owners": "Mrs M D J Liley",
+    "country": "SAF",
+    "trainer_name": "Tony Rivalland",
+    "last_twenty_starts": "",
+    "sire": "MALMOOS (SAF)",
+    "dam": "SKY CAPERS (SAF)",
+    "breeding": "3 g MALMOOS (SAF)-SKY CAPERS (SAF)",
+    "weight": {
+     "allocated": "58",
+     "total": "58"
+    },
+    "favourite": false,
+    "mover": false,
+    "speedmap": {},
+    "form_indicators": null,
+    "past_performances": null,
+    "jockey_past_performances": null,
+    "fresh_90": {
+     "number_of_starts": 0,
+     "number_of_wins": 0,
+     "number_of_placings": 0,
+     "number_of_seconds": 0,
+     "number_of_thirds": 0,
+     "winning_distance": 0
+    },
+    "trainer_location": "",
+    "horse_id": 2460546,
+    "dam_sire": "Jet Master",
+    "meta": null,
+    "flucs": [
+     19,
+     21,
+     46,
+     41
+    ],
+    "scr_time": null,
+    "competitor_id": "",
+    "ride_guide_exists": false,
+    "ride_guide_thumbnail": "",
+    "ride_guide_file": "",
+    "flucs_with_timestamp": {
+     "last_six": [
+      {
+       "timestamp": "2026-09-21T08:41:39.362695656Z",
+       "fluc": 19
+      },
+      {
+       "timestamp": "2026-09-21T09:39:22.267225596Z",
+       "fluc": 21
+      },
+      {
+       "timestamp": "2026-09-21T10:07:22.267834288Z",
+       "fluc": 46
+      },
+      {
+       "timestamp": "2026-09-21T10:07:38.498696849Z",
+       "fluc": 41
+      }
+     ],
+     "open": {
+      "timestamp": "2026-09-21T08:41:39.362695656Z",
+      "fluc": 19
+     },
+     "high": {
+      "timestamp": "2026-09-21T10:07:22.267834288Z",
+      "fluc": 46
+     },
+     "low": {
+      "timestamp": "2026-09-21T08:41:39.362695656Z",
+      "fluc": 19
+     },
+     "nine_am": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     }
+    }
+   },
+   {
+    "entrant_id": "f7b3ef73-b5b7-44b8-b705-5d36c7e3e8e3",
+    "market_name": "Final Field",
+    "primary_market": true,
+    "name": "What An Act",
+    "is_scratched": false,
+    "gear": "alumites",
+    "odds": {
+     "fixed_win": 101,
+     "fixed_place": 15,
+     "pool_win": 126.9,
+     "pool_place": 11.5
+    },
+    "scratch_time": 0,
+    "barrier": 11,
+    "runner_number": 11,
+    "prize_money": "0",
+    "age": 3,
+    "sex": "C",
+    "colour": "B",
+    "silk_colours": "ORANGE, PURPLE CHECKS SLEEVES, CHECKS CAP",
+    "silk_url_64x64": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/what-an-act_64x64.png",
+    "silk_url_128x128": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/what-an-act_128x128.png",
+    "alt_silk_url_64x64": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_11_64x64.png",
+    "alt_silk_url_128x128": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_11_128x128.png",
+    "form_comment": null,
+    "class_level": "",
+    "jockey": "Siphesihle Hlengwa",
+    "apprentice_indicator": "",
+    "allowance_weight": "",
+    "owners": "Mr E W Buhr",
+    "country": "SAF",
+    "trainer_name": "Stuart Ferrie",
+    "last_twenty_starts": "",
+    "sire": "ACT OF WAR (SAF)",
+    "dam": "DUMMY RUN (SAF)",
+    "breeding": "3 c ACT OF WAR (SAF)-DUMMY RUN (SAF)",
+    "weight": {
+     "allocated": "58",
+     "total": "58"
+    },
+    "favourite": false,
+    "mover": false,
+    "speedmap": {},
+    "form_indicators": null,
+    "past_performances": null,
+    "jockey_past_performances": null,
+    "fresh_90": {
+     "number_of_starts": 0,
+     "number_of_wins": 0,
+     "number_of_placings": 0,
+     "number_of_seconds": 0,
+     "number_of_thirds": 0,
+     "winning_distance": 0
+    },
+    "trainer_location": "",
+    "horse_id": 2460547,
+    "dam_sire": "Mogok",
+    "meta": null,
+    "flucs": [
+     26,
+     31,
+     126,
+     101
+    ],
+    "scr_time": null,
+    "competitor_id": "",
+    "ride_guide_exists": false,
+    "ride_guide_thumbnail": "",
+    "ride_guide_file": "",
+    "flucs_with_timestamp": {
+     "last_six": [
+      {
+       "timestamp": "2026-09-21T08:41:39.365698928Z",
+       "fluc": 26
+      },
+      {
+       "timestamp": "2026-09-21T09:41:37.364584562Z",
+       "fluc": 31
+      },
+      {
+       "timestamp": "2026-09-21T10:06:46.56670341Z",
+       "fluc": 126
+      },
+      {
+       "timestamp": "2026-09-21T10:07:22.269412056Z",
+       "fluc": 101
+      }
+     ],
+     "open": {
+      "timestamp": "2026-09-21T08:41:39.365698928Z",
+      "fluc": 26
+     },
+     "high": {
+      "timestamp": "2026-09-21T10:06:46.56670341Z",
+      "fluc": 126
+     },
+     "low": {
+      "timestamp": "2026-09-21T08:41:39.365698928Z",
+      "fluc": 26
+     },
+     "nine_am": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     }
+    }
+   },
+   {
+    "entrant_id": "cb27130d-7708-473b-beb5-ebf6e51f0d9e",
+    "market_name": "Final Field",
+    "primary_market": true,
+    "name": "Drumline",
+    "is_scratched": false,
+    "gear": "alumites",
+    "odds": {
+     "fixed_win": 26,
+     "fixed_place": 5.5,
+     "pool_win": 46.4,
+     "pool_place": 6.7
+    },
+    "scratch_time": 0,
+    "barrier": 12,
+    "runner_number": 12,
+    "prize_money": "0",
+    "age": 3,
+    "sex": "C",
+    "colour": "B",
+    "silk_colours": "YELLOW GREEN, MEDIUM BLUE QUARTERS,WHITE SLEEVES, YELLOW GREEN ARMBANDS,WHITE CAP",
+    "silk_url_64x64": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/drumline_64x64.png",
+    "silk_url_128x128": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/drumline_128x128.png",
+    "alt_silk_url_64x64": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_12_64x64.png",
+    "alt_silk_url_128x128": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_12_128x128.png",
+    "form_comment": null,
+    "class_level": "",
+    "jockey": "Serino Moodley",
+    "apprentice_indicator": "",
+    "allowance_weight": "",
+    "owners": "Messrs E G Hart de Keating, M L Jean Hardy & M J L Nairac",
+    "country": "SAF",
+    "trainer_name": "Stuart Ferrie",
+    "last_twenty_starts": "",
+    "sire": "SOQRAT (AUS)",
+    "dam": "FORWARD MARCH (SAF)",
+    "breeding": "3 c SOQRAT (AUS)-FORWARD MARCH (SAF)",
+    "weight": {
+     "allocated": "58",
+     "total": "58"
+    },
+    "favourite": false,
+    "mover": false,
+    "speedmap": {},
+    "form_indicators": null,
+    "past_performances": null,
+    "jockey_past_performances": null,
+    "fresh_90": {
+     "number_of_starts": 0,
+     "number_of_wins": 0,
+     "number_of_placings": 0,
+     "number_of_seconds": 0,
+     "number_of_thirds": 0,
+     "winning_distance": 0
+    },
+    "trainer_location": "",
+    "horse_id": 2460548,
+    "dam_sire": "Pathfork",
+    "meta": null,
+    "flucs": [
+     15,
+     18,
+     31,
+     26
+    ],
+    "scr_time": null,
+    "competitor_id": "",
+    "ride_guide_exists": false,
+    "ride_guide_thumbnail": "",
+    "ride_guide_file": "",
+    "flucs_with_timestamp": {
+     "last_six": [
+      {
+       "timestamp": "2026-09-21T08:41:39.361638165Z",
+       "fluc": 15
+      },
+      {
+       "timestamp": "2026-09-21T09:39:22.269298153Z",
+       "fluc": 18
+      },
+      {
+       "timestamp": "2026-09-21T10:03:34.067586805Z",
+       "fluc": 31
+      },
+      {
+       "timestamp": "2026-09-21T10:07:39.304083414Z",
+       "fluc": 26
+      }
+     ],
+     "open": {
+      "timestamp": "2026-09-21T08:41:39.361638165Z",
+      "fluc": 15
+     },
+     "high": {
+      "timestamp": "2026-09-21T10:03:34.067586805Z",
+      "fluc": 31
+     },
+     "low": {
+      "timestamp": "2026-09-21T08:41:39.361638165Z",
+      "fluc": 15
+     },
+     "nine_am": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     }
+    }
+   },
+   {
+    "entrant_id": "be5ec6a7-3748-44c3-ba70-24d7343c66df",
+    "market_name": "Final Field",
+    "primary_market": true,
+    "name": "Big Dipper",
+    "is_scratched": false,
+    "gear": "alumites",
+    "odds": {
+     "fixed_win": 23,
+     "fixed_place": 5,
+     "pool_win": 26.7,
+     "pool_place": 3.6
+    },
+    "scratch_time": 0,
+    "barrier": 13,
+    "runner_number": 13,
+    "prize_money": "0",
+    "age": 3,
+    "sex": "G",
+    "colour": "B",
+    "silk_colours": "WHITE, BLACK FLEUR DE LYS, COLLAR,RED SLEEVES, BLACK CUFF, BLACK CAP, WHITE STRIPES CAP",
+    "silk_url_64x64": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/big-dipper_64x64.png",
+    "silk_url_128x128": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/big-dipper_128x128.png",
+    "alt_silk_url_64x64": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_13_64x64.png",
+    "alt_silk_url_128x128": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_13_128x128.png",
+    "form_comment": null,
+    "class_level": "",
+    "jockey": "Nicholas Patel",
+    "apprentice_indicator": "",
+    "allowance_weight": "",
+    "owners": "Wernars Family & Gary Player Stud Farm (Pty) Ltd",
+    "country": "SAF",
+    "trainer_name": "Gareth Van Zyl",
+    "last_twenty_starts": "9",
+    "sire": "QUERARI (GER)",
+    "dam": "INSIGNIS (SAF)",
+    "breeding": "3 g QUERARI (GER)-INSIGNIS (SAF)",
+    "weight": {
+     "allocated": "58",
+     "total": "58"
+    },
+    "favourite": false,
+    "mover": false,
+    "speedmap": {
+     "settling_lengths": 5,
+     "entrant_id": "be5ec6a7-3748-44c3-ba70-24d7343c66df",
+     "label": "Midfield"
+    },
+    "form_indicators": null,
+    "past_performances": null,
+    "jockey_past_performances": null,
+    "fresh_90": {
+     "number_of_starts": 1,
+     "number_of_wins": 0,
+     "number_of_placings": 0,
+     "number_of_seconds": 0,
+     "number_of_thirds": 0,
+     "winning_distance": 0
+    },
+    "trainer_location": "",
+    "horse_id": 2446084,
+    "dam_sire": "Go Deputy",
+    "meta": null,
+    "flucs": [
+     19,
+     20,
+     31,
+     23
+    ],
+    "scr_time": null,
+    "competitor_id": "",
+    "ride_guide_exists": false,
+    "ride_guide_thumbnail": "",
+    "ride_guide_file": "",
+    "flucs_with_timestamp": {
+     "last_six": [
+      {
+       "timestamp": "2026-09-21T08:41:39.366090984Z",
+       "fluc": 19
+      },
+      {
+       "timestamp": "2026-09-21T09:40:52.56495163Z",
+       "fluc": 20
+      },
+      {
+       "timestamp": "2026-09-21T09:52:48.665015884Z",
+       "fluc": 31
+      },
+      {
+       "timestamp": "2026-09-21T10:08:12.758705747Z",
+       "fluc": 23
+      }
+     ],
+     "open": {
+      "timestamp": "2026-09-21T08:41:39.366090984Z",
+      "fluc": 19
+     },
+     "high": {
+      "timestamp": "2026-09-21T09:52:48.665015884Z",
+      "fluc": 31
+     },
+     "low": {
+      "timestamp": "2026-09-21T08:41:39.366090984Z",
+      "fluc": 19
+     },
+     "nine_am": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     }
+    }
+   },
+   {
+    "entrant_id": "6e1b6e5b-a757-4112-839d-42ec402d6dea",
+    "market_name": "Final Field",
+    "primary_market": true,
+    "name": "Emerald Visionary",
+    "is_scratched": false,
+    "gear": "alumites",
+    "odds": {
+     "fixed_win": 41,
+     "fixed_place": 8,
+     "pool_win": 71.1,
+     "pool_place": 12.1
+    },
+    "scratch_time": 0,
+    "barrier": 14,
+    "runner_number": 14,
+    "prize_money": "0",
+    "age": 3,
+    "sex": "G",
+    "colour": "CH",
+    "silk_colours": "BLACK,RED HOOPS,WHITE BAND, GOLD SLEEVES,CAP",
+    "silk_url_64x64": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/emerald-visionary_64x64.png",
+    "silk_url_128x128": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/emerald-visionary_128x128.png",
+    "alt_silk_url_64x64": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_14_64x64.png",
+    "alt_silk_url_128x128": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_14_128x128.png",
+    "form_comment": null,
+    "class_level": "",
+    "jockey": "Tristan Godden",
+    "apprentice_indicator": "",
+    "allowance_weight": "",
+    "owners": "The OC Syndicate (Nom: Mr Stuart Ferrie)",
+    "country": "SAF",
+    "trainer_name": "Stuart Ferrie",
+    "last_twenty_starts": "",
+    "sire": "VISIONAIRE (USA)",
+    "dam": "EMERALD TIARA (SAF)",
+    "breeding": "3 g VISIONAIRE (USA)-EMERALD TIARA (SAF)",
+    "weight": {
+     "allocated": "58",
+     "total": "58"
+    },
+    "favourite": false,
+    "mover": false,
+    "speedmap": {},
+    "form_indicators": null,
+    "past_performances": null,
+    "jockey_past_performances": null,
+    "fresh_90": {
+     "number_of_starts": 0,
+     "number_of_wins": 0,
+     "number_of_placings": 0,
+     "number_of_seconds": 0,
+     "number_of_thirds": 0,
+     "winning_distance": 0
+    },
+    "trainer_location": "",
+    "horse_id": 2460542,
+    "dam_sire": "Gimmethegreenlight",
+    "meta": null,
+    "flucs": [
+     26,
+     31,
+     67,
+     41
+    ],
+    "scr_time": null,
+    "competitor_id": "",
+    "ride_guide_exists": false,
+    "ride_guide_thumbnail": "",
+    "ride_guide_file": "",
+    "flucs_with_timestamp": {
+     "last_six": [
+      {
+       "timestamp": "2026-09-21T08:41:39.364799292Z",
+       "fluc": 26
+      },
+      {
+       "timestamp": "2026-09-21T09:41:37.36419294Z",
+       "fluc": 31
+      },
+      {
+       "timestamp": "2026-09-21T10:01:54.668326139Z",
+       "fluc": 67
+      },
+      {
+       "timestamp": "2026-09-21T10:07:39.303280327Z",
+       "fluc": 41
+      }
+     ],
+     "open": {
+      "timestamp": "2026-09-21T08:41:39.364799292Z",
+      "fluc": 26
+     },
+     "high": {
+      "timestamp": "2026-09-21T10:01:54.668326139Z",
+      "fluc": 67
+     },
+     "low": {
+      "timestamp": "2026-09-21T08:41:39.364799292Z",
+      "fluc": 26
+     },
+     "nine_am": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     }
+    }
+   },
+   {
+    "entrant_id": "f4c54989-f950-4370-bf59-40e72046ba6e",
+    "market_name": "Final Field",
+    "primary_market": true,
+    "name": "Albert Ross",
+    "is_scratched": false,
+    "gear": "alumites",
+    "odds": {
+     "fixed_win": 17,
+     "fixed_place": 4.2,
+     "pool_win": 25.7,
+     "pool_place": 4.5
+    },
+    "scratch_time": 0,
+    "barrier": 15,
+    "runner_number": 15,
+    "prize_money": "0",
+    "age": 3,
+    "sex": "G",
+    "colour": "B",
+    "silk_colours": "YELLOW, PURPLE STARS, STARS SLEEVES, YELLOW CAP, PURPLE STAR",
+    "silk_url_64x64": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/albert-ross_64x64.png",
+    "silk_url_128x128": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/albert-ross_128x128.png",
+    "alt_silk_url_64x64": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_15_64x64.png",
+    "alt_silk_url_128x128": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_15_128x128.png",
+    "form_comment": null,
+    "class_level": "",
+    "jockey": "Calvin Habib",
+    "apprentice_indicator": "",
+    "allowance_weight": "",
+    "owners": "Hollywood Racing (Nom: Mr A Delpech)",
+    "country": "SAF",
+    "trainer_name": "Mark Dixon",
+    "last_twenty_starts": "",
+    "sire": "MALMOOS (SAF)",
+    "dam": "JOKING (SAF)",
+    "breeding": "3 g MALMOOS (SAF)-JOKING (SAF)",
+    "weight": {
+     "allocated": "58",
+     "total": "58"
+    },
+    "favourite": false,
+    "mover": false,
+    "speedmap": {},
+    "form_indicators": null,
+    "past_performances": null,
+    "jockey_past_performances": null,
+    "fresh_90": {
+     "number_of_starts": 0,
+     "number_of_wins": 0,
+     "number_of_placings": 0,
+     "number_of_seconds": 0,
+     "number_of_thirds": 0,
+     "winning_distance": 0
+    },
+    "trainer_location": "",
+    "horse_id": 2460550,
+    "dam_sire": "Querari",
+    "meta": null,
+    "flucs": [
+     15,
+     21,
+     16,
+     17
+    ],
+    "scr_time": null,
+    "competitor_id": "",
+    "ride_guide_exists": false,
+    "ride_guide_thumbnail": "",
+    "ride_guide_file": "",
+    "flucs_with_timestamp": {
+     "last_six": [
+      {
+       "timestamp": "2026-09-21T08:41:39.363225471Z",
+       "fluc": 15
+      },
+      {
+       "timestamp": "2026-09-21T10:01:54.66248263Z",
+       "fluc": 21
+      },
+      {
+       "timestamp": "2026-09-21T10:05:56.898756636Z",
+       "fluc": 16
+      },
+      {
+       "timestamp": "2026-09-21T10:09:23.418153003Z",
+       "fluc": 17
+      }
+     ],
+     "open": {
+      "timestamp": "2026-09-21T08:41:39.363225471Z",
+      "fluc": 15
+     },
+     "high": {
+      "timestamp": "2026-09-21T10:01:54.66248263Z",
+      "fluc": 21
+     },
+     "low": {
+      "timestamp": "2026-09-21T08:41:39.363225471Z",
+      "fluc": 15
+     },
+     "nine_am": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     }
+    }
+   },
+   {
+    "entrant_id": "1b58776d-5689-4ba1-abd3-dd3b72240238",
+    "market_name": "Final Field",
+    "primary_market": true,
+    "name": "Kiartay",
+    "is_scratched": false,
+    "gear": "alumites",
+    "odds": {
+     "fixed_win": 11,
+     "fixed_place": 3.2,
+     "pool_win": 13.9,
+     "pool_place": 2.6
+    },
+    "scratch_time": 0,
+    "barrier": 16,
+    "runner_number": 16,
+    "prize_money": "4709",
+    "age": 3,
+    "sex": "G",
+    "colour": "B",
+    "silk_colours": "LIME,RED FLEUR DE LYS,SLEEVES,RED STRIPES CAP",
+    "silk_url_64x64": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/kiartay_64x64.png",
+    "silk_url_128x128": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/kiartay_128x128.png",
+    "alt_silk_url_64x64": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_16_64x64.png",
+    "alt_silk_url_128x128": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_16_128x128.png",
+    "form_comment": null,
+    "class_level": "",
+    "jockey": "Callan Murray",
+    "apprentice_indicator": "",
+    "allowance_weight": "",
+    "owners": "Mr Rakesh Singh",
+    "country": "SAF",
+    "trainer_name": "Tienie Prinsloo",
+    "last_twenty_starts": "20x585046",
+    "sire": "ERIK THE RED (SAF)",
+    "dam": "GREEN LIGHT GAL (SAF)",
+    "breeding": "3 g ERIK THE RED (SAF)-GREEN LIGHT GAL (SAF)",
+    "weight": {
+     "allocated": "58",
+     "total": "58"
+    },
+    "favourite": false,
+    "mover": false,
+    "speedmap": {
+     "settling_lengths": 7,
+     "entrant_id": "1b58776d-5689-4ba1-abd3-dd3b72240238",
+     "label": "Pace"
+    },
+    "form_indicators": null,
+    "past_performances": null,
+    "jockey_past_performances": null,
+    "fresh_90": {
+     "number_of_starts": 2,
+     "number_of_wins": 0,
+     "number_of_placings": 1,
+     "number_of_seconds": 1,
+     "number_of_thirds": 0,
+     "winning_distance": 0
+    },
+    "trainer_location": "",
+    "horse_id": 2376855,
+    "dam_sire": "Gimmethegreenlight",
+    "meta": null,
+    "flucs": [
+     26,
+     10,
+     11
+    ],
+    "scr_time": null,
+    "competitor_id": "",
+    "ride_guide_exists": false,
+    "ride_guide_thumbnail": "",
+    "ride_guide_file": "",
+    "flucs_with_timestamp": {
+     "last_six": [
+      {
+       "timestamp": "2026-09-21T08:41:39.364731432Z",
+       "fluc": 26
+      },
+      {
+       "timestamp": "2026-09-21T09:56:35.460353177Z",
+       "fluc": 10
+      },
+      {
+       "timestamp": "2026-09-21T10:00:18.769134317Z",
+       "fluc": 11
+      }
+     ],
+     "open": {
+      "timestamp": "2026-09-21T08:41:39.364731432Z",
+      "fluc": 26
+     },
+     "high": {
+      "timestamp": "2026-09-21T08:41:39.364731432Z",
+      "fluc": 26
+     },
+     "low": {
+      "timestamp": "2026-09-21T09:56:35.460353177Z",
+      "fluc": 10
+     },
+     "nine_am": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     }
+    }
+   },
+   {
+    "entrant_id": "92bdef7b-3e8f-4415-9961-cf948ecf9a0e",
+    "market_name": "Final Field",
+    "primary_market": true,
+    "name": "Roxbury Park",
+    "is_scratched": false,
+    "gear": "alumites",
+    "odds": {
+     "fixed_win": 6.5,
+     "fixed_place": 2.25,
+     "pool_win": 6.7,
+     "pool_place": 2.5
+    },
+    "scratch_time": 0,
+    "barrier": 2,
+    "runner_number": 17,
+    "prize_money": "0",
+    "age": 3,
+    "sex": "G",
+    "colour": "B",
+    "silk_colours": "BLACK,RED MALTESE CROSS, SLEEVES,CAP",
+    "silk_url_64x64": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/roxbury-park_64x64.png",
+    "silk_url_128x128": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/roxbury-park_128x128.png",
+    "alt_silk_url_64x64": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_17_64x64.png",
+    "alt_silk_url_128x128": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_17_128x128.png",
+    "form_comment": null,
+    "class_level": "",
+    "jockey": "Keagan De Melo",
+    "apprentice_indicator": "",
+    "allowance_weight": "",
+    "owners": "Alac (Pty) Ltd (Nom: Mr A L A Crabbia)",
+    "country": "SAF",
+    "trainer_name": "Dean Kannemeyer",
+    "last_twenty_starts": "",
+    "sire": "GIMMETHEGREENLIGHT (AUS)",
+    "dam": "QUEEN OF POP (SAF)",
+    "breeding": "3 g GIMMETHEGREENLIGHT (AUS)-QUEEN OF POP (SAF)",
+    "weight": {
+     "allocated": "58",
+     "total": "58"
+    },
+    "favourite": false,
+    "mover": false,
+    "speedmap": {},
+    "form_indicators": null,
+    "past_performances": null,
+    "jockey_past_performances": null,
+    "fresh_90": {
+     "number_of_starts": 0,
+     "number_of_wins": 0,
+     "number_of_placings": 0,
+     "number_of_seconds": 0,
+     "number_of_thirds": 0,
+     "winning_distance": 0
+    },
+    "trainer_location": "",
+    "horse_id": 2460551,
+    "dam_sire": "Sail From Seattle",
+    "meta": null,
+    "flucs": [
+     5,
+     6,
+     9,
+     6.5
+    ],
+    "scr_time": null,
+    "competitor_id": "",
+    "ride_guide_exists": false,
+    "ride_guide_thumbnail": "",
+    "ride_guide_file": "",
+    "flucs_with_timestamp": {
+     "last_six": [
+      {
+       "timestamp": "2026-09-21T08:41:39.36277371Z",
+       "fluc": 5
+      },
+      {
+       "timestamp": "2026-09-21T09:40:52.565418381Z",
+       "fluc": 6
+      },
+      {
+       "timestamp": "2026-09-21T10:06:20.665381119Z",
+       "fluc": 9
+      },
+      {
+       "timestamp": "2026-09-21T10:08:54.727434087Z",
+       "fluc": 6.5
+      }
+     ],
+     "open": {
+      "timestamp": "2026-09-21T08:41:39.36277371Z",
+      "fluc": 5
+     },
+     "high": {
+      "timestamp": "2026-09-21T10:06:20.665381119Z",
+      "fluc": 9
+     },
+     "low": {
+      "timestamp": "2026-09-21T08:41:39.36277371Z",
+      "fluc": 5
+     },
+     "nine_am": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     }
+    }
+   },
+   {
+    "entrant_id": "12364cc1-7552-4338-b598-e3251078cc2c",
+    "market_name": "Final Field",
+    "primary_market": true,
+    "name": "Gimme The Sun",
+    "is_scratched": true,
+    "gear": "alumites",
+    "odds": {
+     "fixed_win": 0,
+     "fixed_place": 0,
+     "pool_win": 69.3,
+     "pool_place": 48.4
+    },
+    "scratch_time": 1789972470,
+    "barrier": 0,
+    "runner_number": 18,
+    "prize_money": "0",
+    "age": 3,
+    "sex": "C",
+    "colour": "B",
+    "silk_colours": "NAVY, LT BLUE HOOPS, CHECKS SLEEVES, CHECKS CAP",
+    "silk_url_64x64": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/gimme-the-sun_64x64.png",
+    "silk_url_128x128": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/gimme-the-sun_128x128.png",
+    "alt_silk_url_64x64": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_18_64x64.png",
+    "alt_silk_url_128x128": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_18_128x128.png",
+    "form_comment": null,
+    "class_level": "",
+    "jockey": "Reserve 2",
+    "apprentice_indicator": "",
+    "allowance_weight": "",
+    "owners": "Messrs Rowland Roopnarian, J Deokynarain, Rajan Naidoo & Y Naidoo",
+    "country": "SAF",
+    "trainer_name": "Yogas Govender",
+    "last_twenty_starts": "6",
+    "sire": "GIMMETHEGREENLIGHT (AUS)",
+    "dam": "SUNSHINE SILK (SAF)",
+    "breeding": "3 c GIMMETHEGREENLIGHT (AUS)-SUNSHINE SILK (SAF)",
+    "weight": {
+     "allocated": "58",
+     "total": "58"
+    },
+    "favourite": false,
+    "mover": false,
+    "speedmap": {
+     "settling_lengths": 1,
+     "entrant_id": "12364cc1-7552-4338-b598-e3251078cc2c",
+     "label": "invalid settling lengths"
+    },
+    "form_indicators": null,
+    "past_performances": null,
+    "jockey_past_performances": null,
+    "fresh_90": {
+     "number_of_starts": 1,
+     "number_of_wins": 0,
+     "number_of_placings": 0,
+     "number_of_seconds": 0,
+     "number_of_thirds": 0,
+     "winning_distance": 0
+    },
+    "trainer_location": "",
+    "horse_id": 2446407,
+    "dam_sire": "Silvano",
+    "meta": null,
+    "flucs": [],
+    "scr_time": "2026-09-21T06:34:30Z",
+    "competitor_id": "",
+    "ride_guide_exists": false,
+    "ride_guide_thumbnail": "",
+    "ride_guide_file": "",
+    "flucs_with_timestamp": {
+     "last_six": [],
+     "open": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     },
+     "high": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     },
+     "low": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     },
+     "nine_am": {
+      "timestamp": "0001-01-01T00:00:00Z",
+      "fluc": 0
+     }
+    }
+   }
+  ],
+  "mover": {
+   "entrant_id": "c16c90c1-1a15-4c9f-9bca-52374615f925",
+   "market_name": "Live Racing",
+   "primary_market": false,
+   "name": "Roxbury Park",
+   "is_scratched": false,
+   "gear": "alumites",
+   "odds": {
+    "fixed_win": 1,
+    "fixed_place": 0
+   },
+   "scratch_time": 0,
+   "barrier": 2,
+   "runner_number": 17,
+   "prize_money": "0",
+   "age": 3,
+   "sex": "G",
+   "colour": "B",
+   "silk_colours": "BLACK,RED MALTESE CROSS, SLEEVES,CAP",
+   "silk_url_64x64": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/roxbury-park_64x64.png",
+   "silk_url_128x128": "https://cdn.prod.pricekinetics.com/silks/events/racing/betmakers-cmFjZToyMTMxMTI0/roxbury-park_128x128.png",
+   "alt_silk_url_64x64": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_17_64x64.png",
+   "alt_silk_url_128x128": "https://60vddugt52s3rdslo1hpoog5la.silks.betmakers.com/596410_1_17_128x128.png",
+   "form_comment": null,
+   "class_level": "",
+   "jockey": "Keagan De Melo",
+   "apprentice_indicator": "",
+   "allowance_weight": "",
+   "owners": "Alac (Pty) Ltd (Nom: Mr A L A Crabbia)",
+   "country": "SAF",
+   "trainer_name": "Dean Kannemeyer",
+   "last_twenty_starts": "",
+   "sire": "GIMMETHEGREENLIGHT (AUS)",
+   "dam": "QUEEN OF POP (SAF)",
+   "breeding": "3 g GIMMETHEGREENLIGHT (AUS)-QUEEN OF POP (SAF)",
+   "weight": {
+    "allocated": "58",
+    "total": "58"
+   },
+   "favourite": false,
+   "mover": true,
+   "speedmap": {},
+   "form_indicators": null,
+   "past_performances": null,
+   "jockey_past_performances": null,
+   "fresh_90": {
+    "number_of_starts": 0,
+    "number_of_wins": 0,
+    "number_of_placings": 0,
+    "number_of_seconds": 0,
+    "number_of_thirds": 0,
+    "winning_distance": 0
+   },
+   "trainer_location": "",
+   "horse_id": 2460551,
+   "dam_sire": "Sail From Seattle"
+  },
+  "error": ""
+ }
+}

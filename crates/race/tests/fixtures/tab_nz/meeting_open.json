@@ -1,0 +1,158 @@
+{
+ "header": {
+  "title": "Get meeting by id",
+  "generated_time": "2026-09-21T09:57:44.734395883Z",
+  "url": "/affiliates/v1/racing/meetings/4eb08653-e361-5f9c-9d39-cc652eb63473"
+ },
+ "params": {
+  "enc": "json",
+  "id": "4eb08653-e361-5f9c-9d39-cc652eb63473"
+ },
+ "data": {
+  "meetings": [
+   {
+    "meeting": "4eb08653-e361-5f9c-9d39-cc652eb63473",
+    "name": "Scottsville",
+    "date": "2026-09-21T00:00:00Z",
+    "track_condition": "Soft",
+    "category": "T",
+    "category_name": "Thoroughbred Horse Racing",
+    "country": "SAF",
+    "state": "ZAF",
+    "races": [
+     {
+      "id": "f0eb3cef-e900-48bd-be5c-fe7b0330239f",
+      "race_number": 1,
+      "name": "Gallop Tv Mdn Plate",
+      "start_time": "2026-09-21T10:07:00Z",
+      "tote_start_time": "22:07:00",
+      "track_condition": "Soft",
+      "distance": 1200,
+      "weather": "Overcast",
+      "country": "SAF",
+      "state": "ZAF",
+      "status": "Open"
+     },
+     {
+      "id": "f204aa5c-86a8-42bc-93e9-e783b7d486c0",
+      "race_number": 2,
+      "name": "Tote For The Win Mdn Plate (F & M)",
+      "start_time": "2026-09-21T10:45:00Z",
+      "tote_start_time": "22:45:00",
+      "track_condition": "Soft",
+      "distance": 1200,
+      "weather": "Overcast",
+      "country": "SAF",
+      "state": "ZAF",
+      "status": "Open"
+     },
+     {
+      "id": "9bf2d4d2-66f6-4141-ad74-942b3429a0b9",
+      "race_number": 3,
+      "name": "Join The Race Coast Turf Club Today! Mdn Plate",
+      "start_time": "2026-09-21T11:20:00Z",
+      "tote_start_time": "23:20:00",
+      "track_condition": "Soft",
+      "distance": 1600,
+      "weather": "Overcast",
+      "country": "SAF",
+      "state": "ZAF",
+      "status": "Open"
+     },
+     {
+      "id": "47ffcc84-0489-4146-a4ae-39b4376fec3d",
+      "race_number": 4,
+      "name": "Lucky Fish Aviator Class 4",
+      "start_time": "2026-09-21T11:55:00Z",
+      "tote_start_time": "23:55:00",
+      "track_condition": "Soft",
+      "distance": 1600,
+      "weather": "Overcast",
+      "country": "SAF",
+      "state": "ZAF",
+      "status": "Open"
+     },
+     {
+      "id": "d71ab13a-ff42-4e68-9fd4-ccb4ac9709f8",
+      "race_number": 5,
+      "name": "Online Form Guide Www.galloptv.co.za B Stakes",
+      "start_time": "2026-09-21T12:30:00Z",
+      "tote_start_time": "24:30:00",
+      "track_condition": "Soft",
+      "distance": 1600,
+      "weather": "Overcast",
+      "country": "SAF",
+      "state": "ZAF",
+      "status": "Open"
+     },
+     {
+      "id": "ce80ca1c-7d1f-46f2-9dce-3474076cffa1",
+      "race_number": 6,
+      "name": "Bet With Colossus Pools Exclusive On Www.tote.co.za Class 5",
+      "start_time": "2026-09-21T13:05:00Z",
+      "tote_start_time": "25:05:00",
+      "track_condition": "Soft",
+      "distance": 1200,
+      "weather": "Overcast",
+      "country": "SAF",
+      "state": "ZAF",
+      "status": "Open"
+     },
+     {
+      "id": "abc9045f-07eb-458f-b604-9d7848687422",
+      "race_number": 7,
+      "name": "Join The Vibe! Www.socialsquad.co.za Class 4",
+      "start_time": "2026-09-21T13:40:00Z",
+      "tote_start_time": "25:40:00",
+      "track_condition": "Soft",
+      "distance": 1200,
+      "weather": "Overcast",
+      "country": "SAF",
+      "state": "ZAF",
+      "status": "Open"
+     },
+     {
+      "id": "e7ec5022-c8af-496b-8297-3938011fab72",
+      "race_number": 8,
+      "name": "Hollywoodbets Bright Future Middle Stakes",
+      "start_time": "2026-09-21T14:15:00Z",
+      "tote_start_time": "26:15:00",
+      "track_condition": "Soft",
+      "distance": 1000,
+      "weather": "Overcast",
+      "country": "SAF",
+      "state": "ZAF",
+      "status": "Open"
+     }
+    ],
+    "video_channels": [
+     "Trackside1",
+     "Trackside2"
+    ],
+    "early_quaddie": [
+     1,
+     2,
+     3,
+     4
+    ],
+    "tote_meeting_number": 51,
+    "tote_raceday_date": "2026-09-21",
+    "tote_status": "Open",
+    "jetbet_club_name": "",
+    "club_day": 68,
+    "club_mnemonic": "SAFR",
+    "jetbet_track_name": "Scottsville",
+    "sell_date": "2026-09-21",
+    "fob_mnemonic": "",
+    "fob_sell_date": "",
+    "fob_close_date": "",
+    "fob_complete_date": "",
+    "fob_club_day": 0,
+    "meeting_date": "2026-09-21",
+    "track_mnemonic": "INTL",
+    "is_fob_meeting": false,
+    "meeting_type": ""
+   }
+  ]
+ }
+}
