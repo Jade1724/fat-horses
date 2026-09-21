@@ -3,5 +3,12 @@
 version = 4
 
 [[package]]
-name = "fat-horses"
+name = "fat-horses-cli"
+version = "0.1.0"
+dependencies = [
+ "fat-horses-domain",
+]
+
+[[package]]
+name = "fat-horses-domain"
 version = "0.1.0"

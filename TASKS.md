@@ -14,7 +14,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 
 ## M0 Workspace
 
-- [ ] **T0.1 Convert to a Cargo workspace.** Root `Cargo.toml` becomes a workspace. Move `src/main.rs` to `crates/cli` (binary `fat-horses`). Add an empty `crates/domain` library with one placeholder test. Update the layout note in `CLAUDE.md`.
+- [x] **T0.1 Convert to a Cargo workspace.** Root `Cargo.toml` becomes a workspace. Move `src/main.rs` to `crates/cli` (binary `fat-horses`). Add an empty `crates/domain` library with one placeholder test. Update the layout note in `CLAUDE.md`.
   Done when: `cargo run -p fat-horses-cli` prints something; `make check` passes and runs the domain test.
 
 ## M1 Spikes (findings go to `docs/spikes/`)

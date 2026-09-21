@@ -1,0 +1,12 @@
+[package]
+name = "fat-horses-cli"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "fat-horses"
+path = "src/main.rs"
+
+[dependencies]
+domain.workspace = true

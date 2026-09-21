@@ -1,6 +1,12 @@
 # fat-horses
 
-Rust binary crate (`cargo`, edition from `Cargo.toml`).
+Cargo workspace (edition 2024). Product spec: `SPEC.md`; work list: `TASKS.md`
+(take the first open non-`[human]` task, tick it in the same change).
+
+- `crates/domain` — pure rules and traits, no I/O.
+- `crates/cli` — the `fat-horses` binary.
+- More crates per `SPEC.md` §7 as tasks add them. Workspace deps are declared in
+  the root `Cargo.toml` `[workspace.dependencies]`.
 
 ## Commands
 
