@@ -3,7 +3,7 @@
 
 CARGO ?= cargo
 
-.PHONY: check fmt fmt-check lint test fix
+.PHONY: check fmt fmt-check lint test fix it
 
 ## Run every gate: format, lint, test. Stops at the first failure.
 check: fmt-check lint test
@@ -30,3 +30,13 @@ fix:
 	$(CARGO) fmt --all
 	$(CARGO) clippy --all-targets --all-features --fix --allow-dirty --allow-staged -- -D warnings
 	$(MAKE) check
+
+DYNAMODB_LOCAL_IMAGE ?= amazon/dynamodb-local:latest
+
+## Integration tests against DynamoDB Local in Docker. Not part of `check`.
+it:
+	@docker rm -f fat-horses-ddb >/dev/null 2>&1 || true
+	docker run -d --rm --name fat-horses-ddb -p 8000:8000 $(DYNAMODB_LOCAL_IMAGE) -jar DynamoDBLocal.jar -inMemory
+	@for i in $$(seq 1 30); do curl -s -o /dev/null localhost:8000 && break; sleep 1; done
+	FAT_HORSES_DYNAMODB_ENDPOINT=http://localhost:8000 $(CARGO) run --locked -q -p fat-horses-store --example dynamo_contract; \
+	  status=$$?; docker stop fat-horses-ddb >/dev/null; exit $$status

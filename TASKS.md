@@ -56,6 +56,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
   Needs: T3.4.
 - [ ] **T3.6 DynamoDB stores.** `crates/store` implementation with `TransactWriteItems` and the `STATE/PICKED` item. Add `make it`, which starts DynamoDB Local (docker) and runs the contract suite against it; not part of `make check`.
   Needs: T3.4.
+  Status: code, unit tests and `make it` are written; **not yet run** because this machine's user can't reach the Docker socket (not in the `docker` group). Tick once `make it` passes.
 
 ## M3c Classifier (LLM)
 
