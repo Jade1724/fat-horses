@@ -9,7 +9,9 @@ pub mod pick;
 pub mod places;
 pub mod pool;
 pub mod race;
+pub mod session;
 pub mod status;
+pub mod store;
 pub mod winner;
 
 /// Crate version, used in the CLI banner and the HTTP User-Agent.
