@@ -61,7 +61,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 ## M3c Classifier (LLM)
 
 - [x] **T3.7 `Classifier` trait, `FakeClassifier` and output validation (L2, L4).** Validation as a pure function with tests: unknown place IDs, unknown tags, confidence out of range, long reasons, bad JSON.
-- [ ] **T3.8 Guess caching (L6).** Wraps any `Classifier`: uses the `GuessCache`, recomputes when `input_hash` or prompt version changes, batches of 50, cap 200 closest places (L5). Tests with `FakeClassifier` that count calls.
+- [x] **T3.8 Guess caching (L6).** Wraps any `Classifier`: uses the `GuessCache`, recomputes when `input_hash` or prompt version changes, batches of 50, cap 200 closest places (L5). Tests with `FakeClassifier` that count calls.
   Needs: T3.4, T3.7.
 - [ ] **T3.9 `BedrockClassifier` (L3, L5, L7, L8).** Converse API with tool-use JSON output, prompts in `crates/classify/prompts/`, timeout and one retry. Unit tests build the request from fixtures and parse recorded responses (no network). `make live` runs one real call.
   Needs: T1.3, T3.7.
