@@ -4,6 +4,7 @@ pub mod assign;
 pub mod classify;
 pub mod countries;
 pub mod matching;
+pub mod pick;
 pub mod places;
 pub mod pool;
 pub mod race;
