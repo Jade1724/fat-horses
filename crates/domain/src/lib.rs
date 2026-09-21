@@ -2,6 +2,7 @@
 
 pub mod countries;
 pub mod pool;
+pub mod race;
 
 /// Crate version, used in the CLI banner and the HTTP User-Agent.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
