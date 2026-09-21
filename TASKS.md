@@ -109,10 +109,10 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 
 - [ ] **T7.1 `match_dishes` end to end (F6.5).** Prompt, Bedrock call, validation, wiring into `fallback_match`; tests with fakes and recorded responses; eval cases for tier 3.
   Needs: T3.9, T4.1.
-- [ ] **T7.2 Fallback UI.** "No match nearby" state with dishes, fallback pins with reasons.
+- [x] **T7.2 Fallback UI.** "No match nearby" state with dishes, fallback pins with reasons. (Built with T5.5: fallback matches get the same "likely" badge and reason as inferred ones.)
 
 ## M8 Polish
 
-- [ ] **T8.1 Error states in the UI** for every `error` code in §5.
+- [x] **T8.1 Error states in the UI** for every `error` code in §5. (`web/src/format.ts` `errorText`, plus 422 messages on the form.)
 - [ ] **T8.2 Logs (N7) and a CloudWatch alarm** on failed Step Functions executions.
 - [ ] **T8.3 Mobile layout pass** at 360 px (F10.1).
