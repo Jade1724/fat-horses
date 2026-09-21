@@ -52,7 +52,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 - [x] **T3.3 Overpass places client (F6.1).** Query builder (radius, amenity list, `out center`) with a snapshot test of the query text; parsing tests from fixtures (T1.5 fixtures if available, otherwise hand-written ones).
 - [x] **T3.4 Store traits + in-memory stores + contract tests (§4.2).** `VisitStore` (applies T2.11 transitions atomically, conditional on current status), `PickStore`, `GuessCache`, `GeocodeCache`. A reusable contract test suite; the in-memory store passes it, including stale-status → conflict.
   Needs: T2.11.
-- [ ] **T3.5 JSON-file stores.** For the CLI, stored under `~/.local/share/fat-horses/`. Pass the T3.4 contract suite.
+- [x] **T3.5 JSON-file stores.** For the CLI, stored under `~/.local/share/fat-horses/`. Pass the T3.4 contract suite.
   Needs: T3.4.
 - [ ] **T3.6 DynamoDB stores.** `crates/store` implementation with `TransactWriteItems` and the `STATE/PICKED` item. Add `make it`, which starts DynamoDB Local (docker) and runs the contract suite against it; not part of `make check`.
   Needs: T3.4.

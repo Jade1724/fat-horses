@@ -249,14 +249,21 @@ pub fn picked_after(change: &Change) -> Option<String> {
     }
 }
 
-/// The history sort key: `<RFC3339 ms timestamp>#<restaurant id>` (§4.2).
+/// The history sort key: `<RFC3339 µs timestamp>#<restaurant id>#<reason>` (§4.2).
+/// The reason keeps two changes to one restaurant in the same instant (e.g. pick
+/// then visit) from colliding.
 pub fn log_key(entry: &LogEntry) -> String {
+    let reason = serde_json::to_value(entry.reason)
+        .ok()
+        .and_then(|v| v.as_str().map(str::to_owned))
+        .unwrap_or_default();
     format!(
-        "{}#{}",
+        "{}#{}#{}",
         entry
             .at
-            .to_rfc3339_opts(chrono::SecondsFormat::Millis, true),
-        entry.restaurant_id
+            .to_rfc3339_opts(chrono::SecondsFormat::Micros, true),
+        entry.restaurant_id,
+        reason
     )
 }
 
@@ -305,6 +312,9 @@ mod tests {
     #[test]
     fn log_key_format() {
         let t = status::apply(&restaurant(None), Event::Visit, now()).unwrap();
-        assert_eq!(log_key(&t.log), "2026-09-21T10:00:00.000Z#osm:node/1");
+        assert_eq!(
+            log_key(&t.log),
+            "2026-09-21T10:00:00.000000Z#osm:node/1#visited"
+        );
     }
 }

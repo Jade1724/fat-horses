@@ -153,7 +153,7 @@ Keys `pk` (S), `sk` (S); attribute `ttl` (N, epoch seconds) for TTL. On-demand b
 | Restaurant | `RESTAURANT#<place_id>` | `META` | name, lat, lon, address, cuisine (list), country_iso, status (`PICKED`/`VISITED`; absent = `null`), status_before_pick, picked_at, visited_at, visit_count, match, reason |
 | Currently picked | `STATE` | `PICKED` | restaurant_id. Written in the same transaction as every change to or from `PICKED` (enforces F8.3) |
 | Country | `COUNTRY#<iso2>` | `META` | visit_count, first_visited_at, last_visited_at |
-| Log entry | `LOG` | `<RFC3339 ms timestamp>#<restaurant_id>` | the fields of F8.6 |
+| Log entry | `LOG` | `<RFC3339 µs timestamp>#<restaurant_id>#<reason>` | the fields of F8.6 |
 | Pick session | `PICK#<pick_id>` | `META` | request, location, status, pool size, world_complete, race card, winner, places, matches, pick, llm_unavailable, error; `ttl` = +30 days |
 | Guess | `PLACE#<place_id>` | `GUESS#v<prompt_version>` | cuisines, reason, model_id, input_hash, created_at; `ttl` = +180 days |
 | Geocode cache | `GEOCODE#<normalised address>` | `META` | lat, lon, display_name; `ttl` = +30 days |
