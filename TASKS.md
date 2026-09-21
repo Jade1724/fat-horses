@@ -31,7 +31,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 ## M2 Domain rules (`crates/domain`, pure, seeded RNG + fixed clock)
 
 - [x] **T2.1 Countries data model and loader.** Types for §4.1, a loader from JSON, and the §4.1 validation as a function with tests (a valid sample passes; each rule has a failing sample).
-- [ ] **T2.2 Populate `data/countries.json`.** Every country with population ≥ 10 M from World Bank `SP.POP.TOTL` (latest full year), with flag, `cuisine_tags` (OSM values where they exist) and 3–12 `dishes`. A test loads the real file and validates it.
+- [x] **T2.2 Populate `data/countries.json`.** Every country with population ≥ 10 M from World Bank `SP.POP.TOTL` (latest full year), with flag, `cuisine_tags` (OSM values where they exist) and 3–12 `dishes`. A test loads the real file and validates it.
   Needs: T2.1.
 - [ ] **T2.3 [human] Review `countries.json`.** The owner checks the cuisine tags and dishes.
   Needs: T2.2.

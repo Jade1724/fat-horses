@@ -1,0 +1,1831 @@
+{
+  "source": {
+    "population": "World Bank WDI SP.POP.TOTL",
+    "year": 2025
+  },
+  "countries": [
+    {
+      "iso2": "IN",
+      "name": "India",
+      "flag": "🇮🇳",
+      "population": 1463865525,
+      "cuisine_tags": [
+        "indian",
+        "curry",
+        "north_indian",
+        "south_indian",
+        "punjabi",
+        "biryani"
+      ],
+      "dishes": [
+        "butter chicken",
+        "biryani",
+        "masala dosa",
+        "paneer",
+        "dal",
+        "naan",
+        "samosa",
+        "tandoori chicken",
+        "chana masala"
+      ]
+    },
+    {
+      "iso2": "CN",
+      "name": "China",
+      "flag": "🇨🇳",
+      "population": 1406585000,
+      "cuisine_tags": [
+        "chinese",
+        "cantonese",
+        "sichuan",
+        "szechuan",
+        "dim_sum",
+        "dumpling",
+        "noodle",
+        "hot_pot",
+        "hunan",
+        "shanghai"
+      ],
+      "dishes": [
+        "dumplings",
+        "peking duck",
+        "mapo tofu",
+        "kung pao chicken",
+        "xiaolongbao",
+        "hot pot",
+        "char siu",
+        "chow mein",
+        "dim sum"
+      ]
+    },
+    {
+      "iso2": "US",
+      "name": "United States",
+      "flag": "🇺🇸",
+      "population": 341784857,
+      "cuisine_tags": [
+        "american",
+        "burger",
+        "bbq",
+        "steak_house",
+        "diner",
+        "cajun",
+        "hot_dog",
+        "chicken_wings"
+      ],
+      "dishes": [
+        "burger",
+        "barbecue ribs",
+        "fried chicken",
+        "mac and cheese",
+        "hot dog",
+        "buffalo wings",
+        "clam chowder",
+        "pancakes"
+      ]
+    },
+    {
+      "iso2": "ID",
+      "name": "Indonesia",
+      "flag": "🇮🇩",
+      "population": 285721236,
+      "cuisine_tags": [
+        "indonesian",
+        "padang",
+        "javanese",
+        "balinese"
+      ],
+      "dishes": [
+        "nasi goreng",
+        "rendang",
+        "satay",
+        "gado-gado",
+        "mie goreng",
+        "sambal",
+        "soto ayam",
+        "tempeh"
+      ]
+    },
+    {
+      "iso2": "PK",
+      "name": "Pakistan",
+      "flag": "🇵🇰",
+      "population": 255219554,
+      "cuisine_tags": [
+        "pakistani"
+      ],
+      "dishes": [
+        "nihari",
+        "haleem",
+        "karahi",
+        "biryani",
+        "seekh kebab",
+        "chapli kebab",
+        "paratha"
+      ]
+    },
+    {
+      "iso2": "NG",
+      "name": "Nigeria",
+      "flag": "🇳🇬",
+      "population": 237527782,
+      "cuisine_tags": [
+        "nigerian",
+        "west_african"
+      ],
+      "dishes": [
+        "jollof rice",
+        "egusi soup",
+        "suya",
+        "pounded yam",
+        "moi moi",
+        "puff-puff",
+        "pepper soup"
+      ]
+    },
+    {
+      "iso2": "BR",
+      "name": "Brazil",
+      "flag": "🇧🇷",
+      "population": 212812405,
+      "cuisine_tags": [
+        "brazilian",
+        "churrascaria"
+      ],
+      "dishes": [
+        "feijoada",
+        "picanha",
+        "pão de queijo",
+        "coxinha",
+        "moqueca",
+        "açaí",
+        "brigadeiro",
+        "churrasco"
+      ]
+    },
+    {
+      "iso2": "BD",
+      "name": "Bangladesh",
+      "flag": "🇧🇩",
+      "population": 175686899,
+      "cuisine_tags": [
+        "bangladeshi",
+        "bengali"
+      ],
+      "dishes": [
+        "hilsa fish curry",
+        "bhuna khichuri",
+        "kacchi biryani",
+        "pitha",
+        "shorshe ilish",
+        "fuchka"
+      ]
+    },
+    {
+      "iso2": "RU",
+      "name": "Russia",
+      "flag": "🇷🇺",
+      "population": 143513328,
+      "cuisine_tags": [
+        "russian"
+      ],
+      "dishes": [
+        "borscht",
+        "pelmeni",
+        "blini",
+        "beef stroganoff",
+        "olivier salad",
+        "shashlik",
+        "pirozhki",
+        "kvass"
+      ]
+    },
+    {
+      "iso2": "ET",
+      "name": "Ethiopia",
+      "flag": "🇪🇹",
+      "population": 135472051,
+      "cuisine_tags": [
+        "ethiopian"
+      ],
+      "dishes": [
+        "injera",
+        "doro wat",
+        "tibs",
+        "kitfo",
+        "shiro",
+        "berbere",
+        "misir wat"
+      ]
+    },
+    {
+      "iso2": "MX",
+      "name": "Mexico",
+      "flag": "🇲🇽",
+      "population": 131946900,
+      "cuisine_tags": [
+        "mexican",
+        "taco",
+        "burrito"
+      ],
+      "dishes": [
+        "tacos",
+        "mole",
+        "enchiladas",
+        "tamales",
+        "pozole",
+        "chiles en nogada",
+        "guacamole",
+        "quesadilla",
+        "carnitas"
+      ]
+    },
+    {
+      "iso2": "JP",
+      "name": "Japan",
+      "flag": "🇯🇵",
+      "population": 123366734,
+      "cuisine_tags": [
+        "japanese",
+        "sushi",
+        "ramen",
+        "udon",
+        "soba",
+        "yakitori",
+        "izakaya",
+        "tonkatsu",
+        "donburi",
+        "okonomiyaki",
+        "teppanyaki",
+        "yakiniku"
+      ],
+      "dishes": [
+        "sushi",
+        "ramen",
+        "tempura",
+        "okonomiyaki",
+        "miso",
+        "wasabi",
+        "udon",
+        "katsu curry",
+        "yakitori",
+        "matcha"
+      ]
+    },
+    {
+      "iso2": "EG",
+      "name": "Egypt",
+      "flag": "🇪🇬",
+      "population": 118365995,
+      "cuisine_tags": [
+        "egyptian"
+      ],
+      "dishes": [
+        "koshari",
+        "ful medames",
+        "ta'ameya",
+        "molokhia",
+        "fatteh",
+        "mahshi",
+        "feteer"
+      ]
+    },
+    {
+      "iso2": "PH",
+      "name": "Philippines",
+      "flag": "🇵🇭",
+      "population": 116786962,
+      "cuisine_tags": [
+        "filipino"
+      ],
+      "dishes": [
+        "adobo",
+        "sinigang",
+        "lechon",
+        "pancit",
+        "sisig",
+        "lumpia",
+        "halo-halo",
+        "kare-kare"
+      ]
+    },
+    {
+      "iso2": "CD",
+      "name": "DR Congo",
+      "flag": "🇨🇩",
+      "population": 112832473,
+      "cuisine_tags": [
+        "congolese",
+        "central_african"
+      ],
+      "dishes": [
+        "moambe chicken",
+        "fufu",
+        "pondu",
+        "liboke",
+        "makayabu",
+        "chikwangue"
+      ]
+    },
+    {
+      "iso2": "VN",
+      "name": "Vietnam",
+      "flag": "🇻🇳",
+      "population": 101598527,
+      "cuisine_tags": [
+        "vietnamese",
+        "pho",
+        "banh_mi"
+      ],
+      "dishes": [
+        "pho",
+        "banh mi",
+        "bun cha",
+        "goi cuon",
+        "com tam",
+        "bun bo hue",
+        "ca phe sua da"
+      ]
+    },
+    {
+      "iso2": "IR",
+      "name": "Iran",
+      "flag": "🇮🇷",
+      "population": 92417681,
+      "cuisine_tags": [
+        "persian",
+        "iranian"
+      ],
+      "dishes": [
+        "chelow kabab",
+        "ghormeh sabzi",
+        "fesenjan",
+        "tahdig",
+        "joojeh kabab",
+        "saffron rice",
+        "ash reshteh"
+      ]
+    },
+    {
+      "iso2": "TR",
+      "name": "Türkiye",
+      "flag": "🇹🇷",
+      "population": 85878556,
+      "cuisine_tags": [
+        "turkish",
+        "kebab",
+        "doner",
+        "pide"
+      ],
+      "dishes": [
+        "döner kebab",
+        "lahmacun",
+        "pide",
+        "baklava",
+        "köfte",
+        "iskender",
+        "börek",
+        "meze",
+        "turkish delight"
+      ]
+    },
+    {
+      "iso2": "DE",
+      "name": "Germany",
+      "flag": "🇩🇪",
+      "population": 83491249,
+      "cuisine_tags": [
+        "german",
+        "bavarian",
+        "schnitzel",
+        "currywurst"
+      ],
+      "dishes": [
+        "bratwurst",
+        "schnitzel",
+        "currywurst",
+        "pretzel",
+        "sauerkraut",
+        "spätzle",
+        "schweinshaxe",
+        "black forest cake"
+      ]
+    },
+    {
+      "iso2": "TH",
+      "name": "Thailand",
+      "flag": "🇹🇭",
+      "population": 71619863,
+      "cuisine_tags": [
+        "thai"
+      ],
+      "dishes": [
+        "pad thai",
+        "green curry",
+        "tom yum",
+        "som tam",
+        "massaman curry",
+        "khao soi",
+        "mango sticky rice",
+        "pad kra pao"
+      ]
+    },
+    {
+      "iso2": "TZ",
+      "name": "Tanzania",
+      "flag": "🇹🇿",
+      "population": 70545865,
+      "cuisine_tags": [
+        "tanzanian",
+        "east_african"
+      ],
+      "dishes": [
+        "ugali",
+        "nyama choma",
+        "pilau",
+        "chipsi mayai",
+        "mishkaki",
+        "zanzibar pizza"
+      ]
+    },
+    {
+      "iso2": "GB",
+      "name": "United Kingdom",
+      "flag": "🇬🇧",
+      "population": 69487000,
+      "cuisine_tags": [
+        "british",
+        "english",
+        "scottish",
+        "welsh",
+        "fish_and_chips",
+        "pub"
+      ],
+      "dishes": [
+        "fish and chips",
+        "full english breakfast",
+        "sunday roast",
+        "shepherd's pie",
+        "scones",
+        "bangers and mash",
+        "haggis",
+        "sticky toffee pudding"
+      ]
+    },
+    {
+      "iso2": "FR",
+      "name": "France",
+      "flag": "🇫🇷",
+      "population": 68720337,
+      "cuisine_tags": [
+        "french",
+        "crepe",
+        "bistro",
+        "brasserie"
+      ],
+      "dishes": [
+        "croissant",
+        "coq au vin",
+        "boeuf bourguignon",
+        "crêpes",
+        "ratatouille",
+        "escargots",
+        "croque monsieur",
+        "camembert",
+        "baguette"
+      ]
+    },
+    {
+      "iso2": "ZA",
+      "name": "South Africa",
+      "flag": "🇿🇦",
+      "population": 64747319,
+      "cuisine_tags": [
+        "south_african"
+      ],
+      "dishes": [
+        "braai",
+        "bobotie",
+        "bunny chow",
+        "boerewors",
+        "biltong",
+        "chakalaka",
+        "malva pudding",
+        "peri-peri chicken"
+      ]
+    },
+    {
+      "iso2": "IT",
+      "name": "Italy",
+      "flag": "🇮🇹",
+      "population": 58915656,
+      "cuisine_tags": [
+        "italian",
+        "pizza",
+        "pasta",
+        "trattoria",
+        "gelato"
+      ],
+      "dishes": [
+        "pizza",
+        "pasta",
+        "risotto",
+        "lasagne",
+        "tiramisu",
+        "gelato",
+        "prosciutto",
+        "parmigiano",
+        "carbonara"
+      ]
+    },
+    {
+      "iso2": "KE",
+      "name": "Kenya",
+      "flag": "🇰🇪",
+      "population": 57532493,
+      "cuisine_tags": [
+        "kenyan"
+      ],
+      "dishes": [
+        "nyama choma",
+        "ugali",
+        "sukuma wiki",
+        "githeri",
+        "mandazi",
+        "pilau",
+        "chapati"
+      ]
+    },
+    {
+      "iso2": "MM",
+      "name": "Myanmar",
+      "flag": "🇲🇲",
+      "population": 54850648,
+      "cuisine_tags": [
+        "burmese",
+        "myanmar"
+      ],
+      "dishes": [
+        "mohinga",
+        "tea leaf salad",
+        "shan noodles",
+        "ohn no khao swe",
+        "laphet thoke",
+        "burmese curry"
+      ]
+    },
+    {
+      "iso2": "CO",
+      "name": "Colombia",
+      "flag": "🇨🇴",
+      "population": 53425635,
+      "cuisine_tags": [
+        "colombian"
+      ],
+      "dishes": [
+        "bandeja paisa",
+        "arepas",
+        "ajiaco",
+        "empanadas",
+        "sancocho",
+        "buñuelos",
+        "lechona"
+      ]
+    },
+    {
+      "iso2": "KR",
+      "name": "South Korea",
+      "flag": "🇰🇷",
+      "population": 51684564,
+      "cuisine_tags": [
+        "korean",
+        "korean_bbq",
+        "bibimbap",
+        "fried_chicken"
+      ],
+      "dishes": [
+        "kimchi",
+        "bibimbap",
+        "bulgogi",
+        "korean fried chicken",
+        "tteokbokki",
+        "samgyeopsal",
+        "japchae",
+        "kimchi jjigae"
+      ]
+    },
+    {
+      "iso2": "SD",
+      "name": "Sudan",
+      "flag": "🇸🇩",
+      "population": 51662147,
+      "cuisine_tags": [
+        "sudanese"
+      ],
+      "dishes": [
+        "ful medames",
+        "kisra",
+        "asida",
+        "mullah",
+        "tamia",
+        "gurasa"
+      ]
+    },
+    {
+      "iso2": "UG",
+      "name": "Uganda",
+      "flag": "🇺🇬",
+      "population": 51384894,
+      "cuisine_tags": [
+        "ugandan"
+      ],
+      "dishes": [
+        "rolex (chapati egg roll)",
+        "matoke",
+        "luwombo",
+        "posho",
+        "groundnut stew",
+        "muchomo"
+      ]
+    },
+    {
+      "iso2": "ES",
+      "name": "Spain",
+      "flag": "🇪🇸",
+      "population": 49355143,
+      "cuisine_tags": [
+        "spanish",
+        "tapas",
+        "paella",
+        "basque"
+      ],
+      "dishes": [
+        "paella",
+        "tapas",
+        "jamón ibérico",
+        "tortilla española",
+        "patatas bravas",
+        "churros",
+        "gazpacho",
+        "croquetas",
+        "manchego"
+      ]
+    },
+    {
+      "iso2": "DZ",
+      "name": "Algeria",
+      "flag": "🇩🇿",
+      "population": 47435312,
+      "cuisine_tags": [
+        "algerian",
+        "north_african",
+        "maghreb"
+      ],
+      "dishes": [
+        "couscous",
+        "chakhchoukha",
+        "chorba",
+        "mhajeb",
+        "tajine",
+        "merguez",
+        "makroud"
+      ]
+    },
+    {
+      "iso2": "IQ",
+      "name": "Iraq",
+      "flag": "🇮🇶",
+      "population": 47020774,
+      "cuisine_tags": [
+        "iraqi"
+      ],
+      "dishes": [
+        "masgouf",
+        "dolma",
+        "kubba",
+        "quzi",
+        "tashreeb",
+        "samoon",
+        "biryani iraqi"
+      ]
+    },
+    {
+      "iso2": "AR",
+      "name": "Argentina",
+      "flag": "🇦🇷",
+      "population": 45851378,
+      "cuisine_tags": [
+        "argentinian",
+        "argentine",
+        "parrilla"
+      ],
+      "dishes": [
+        "asado",
+        "empanadas",
+        "chimichurri",
+        "milanesa",
+        "dulce de leche",
+        "alfajores",
+        "provoleta",
+        "choripán"
+      ]
+    },
+    {
+      "iso2": "AF",
+      "name": "Afghanistan",
+      "flag": "🇦🇫",
+      "population": 43844111,
+      "cuisine_tags": [
+        "afghan"
+      ],
+      "dishes": [
+        "kabuli pulao",
+        "mantu",
+        "bolani",
+        "ashak",
+        "qorma",
+        "kebab afghani",
+        "naan-e afghani"
+      ]
+    },
+    {
+      "iso2": "YE",
+      "name": "Yemen",
+      "flag": "🇾🇪",
+      "population": 41773878,
+      "cuisine_tags": [
+        "yemeni"
+      ],
+      "dishes": [
+        "mandi",
+        "saltah",
+        "fahsa",
+        "haneeth",
+        "bint al-sahn",
+        "zurbian"
+      ]
+    },
+    {
+      "iso2": "CA",
+      "name": "Canada",
+      "flag": "🇨🇦",
+      "population": 41651653,
+      "cuisine_tags": [
+        "canadian",
+        "poutine"
+      ],
+      "dishes": [
+        "poutine",
+        "butter tarts",
+        "nanaimo bars",
+        "tourtière",
+        "maple syrup",
+        "montreal smoked meat",
+        "peameal bacon"
+      ]
+    },
+    {
+      "iso2": "AO",
+      "name": "Angola",
+      "flag": "🇦🇴",
+      "population": 39040039,
+      "cuisine_tags": [
+        "angolan"
+      ],
+      "dishes": [
+        "muamba de galinha",
+        "funge",
+        "calulu",
+        "mufete",
+        "cocada amarela",
+        "kizaka"
+      ]
+    },
+    {
+      "iso2": "UA",
+      "name": "Ukraine",
+      "flag": "🇺🇦",
+      "population": 38980376,
+      "cuisine_tags": [
+        "ukrainian"
+      ],
+      "dishes": [
+        "borscht",
+        "varenyky",
+        "holubtsi",
+        "salo",
+        "deruny",
+        "chicken kyiv",
+        "syrniki"
+      ]
+    },
+    {
+      "iso2": "MA",
+      "name": "Morocco",
+      "flag": "🇲🇦",
+      "population": 38430770,
+      "cuisine_tags": [
+        "moroccan"
+      ],
+      "dishes": [
+        "tagine",
+        "couscous",
+        "pastilla",
+        "harira",
+        "mint tea",
+        "msemen",
+        "kefta",
+        "zaalouk"
+      ]
+    },
+    {
+      "iso2": "UZ",
+      "name": "Uzbekistan",
+      "flag": "🇺🇿",
+      "population": 37053428,
+      "cuisine_tags": [
+        "uzbek"
+      ],
+      "dishes": [
+        "plov",
+        "samsa",
+        "lagman",
+        "manti",
+        "shashlik",
+        "non bread",
+        "shurpa"
+      ]
+    },
+    {
+      "iso2": "SA",
+      "name": "Saudi Arabia",
+      "flag": "🇸🇦",
+      "population": 36973555,
+      "cuisine_tags": [
+        "saudi",
+        "arab",
+        "arabian"
+      ],
+      "dishes": [
+        "kabsa",
+        "mandi",
+        "jareesh",
+        "mutabbaq",
+        "saleeg",
+        "dates",
+        "arabic coffee"
+      ]
+    },
+    {
+      "iso2": "PL",
+      "name": "Poland",
+      "flag": "🇵🇱",
+      "population": 36435861,
+      "cuisine_tags": [
+        "polish"
+      ],
+      "dishes": [
+        "pierogi",
+        "bigos",
+        "żurek",
+        "kielbasa",
+        "gołąbki",
+        "placki ziemniaczane",
+        "pączki"
+      ]
+    },
+    {
+      "iso2": "MY",
+      "name": "Malaysia",
+      "flag": "🇲🇾",
+      "population": 35977838,
+      "cuisine_tags": [
+        "malaysian",
+        "malay",
+        "nyonya"
+      ],
+      "dishes": [
+        "nasi lemak",
+        "laksa",
+        "roti canai",
+        "char kway teow",
+        "satay",
+        "rendang",
+        "teh tarik",
+        "nasi kandar"
+      ]
+    },
+    {
+      "iso2": "MZ",
+      "name": "Mozambique",
+      "flag": "🇲🇿",
+      "population": 35631653,
+      "cuisine_tags": [
+        "mozambican"
+      ],
+      "dishes": [
+        "peri-peri chicken",
+        "matapa",
+        "prawns piri-piri",
+        "xima",
+        "galinha à zambeziana",
+        "rissóis"
+      ]
+    },
+    {
+      "iso2": "GH",
+      "name": "Ghana",
+      "flag": "🇬🇭",
+      "population": 35064272,
+      "cuisine_tags": [
+        "ghanaian",
+        "west_african"
+      ],
+      "dishes": [
+        "jollof rice",
+        "waakye",
+        "banku",
+        "fufu",
+        "kelewele",
+        "red red",
+        "kenkey"
+      ]
+    },
+    {
+      "iso2": "PE",
+      "name": "Peru",
+      "flag": "🇵🇪",
+      "population": 34576665,
+      "cuisine_tags": [
+        "peruvian",
+        "ceviche",
+        "nikkei"
+      ],
+      "dishes": [
+        "ceviche",
+        "lomo saltado",
+        "ají de gallina",
+        "anticuchos",
+        "causa",
+        "pisco sour",
+        "pollo a la brasa"
+      ]
+    },
+    {
+      "iso2": "MG",
+      "name": "Madagascar",
+      "flag": "🇲🇬",
+      "population": 32740678,
+      "cuisine_tags": [
+        "malagasy"
+      ],
+      "dishes": [
+        "romazava",
+        "ravitoto",
+        "mofo gasy",
+        "koba",
+        "henakisoa",
+        "vanilla"
+      ]
+    },
+    {
+      "iso2": "CI",
+      "name": "Côte d'Ivoire",
+      "flag": "🇨🇮",
+      "population": 32711547,
+      "cuisine_tags": [
+        "ivorian",
+        "west_african"
+      ],
+      "dishes": [
+        "attiéké",
+        "alloco",
+        "garba",
+        "kedjenou",
+        "foutou",
+        "placali"
+      ]
+    },
+    {
+      "iso2": "CM",
+      "name": "Cameroon",
+      "flag": "🇨🇲",
+      "population": 29879337,
+      "cuisine_tags": [
+        "cameroonian"
+      ],
+      "dishes": [
+        "ndolé",
+        "eru",
+        "achu",
+        "poulet DG",
+        "koki",
+        "puff-puff",
+        "mbongo tchobi"
+      ]
+    },
+    {
+      "iso2": "NP",
+      "name": "Nepal",
+      "flag": "🇳🇵",
+      "population": 29618118,
+      "cuisine_tags": [
+        "nepalese",
+        "nepali",
+        "himalayan",
+        "momo"
+      ],
+      "dishes": [
+        "momo",
+        "dal bhat",
+        "thukpa",
+        "sel roti",
+        "gundruk",
+        "chatamari",
+        "yomari"
+      ]
+    },
+    {
+      "iso2": "VE",
+      "name": "Venezuela",
+      "flag": "🇻🇪",
+      "population": 28516896,
+      "cuisine_tags": [
+        "venezuelan",
+        "arepa"
+      ],
+      "dishes": [
+        "arepas",
+        "pabellón criollo",
+        "cachapas",
+        "tequeños",
+        "hallacas",
+        "empanadas"
+      ]
+    },
+    {
+      "iso2": "NE",
+      "name": "Niger",
+      "flag": "🇳🇪",
+      "population": 27917831,
+      "cuisine_tags": [
+        "nigerien",
+        "west_african"
+      ],
+      "dishes": [
+        "dambou",
+        "djerma stew",
+        "fura",
+        "kilishi",
+        "tuwo",
+        "brochettes"
+      ]
+    },
+    {
+      "iso2": "AU",
+      "name": "Australia",
+      "flag": "🇦🇺",
+      "population": 27614411,
+      "cuisine_tags": [
+        "australian"
+      ],
+      "dishes": [
+        "meat pie",
+        "lamington",
+        "pavlova",
+        "barramundi",
+        "vegemite",
+        "sausage sizzle",
+        "flat white",
+        "anzac biscuits"
+      ]
+    },
+    {
+      "iso2": "KP",
+      "name": "North Korea",
+      "flag": "🇰🇵",
+      "population": 26571036,
+      "cuisine_tags": [
+        "north_korean",
+        "korean"
+      ],
+      "dishes": [
+        "naengmyeon",
+        "pyongyang cold noodles",
+        "kimchi",
+        "injo gogi bap",
+        "songpyeon",
+        "mandu"
+      ]
+    },
+    {
+      "iso2": "SY",
+      "name": "Syria",
+      "flag": "🇸🇾",
+      "population": 25620427,
+      "cuisine_tags": [
+        "syrian",
+        "shawarma",
+        "levantine"
+      ],
+      "dishes": [
+        "shawarma",
+        "kibbeh",
+        "fattoush",
+        "muhammara",
+        "hummus",
+        "baba ghanoush",
+        "falafel",
+        "kunafa"
+      ]
+    },
+    {
+      "iso2": "ML",
+      "name": "Mali",
+      "flag": "🇲🇱",
+      "population": 25198821,
+      "cuisine_tags": [
+        "malian",
+        "west_african"
+      ],
+      "dishes": [
+        "tiguadege na",
+        "tô",
+        "riz gras",
+        "fakoye",
+        "maafe",
+        "jollof rice"
+      ]
+    },
+    {
+      "iso2": "BF",
+      "name": "Burkina Faso",
+      "flag": "🇧🇫",
+      "population": 24074580,
+      "cuisine_tags": [
+        "burkinabe",
+        "west_african"
+      ],
+      "dishes": [
+        "riz gras",
+        "tô",
+        "babenda",
+        "poulet bicyclette",
+        "sauce arachide",
+        "brochettes"
+      ]
+    },
+    {
+      "iso2": "MW",
+      "name": "Malawi",
+      "flag": "🇲🇼",
+      "population": 22216120,
+      "cuisine_tags": [
+        "malawian"
+      ],
+      "dishes": [
+        "nsima",
+        "chambo",
+        "kondowole",
+        "ndiwo",
+        "futali",
+        "mandasi"
+      ]
+    },
+    {
+      "iso2": "ZM",
+      "name": "Zambia",
+      "flag": "🇿🇲",
+      "population": 21913874,
+      "cuisine_tags": [
+        "zambian"
+      ],
+      "dishes": [
+        "nshima",
+        "ifisashi",
+        "kapenta",
+        "chikanda",
+        "vitumbuwa",
+        "ifinkubala"
+      ]
+    },
+    {
+      "iso2": "LK",
+      "name": "Sri Lanka",
+      "flag": "🇱🇰",
+      "population": 21756000,
+      "cuisine_tags": [
+        "sri_lankan"
+      ],
+      "dishes": [
+        "rice and curry",
+        "hoppers",
+        "kottu roti",
+        "string hoppers",
+        "lamprais",
+        "pol sambol",
+        "dhal curry"
+      ]
+    },
+    {
+      "iso2": "TD",
+      "name": "Chad",
+      "flag": "🇹🇩",
+      "population": 21003705,
+      "cuisine_tags": [
+        "chadian",
+        "central_african"
+      ],
+      "dishes": [
+        "boule",
+        "daraba",
+        "kissar",
+        "jarret de boeuf",
+        "maharagwe",
+        "bangaw"
+      ]
+    },
+    {
+      "iso2": "KZ",
+      "name": "Kazakhstan",
+      "flag": "🇰🇿",
+      "population": 20843754,
+      "cuisine_tags": [
+        "kazakh"
+      ],
+      "dishes": [
+        "beshbarmak",
+        "baursak",
+        "kazy",
+        "plov",
+        "manti",
+        "kumis",
+        "shashlik"
+      ]
+    },
+    {
+      "iso2": "CL",
+      "name": "Chile",
+      "flag": "🇨🇱",
+      "population": 19859921,
+      "cuisine_tags": [
+        "chilean"
+      ],
+      "dishes": [
+        "empanadas de pino",
+        "pastel de choclo",
+        "completo",
+        "cazuela",
+        "curanto",
+        "sopaipillas",
+        "pisco"
+      ]
+    },
+    {
+      "iso2": "SO",
+      "name": "Somalia",
+      "flag": "🇸🇴",
+      "population": 19654739,
+      "cuisine_tags": [
+        "somali",
+        "east_african"
+      ],
+      "dishes": [
+        "bariis iskukaris",
+        "suqaar",
+        "canjeero",
+        "sambuusa",
+        "hilib ari",
+        "muufo"
+      ]
+    },
+    {
+      "iso2": "RO",
+      "name": "Romania",
+      "flag": "🇷🇴",
+      "population": 19020271,
+      "cuisine_tags": [
+        "romanian"
+      ],
+      "dishes": [
+        "sarmale",
+        "mici",
+        "mămăligă",
+        "ciorbă",
+        "cozonac",
+        "papanași",
+        "zacuscă"
+      ]
+    },
+    {
+      "iso2": "SN",
+      "name": "Senegal",
+      "flag": "🇸🇳",
+      "population": 18931966,
+      "cuisine_tags": [
+        "senegalese",
+        "west_african"
+      ],
+      "dishes": [
+        "thieboudienne",
+        "yassa poulet",
+        "mafe",
+        "thiakry",
+        "pastels",
+        "bissap"
+      ]
+    },
+    {
+      "iso2": "GT",
+      "name": "Guatemala",
+      "flag": "🇬🇹",
+      "population": 18687881,
+      "cuisine_tags": [
+        "guatemalan",
+        "central_american"
+      ],
+      "dishes": [
+        "pepián",
+        "kak'ik",
+        "tamales",
+        "chiles rellenos",
+        "rellenitos",
+        "hilachas"
+      ]
+    },
+    {
+      "iso2": "EC",
+      "name": "Ecuador",
+      "flag": "🇪🇨",
+      "population": 18289896,
+      "cuisine_tags": [
+        "ecuadorian"
+      ],
+      "dishes": [
+        "encebollado",
+        "ceviche ecuatoriano",
+        "llapingachos",
+        "locro de papa",
+        "hornado",
+        "bolón de verde"
+      ]
+    },
+    {
+      "iso2": "NL",
+      "name": "Netherlands",
+      "flag": "🇳🇱",
+      "population": 18087633,
+      "cuisine_tags": [
+        "dutch"
+      ],
+      "dishes": [
+        "stroopwafel",
+        "bitterballen",
+        "stamppot",
+        "haring",
+        "poffertjes",
+        "gouda",
+        "erwtensoep",
+        "kroket"
+      ]
+    },
+    {
+      "iso2": "KH",
+      "name": "Cambodia",
+      "flag": "🇰🇭",
+      "population": 17847982,
+      "cuisine_tags": [
+        "cambodian",
+        "khmer"
+      ],
+      "dishes": [
+        "fish amok",
+        "lok lak",
+        "nom banh chok",
+        "kuy teav",
+        "bai sach chrouk",
+        "num pang"
+      ]
+    },
+    {
+      "iso2": "ZW",
+      "name": "Zimbabwe",
+      "flag": "🇿🇼",
+      "population": 16950795,
+      "cuisine_tags": [
+        "zimbabwean"
+      ],
+      "dishes": [
+        "sadza",
+        "nyama",
+        "muriwo unedovi",
+        "dovi",
+        "mopane worms",
+        "maputi"
+      ]
+    },
+    {
+      "iso2": "GN",
+      "name": "Guinea",
+      "flag": "🇬🇳",
+      "population": 15099727,
+      "cuisine_tags": [
+        "guinean",
+        "west_african"
+      ],
+      "dishes": [
+        "poulet yassa",
+        "riz gras",
+        "sauce feuille",
+        "fouti",
+        "kansiyé",
+        "mafé"
+      ]
+    },
+    {
+      "iso2": "BJ",
+      "name": "Benin",
+      "flag": "🇧🇯",
+      "population": 14814460,
+      "cuisine_tags": [
+        "beninese",
+        "west_african"
+      ],
+      "dishes": [
+        "amiwo",
+        "akassa",
+        "kuli-kuli",
+        "gboma dessi",
+        "wagasi cheese",
+        "pâte rouge"
+      ]
+    },
+    {
+      "iso2": "RW",
+      "name": "Rwanda",
+      "flag": "🇷🇼",
+      "population": 14569341,
+      "cuisine_tags": [
+        "rwandan",
+        "east_african"
+      ],
+      "dishes": [
+        "isombe",
+        "brochettes",
+        "ugali",
+        "matoke",
+        "sambaza",
+        "ibihaza"
+      ]
+    },
+    {
+      "iso2": "BI",
+      "name": "Burundi",
+      "flag": "🇧🇮",
+      "population": 14390003,
+      "cuisine_tags": [
+        "burundian",
+        "east_african"
+      ],
+      "dishes": [
+        "boko boko harees",
+        "ibiharage",
+        "mukeke",
+        "ndagala",
+        "brochettes",
+        "ubugali"
+      ]
+    },
+    {
+      "iso2": "BO",
+      "name": "Bolivia",
+      "flag": "🇧🇴",
+      "population": 12581843,
+      "cuisine_tags": [
+        "bolivian"
+      ],
+      "dishes": [
+        "salteñas",
+        "silpancho",
+        "pique macho",
+        "sopa de maní",
+        "api con pastel",
+        "anticuchos"
+      ]
+    },
+    {
+      "iso2": "TN",
+      "name": "Tunisia",
+      "flag": "🇹🇳",
+      "population": 12348573,
+      "cuisine_tags": [
+        "tunisian",
+        "north_african",
+        "maghreb"
+      ],
+      "dishes": [
+        "couscous",
+        "brik",
+        "shakshuka",
+        "lablabi",
+        "ojja",
+        "harissa",
+        "makroudh"
+      ]
+    },
+    {
+      "iso2": "SS",
+      "name": "South Sudan",
+      "flag": "🇸🇸",
+      "population": 12188788,
+      "cuisine_tags": [
+        "south_sudanese",
+        "east_african"
+      ],
+      "dishes": [
+        "kisra",
+        "asida",
+        "ful medames",
+        "kajaik",
+        "walwal",
+        "mandazi"
+      ]
+    },
+    {
+      "iso2": "BE",
+      "name": "Belgium",
+      "flag": "🇧🇪",
+      "population": 11941781,
+      "cuisine_tags": [
+        "belgian"
+      ],
+      "dishes": [
+        "moules-frites",
+        "belgian waffles",
+        "carbonnade flamande",
+        "frites",
+        "chocolate",
+        "speculoos",
+        "belgian beer"
+      ]
+    },
+    {
+      "iso2": "HT",
+      "name": "Haiti",
+      "flag": "🇭🇹",
+      "population": 11906095,
+      "cuisine_tags": [
+        "haitian",
+        "caribbean"
+      ],
+      "dishes": [
+        "griot",
+        "diri ak djon djon",
+        "pikliz",
+        "soup joumou",
+        "bannann peze",
+        "tassot"
+      ]
+    },
+    {
+      "iso2": "JO",
+      "name": "Jordan",
+      "flag": "🇯🇴",
+      "population": 11520684,
+      "cuisine_tags": [
+        "jordanian",
+        "levantine"
+      ],
+      "dishes": [
+        "mansaf",
+        "maqluba",
+        "falafel",
+        "hummus",
+        "kunafa",
+        "zarb",
+        "musakhan"
+      ]
+    },
+    {
+      "iso2": "DO",
+      "name": "Dominican Republic",
+      "flag": "🇩🇴",
+      "population": 11520487,
+      "cuisine_tags": [
+        "dominican",
+        "caribbean"
+      ],
+      "dishes": [
+        "la bandera",
+        "mangú",
+        "sancocho",
+        "mofongo",
+        "tostones",
+        "chicharrón"
+      ]
+    },
+    {
+      "iso2": "AE",
+      "name": "United Arab Emirates",
+      "flag": "🇦🇪",
+      "population": 11513149,
+      "cuisine_tags": [
+        "emirati",
+        "arab"
+      ],
+      "dishes": [
+        "machboos",
+        "luqaimat",
+        "harees",
+        "shawarma",
+        "balaleet",
+        "thareed"
+      ]
+    },
+    {
+      "iso2": "HN",
+      "name": "Honduras",
+      "flag": "🇭🇳",
+      "population": 11005850,
+      "cuisine_tags": [
+        "honduran",
+        "central_american"
+      ],
+      "dishes": [
+        "baleadas",
+        "plato típico",
+        "sopa de caracol",
+        "tamales",
+        "pastelitos",
+        "anafre"
+      ]
+    },
+    {
+      "iso2": "CU",
+      "name": "Cuba",
+      "flag": "🇨🇺",
+      "population": 10937203,
+      "cuisine_tags": [
+        "cuban",
+        "caribbean"
+      ],
+      "dishes": [
+        "ropa vieja",
+        "cuban sandwich",
+        "moros y cristianos",
+        "lechón asado",
+        "tostones",
+        "mojito",
+        "yuca con mojo"
+      ]
+    },
+    {
+      "iso2": "CZ",
+      "name": "Czechia",
+      "flag": "🇨🇿",
+      "population": 10886878,
+      "cuisine_tags": [
+        "czech"
+      ],
+      "dishes": [
+        "svíčková",
+        "knedlíky",
+        "goulash",
+        "trdelník",
+        "smažený sýr",
+        "vepřo knedlo zelo",
+        "pilsner"
+      ]
+    },
+    {
+      "iso2": "PT",
+      "name": "Portugal",
+      "flag": "🇵🇹",
+      "population": 10804871,
+      "cuisine_tags": [
+        "portuguese"
+      ],
+      "dishes": [
+        "pastel de nata",
+        "bacalhau",
+        "francesinha",
+        "caldo verde",
+        "piri-piri chicken",
+        "sardines",
+        "bifana"
+      ]
+    },
+    {
+      "iso2": "TJ",
+      "name": "Tajikistan",
+      "flag": "🇹🇯",
+      "population": 10786734,
+      "cuisine_tags": [
+        "tajik"
+      ],
+      "dishes": [
+        "plov",
+        "qurutob",
+        "sambusa",
+        "shurbo",
+        "mantu",
+        "non"
+      ]
+    },
+    {
+      "iso2": "PG",
+      "name": "Papua New Guinea",
+      "flag": "🇵🇬",
+      "population": 10762817,
+      "cuisine_tags": [
+        "papua_new_guinean",
+        "melanesian"
+      ],
+      "dishes": [
+        "mumu",
+        "kaukau",
+        "sago",
+        "saksak",
+        "coconut fish",
+        "taro"
+      ]
+    },
+    {
+      "iso2": "SE",
+      "name": "Sweden",
+      "flag": "🇸🇪",
+      "population": 10596620,
+      "cuisine_tags": [
+        "swedish"
+      ],
+      "dishes": [
+        "swedish meatballs",
+        "gravlax",
+        "kanelbulle",
+        "smörgåsbord",
+        "lingonberry",
+        "herring",
+        "räksmörgås"
+      ]
+    },
+    {
+      "iso2": "GR",
+      "name": "Greece",
+      "flag": "🇬🇷",
+      "population": 10413962,
+      "cuisine_tags": [
+        "greek",
+        "gyros",
+        "souvlaki"
+      ],
+      "dishes": [
+        "gyros",
+        "souvlaki",
+        "moussaka",
+        "spanakopita",
+        "tzatziki",
+        "feta",
+        "baklava",
+        "greek salad"
+      ]
+    },
+    {
+      "iso2": "AZ",
+      "name": "Azerbaijan",
+      "flag": "🇦🇿",
+      "population": 10246996,
+      "cuisine_tags": [
+        "azerbaijani"
+      ],
+      "dishes": [
+        "plov",
+        "dolma",
+        "qutab",
+        "dushbara",
+        "lyulya kebab",
+        "piti",
+        "pakhlava"
+      ]
+    },
+    {
+      "iso2": "IL",
+      "name": "Israel",
+      "flag": "🇮🇱",
+      "population": 10122800,
+      "cuisine_tags": [
+        "israeli",
+        "falafel",
+        "hummus"
+      ],
+      "dishes": [
+        "falafel",
+        "hummus",
+        "shakshuka",
+        "sabich",
+        "shawarma",
+        "bourekas",
+        "israeli salad"
+      ]
+    }
+  ]
+}
