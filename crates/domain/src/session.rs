@@ -9,7 +9,7 @@ use crate::geo::Location;
 use crate::matching::Match;
 use crate::places::Place;
 use crate::race::Race;
-use crate::winner::Winner;
+use crate::winner::{Placing, Winner};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -52,7 +52,8 @@ pub struct PickSession {
     /// The chosen race; its `runners` hold the latest scratchings.
     pub race: Option<Race>,
     pub card: Option<RaceCard>,
-    /// When the current interim placings were first seen (F5.2).
+    /// The latest interim placings and when they were first seen unchanged (F5.2).
+    pub interim_placings: Vec<Placing>,
     pub interim_since: Option<DateTime<Utc>>,
     pub winner: Option<Winner>,
     pub places: Vec<Place>,
@@ -80,6 +81,7 @@ impl PickSession {
             world_complete: false,
             race: None,
             card: None,
+            interim_placings: Vec::new(),
             interim_since: None,
             winner: None,
             places: Vec::new(),

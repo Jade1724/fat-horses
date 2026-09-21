@@ -70,7 +70,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 
 ## M4 App layer and CLI
 
-- [ ] **T4.1 Workflow steps (§6) in `crates/app`.** `find_race`, `assign_countries`, `prepare_nearby`, `check_result`, `match_restaurants`, `fallback_match`, `pick_restaurant`, each `(session, deps) -> session`, generic over the traits. Tests run a full pick with fakes: normal, dead heat, abandoned, no match, LLM failure (F6.8), no race (F3.2).
+- [x] **T4.1 Workflow steps (§6) in `crates/app`.** `find_race`, `assign_countries`, `prepare_nearby`, `check_result`, `match_restaurants`, `fallback_match`, `pick_restaurant`, each `(session, deps) -> session`, generic over the traits. Tests run a full pick with fakes: normal, dead heat, abandoned, no match, LLM failure (F6.8), no race (F3.2).
   Needs: T2.4–T2.11, T3.4, T3.7.
 - [ ] **T4.2 CLI `pick`.** `fat-horses pick "<address>" [--radius] [--min-population] [--include-visited] [--fake-llm]` runs the steps in-process with live clients and the JSON-file store, printing the race card, waiting and polling, then the winner and matches.
   Needs: T3.1, T3.2, T3.3, T3.5, T4.1. Done when: a real pick runs end to end (owner runs it once and confirms in `docs/spikes/cli-e2e.md`).
