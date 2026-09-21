@@ -11,7 +11,7 @@
     "lint": "eslint .",
     "test": "vitest run",
     "check": "npm run -s fmt-check && npm run -s typecheck && npm run -s lint && npm run -s test",
-    "cli": "tsx src/cli/main.ts",
+    "cli": "tsx --env-file-if-exists=.env src/cli/main.ts",
     "build:lambdas": "tsx scripts/build-lambdas.ts",
     "it": "tsx scripts/dynamo-contract.ts",
     "fmt": "prettier --write .",
