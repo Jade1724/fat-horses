@@ -48,7 +48,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 
 - [ ] **T3.1 `RaceProvider` + TAB NZ client.** Trait in domain; `crates/race` client (reqwest, rustls) mapping TAB JSON to domain types. Tests parse the T1.1 fixtures (no network).
   Needs: T1.1, T2.5.
-- [ ] **T3.2 Nominatim geocoder (F1.2, N4).** Client + response parsing tests from recorded fixtures; User-Agent set; 1 request/s limit.
+- [x] **T3.2 Nominatim geocoder (F1.2, N4).** Client + response parsing tests from recorded fixtures; User-Agent set; 1 request/s limit.
 - [ ] **T3.3 Overpass places client (F6.1).** Query builder (radius, amenity list, `out center`) with a snapshot test of the query text; parsing tests from fixtures (T1.5 fixtures if available, otherwise hand-written ones).
 - [ ] **T3.4 Store traits + in-memory stores + contract tests (§4.2).** `VisitStore` (applies T2.11 transitions atomically, conditional on current status), `PickStore`, `GuessCache`, `GeocodeCache`. A reusable contract test suite; the in-memory store passes it, including stale-status → conflict.
   Needs: T2.11.

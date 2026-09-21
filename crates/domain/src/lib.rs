@@ -3,6 +3,7 @@
 pub mod assign;
 pub mod classify;
 pub mod countries;
+pub mod geo;
 pub mod matching;
 pub mod pick;
 pub mod places;
