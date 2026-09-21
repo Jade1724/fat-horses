@@ -35,7 +35,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
   Needs: T2.1.
 - [ ] **T2.3 [human] Review `countries.json`.** The owner checks the cuisine tags and dishes.
   Needs: T2.2.
-- [ ] **T2.4 Pool (F2.2–F2.4).** `pool(countries, min_population, visited, include_visited) -> Pool { countries, world_complete }`. Tests: threshold, visited excluded, include_visited, world complete.
+- [x] **T2.4 Pool (F2.2–F2.4).** `pool(countries, min_population, visited, include_visited) -> Pool { countries, world_complete }`. Tests: threshold, visited excluded, include_visited, world complete.
 - [ ] **T2.5 Race types and selection (F3).** Domain types `Race`, `Runner`, `RaceType`, `RaceStatus`; `select_race(races, now) -> Option<Race>`. Tests: the 2–15 min window, fallback to the next race, the 3 h limit, non-gallops ignored, fewer than 2 runners ignored, closed or abandoned races ignored.
 - [ ] **T2.6 Assignment (F4).** `assign(runners, pool, full_pool, rng) -> RaceCard`. Tests: distinct when possible, the top-up order of F4.2, repeats only when forced, scratched runners get no country, same seed → same card.
 - [ ] **T2.7 Winner (F5).** `resolve(card, result_snapshot, now, first_interim_seen_at, rng) -> Decision { Pending | Winner{..} }`. Tests: official result, interim after 10 min, interim before 10 min is pending, dead heat, abandoned, 45-min timeout, scratched runner can't win.
