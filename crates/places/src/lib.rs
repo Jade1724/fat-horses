@@ -1,6 +1,7 @@
 //! Nominatim geocoder and Overpass places client (SPEC.md F1.2, F6.1).
 
 pub mod nominatim;
+pub mod overpass;
 
 use std::time::Duration;
 

@@ -1,8 +1,29 @@
 //! Places near the pick location (SPEC.md F6.1).
 
 use std::collections::BTreeMap;
+use std::future::Future;
 
 use serde::{Deserialize, Serialize};
+
+/// Default OSM `amenity` values that count as restaurants (F6.1).
+pub const DEFAULT_AMENITIES: &[&str] = &["restaurant", "fast_food"];
+
+#[derive(Debug, thiserror::Error)]
+pub enum PlacesError {
+    #[error("places source unavailable: {0}")]
+    Unavailable(String),
+}
+
+/// Finds restaurant-like places around a point (F6.1), nearest first.
+pub trait Places {
+    fn nearby(
+        &self,
+        lat: f64,
+        lon: f64,
+        radius_m: u32,
+        amenities: &[&str],
+    ) -> impl Future<Output = Result<Vec<Place>, PlacesError>> + Send;
+}
 
 /// A restaurant-like OSM node or way inside the radius.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
