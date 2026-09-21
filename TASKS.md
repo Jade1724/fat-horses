@@ -78,7 +78,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
   Needs: T3.5.
 - [x] **T4.4 HTTP API handlers (§5, F11.1) in `crates/app`.** Request validation, error codes, API-key check (constant time). Tested with in-memory stores and fake request objects.
   Needs: T4.1.
-- [ ] **T4.5 `api` Lambda binary.** `lambda_http` wiring for T4.4. Runs locally with `cargo lambda watch`, using the JSON-file store and running the workflow in-process in the background, for UI development.
+- [x] **T4.5 Lambda binaries and local server.** `crates/lambdas`: `api` (`lambda_http` wiring for T4.4, DynamoDB store, Step Functions starter, API key from SSM) and `workflow` (one §6 step per invocation via `app::workflow::run_step`). For UI development, `fat-horses serve --api-key … [--web web/dist]` runs the same API on localhost with picks in-process and the JSON-file store (replaces `cargo lambda watch`, which isn't installed).
   Needs: T4.4.
 
 ## M5 Web UI (`web/`)

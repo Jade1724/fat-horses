@@ -103,7 +103,7 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 - **F10.8** The current `PICKED` restaurant (if any) is shown on load, so you can mark it visited later.
 
 ### F11. Access
-- **F11.1** Every `/api/*` request needs header `x-api-key`, compared in constant time with the value in SSM (cached in the Lambda for 5 min). Missing or wrong → 401.
+- **F11.1** Every `/api/*` request needs header `x-api-key`, compared in constant time with the value in SSM, read once when the Lambda starts (a changed key takes effect as containers recycle, or at once after redeploying). Missing or wrong → 401.
 - **F11.2** API Gateway throttling: 5 requests/s rate, burst 10.
 
 ---

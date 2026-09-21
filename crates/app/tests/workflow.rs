@@ -14,7 +14,7 @@ use domain::session::{PickError, PickRequest, PickSession, PickStatus};
 use domain::status::Status;
 use domain::store::{PickStore, VisitStore};
 use domain::winner::{Placing, WinReason};
-use fat_horses_app::workflow::{Clock, Config, Deps, run_pick};
+use fat_horses_app::workflow::{Clock, Config, Deps, Step, run_pick, run_step};
 use fat_horses_store::MemoryStore;
 use rand::SeedableRng;
 use rand::rngs::StdRng;
@@ -551,4 +551,95 @@ async fn visited_countries_are_drawn_last() {
             .iter()
             .any(|e| e.country_iso.as_deref() == Some("MX"))
     );
+}
+
+#[tokio::test]
+async fn steps_run_one_at_a_time_like_step_functions() {
+    let deps = Deps {
+        races: FakeRaces {
+            schedule: vec![race(RaceStatus::Open)],
+            updates: Mutex::new(
+                vec![
+                    update(RaceStatus::Open, &[]),
+                    update(RaceStatus::Closed, &[]),
+                    update(RaceStatus::Final, &[(1, 3)]),
+                ]
+                .into(),
+            ),
+        },
+        places: FakePlaces::new(one_per_country()),
+        classifier: FakeClassifier::new(),
+        store: MemoryStore::new(),
+        countries: countries(),
+        config: Config::default(),
+    };
+    deps.store.put_pick(&session()).await.unwrap();
+    let rng = &mut StdRng::seed_from_u64(3);
+
+    let out = run_step(&deps, Step::Start, "p1", t0(), rng).await.unwrap();
+    assert_eq!(out.status, PickStatus::WaitingStart);
+    assert_eq!(out.start_time, Some(t0() + Duration::minutes(8)));
+    assert!(!out.decided && !out.failed);
+    // Retrying a finished step changes nothing.
+    let again = run_step(&deps, Step::Start, "p1", t0(), rng).await.unwrap();
+    assert_eq!(again, out);
+
+    run_step(&deps, Step::PrepareNearby, "p1", t0(), rng)
+        .await
+        .unwrap();
+    let start = t0() + Duration::minutes(8);
+    let out = run_step(&deps, Step::CheckResult, "p1", start, rng)
+        .await
+        .unwrap();
+    assert!(!out.decided);
+    assert_eq!(out.status, PickStatus::Running);
+    let out = run_step(
+        &deps,
+        Step::CheckResult,
+        "p1",
+        start + Duration::minutes(1),
+        rng,
+    )
+    .await
+    .unwrap();
+    assert!(out.decided);
+    let out = run_step(&deps, Step::Finish, "p1", start + Duration::minutes(2), rng)
+        .await
+        .unwrap();
+    assert_eq!(out.status, PickStatus::Done);
+    let s = deps.store.get_pick("p1").await.unwrap().unwrap();
+    assert_eq!(s.winner.unwrap().number, 3);
+    assert!(s.pick.is_some());
+
+    assert!(matches!(
+        run_step(&deps, Step::Start, "missing", t0(), rng).await,
+        Err(domain::store::StoreError::NotFound)
+    ));
+}
+
+#[tokio::test]
+async fn failed_start_reports_failed() {
+    let deps = Deps {
+        races: FakeRaces {
+            schedule: vec![],
+            updates: Mutex::new(VecDeque::new()),
+        },
+        places: FakePlaces::new(vec![]),
+        classifier: FakeClassifier::new(),
+        store: MemoryStore::new(),
+        countries: countries(),
+        config: Config::default(),
+    };
+    deps.store.put_pick(&session()).await.unwrap();
+    let out = run_step(
+        &deps,
+        Step::Start,
+        "p1",
+        t0(),
+        &mut StdRng::seed_from_u64(1),
+    )
+    .await
+    .unwrap();
+    assert!(out.failed);
+    assert_eq!(out.status, PickStatus::Failed);
 }

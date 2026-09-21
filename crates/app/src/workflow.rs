@@ -19,6 +19,7 @@ use domain::status::Restaurant;
 use domain::store::{GuessCache, PickStore, StoreError, VisitStore, record_pick};
 use domain::winner::{Decision, resolve};
 use rand::Rng;
+use serde::{Deserialize, Serialize};
 
 /// Poll interval for results (F5.1).
 pub const POLL_INTERVAL: Duration = Duration::seconds(60);
@@ -470,4 +471,95 @@ where
     session = pick_restaurant(deps, session, clock.now(), rng).await?;
     save!();
     Ok(session)
+}
+
+/// One Step Functions task (§6). The state machine runs
+/// `start → prepare_nearby → wait → check_result (loop) → finish`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Step {
+    /// Find the race and draw countries.
+    Start,
+    PrepareNearby,
+    CheckResult,
+    /// Places retry, matching, fallback and the pick.
+    Finish,
+}
+
+/// What a step tells the state machine.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct StepOutput {
+    pub pick_id: String,
+    pub status: PickStatus,
+    /// The race's scheduled start, for the Wait state.
+    pub start_time: Option<DateTime<Utc>>,
+    /// A winner is decided; go to `finish`.
+    pub decided: bool,
+    /// The pick has failed; stop.
+    pub failed: bool,
+}
+
+impl StepOutput {
+    fn of(s: &PickSession) -> Self {
+        Self {
+            pick_id: s.pick_id.clone(),
+            status: s.status,
+            start_time: s.race.as_ref().map(|r| r.start_time),
+            decided: s.winner.is_some(),
+            failed: s.status == PickStatus::Failed,
+        }
+    }
+}
+
+/// Load the session, run one step, save it. Safe to retry: a step whose work is
+/// already done leaves the session as it is.
+pub async fn run_step<R, P, C, S, G>(
+    deps: &Deps<R, P, C, S>,
+    step: Step,
+    pick_id: &str,
+    now: DateTime<Utc>,
+    rng: &mut G,
+) -> Result<StepOutput, StoreError>
+where
+    R: RaceProvider + Sync,
+    P: Places + Sync,
+    C: Classifier + Sync,
+    S: VisitStore + PickStore + GuessCache + Sync,
+    G: Rng + Send,
+{
+    let mut session = deps
+        .store
+        .get_pick(pick_id)
+        .await?
+        .ok_or(StoreError::NotFound)?;
+    if session.status == PickStatus::Failed || session.status == PickStatus::Done {
+        return Ok(StepOutput::of(&session));
+    }
+    session = match step {
+        Step::Start if session.card.is_none() => {
+            let s = find_race(deps, session, now).await;
+            if s.status == PickStatus::Failed {
+                s
+            } else {
+                assign_countries(deps, s, rng).await?
+            }
+        }
+        Step::PrepareNearby if !session.places_loaded => prepare_nearby(deps, session, now).await,
+        Step::CheckResult if session.winner.is_none() => {
+            check_result(deps, session, now, rng).await.0
+        }
+        Step::Finish => {
+            let s = ensure_places(deps, session, now).await;
+            if s.status == PickStatus::Failed {
+                s
+            } else {
+                let s = match_restaurants(deps, s);
+                let s = fallback_match(deps, s).await;
+                pick_restaurant(deps, s, now, rng).await?
+            }
+        }
+        _ => session,
+    };
+    deps.store.put_pick(&session).await?;
+    Ok(StepOutput::of(&session))
 }
