@@ -1,0 +1,93 @@
+// Lambda wiring (SPEC.md §6): configuration from the environment and AWS clients.
+// Logic lives in `app`.
+
+import { SFNClient, StartExecutionCommand } from "@aws-sdk/client-sfn";
+import { GetParameterCommand, SSMClient } from "@aws-sdk/client-ssm";
+import type { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from "aws-lambda";
+import { Nominatim, Overpass } from "../adapters/osm";
+import { identityFromEnv, TabNz } from "../adapters/tabNz";
+import type { ApiRequest, ApiResponse, WorkflowStarter } from "../app/api";
+import { defaultConfig, type Deps } from "../app/workflow";
+import { FakeClassifier } from "../domain/classify";
+import { bundledCountries } from "../domain/countries";
+import { DynamoStore } from "../store/dynamo";
+
+export function env(name: string): string {
+  const v = process.env[name];
+  if (!v) throw new Error(`missing environment variable ${name}`);
+  return v;
+}
+
+export function dynamoStore(): DynamoStore {
+  return new DynamoStore(env("TABLE_NAME"));
+}
+
+/** Read a SecureString parameter (the API key, F11.1). */
+export async function secureParameter(name: string): Promise<string> {
+  const out = await new SSMClient({}).send(new GetParameterCommand({ Name: name, WithDecryption: true }));
+  const value = out.Parameter?.Value;
+  if (!value) throw new Error(`SSM parameter ${name} has no value`);
+  return value;
+}
+
+/** Starts the pick state machine; the execution is named after the pick. */
+export class SfnStarter implements WorkflowStarter {
+  private readonly client = new SFNClient({});
+  constructor(private readonly stateMachineArn: string) {}
+
+  async start(pickId: string): Promise<void> {
+    await this.client.send(
+      new StartExecutionCommand({
+        stateMachineArn: this.stateMachineArn,
+        name: pickId,
+        input: JSON.stringify({ pick_id: pickId }),
+      }),
+    );
+  }
+}
+
+/**
+ * Workflow dependencies. The classifier guesses nothing until Bedrock is wired
+ * in (T3.9), so only tagged matches (tier 1) are found.
+ */
+export function workflowDeps(): Deps {
+  const config = defaultConfig();
+  config.guess.model_id = process.env.BEDROCK_MODEL_ID ?? "none";
+  return {
+    races: new TabNz(identityFromEnv()),
+    places: new Overpass(),
+    classifier: new FakeClassifier(),
+    store: dynamoStore(),
+    countries: bundledCountries(),
+    config,
+  };
+}
+
+export function geocoder(): Nominatim {
+  return new Nominatim();
+}
+
+/** API Gateway (HTTP API, payload v2) → framework-free request. */
+export function toApiRequest(event: APIGatewayProxyEventV2): ApiRequest {
+  const raw = event.rawPath;
+  const body = event.body
+    ? event.isBase64Encoded
+      ? Buffer.from(event.body, "base64").toString("utf8")
+      : event.body
+    : undefined;
+  return {
+    method: event.requestContext.http.method,
+    path: raw.startsWith("/api") ? raw.slice(4) : raw,
+    query: event.queryStringParameters ?? {},
+    apiKey: event.headers["x-api-key"],
+    body: body || undefined,
+  };
+}
+
+export function toResult(r: ApiResponse): APIGatewayProxyStructuredResultV2 {
+  return {
+    statusCode: r.status,
+    headers: { "content-type": "application/json", "cache-control": "no-store" },
+    body: JSON.stringify(r.body),
+  };
+}
