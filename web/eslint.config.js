@@ -9,4 +9,9 @@ export default tseslint.config(
   {
     languageOptions: { globals: globals.browser },
   },
+  {
+    // Tests may assert that a value exists.
+    files: ["**/*.test.ts"],
+    rules: { "@typescript-eslint/no-non-null-assertion": "off" },
+  },
 );

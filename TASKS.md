@@ -84,11 +84,11 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 ## M5 Web UI (`web/`)
 
 - [x] **T5.1 Scaffold.** Vite + TypeScript + ESLint + Vitest. Extend `make check` with `web` typecheck, lint and test. `make check` runs `npm ci` first rather than skipping the web checks when `web/node_modules` is missing.
-- [ ] **T5.2 API client and key screen (F10.2).** Typed client for §5; 401 clears the key. Unit tests with mocked fetch.
-- [ ] **T5.3 Pick form + map (F10.3).** MapLibre with OpenFreeMap tiles, radius circle, advanced options.
-- [ ] **T5.4 Race progress (F10.4).** Polling, status text, race card with countdown. Unit tests for the countdown/status mapping.
-- [ ] **T5.5 Results (F10.5–F10.8).** Pins coloured by status, the pick card, "likely" badges, buttons wired to the API, current `PICKED` shown on load.
-- [ ] **T5.6 Passport and History views (F9, F10.1).**
+- [x] **T5.2 API client and key screen (F10.2).** Typed client for §5; 401 clears the key. Unit tests with mocked fetch.
+- [x] **T5.3 Pick form + map (F10.3).** MapLibre with OpenFreeMap tiles, radius circle, advanced options.
+- [x] **T5.4 Race progress (F10.4).** Polling, status text, race card with countdown. Unit tests for the countdown/status mapping.
+- [x] **T5.5 Results (F10.5–F10.8).** Pins coloured by status, the pick card, "likely" badges, buttons wired to the API, current `PICKED` shown on load.
+- [x] **T5.6 Passport and History views (F9, F10.1).**
 - [ ] **T5.7 [human] UI check.** The owner runs the UI against T4.5 on desktop and phone width and notes issues as new tasks.
 
 ## M6 Infrastructure (`infra/`)

@@ -1,0 +1,610 @@
+:root {
+  --bg: #f7f3ea;
+  --surface: #ffffff;
+  --text: #1d2320;
+  --muted: #5d6762;
+  --line: #ddd6c8;
+  --turf: #1f5f4a;
+  --turf-ink: #ffffff;
+  --gold: #c8912b;
+  --good: #2e7d4f;
+  --bad: #b3261e;
+  --pin-new: #3d6fb6;
+  --pin-picked: #c8912b;
+  --pin-visited: #2e7d4f;
+  --pin-chosen: #d4412b;
+  --radius: 12px;
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.45;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121614;
+    --surface: #1b211e;
+    --text: #e8ece9;
+    --muted: #9aa59f;
+    --line: #2d3531;
+    --turf: #4fa383;
+    --turf-ink: #0d1411;
+    --gold: #e0ac4a;
+    --good: #5cbf86;
+    --bad: #f08a80;
+    --pin-new: #6f9be0;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+h1 {
+  font-size: 1.4rem;
+  margin: 0 0 0.75rem;
+}
+
+h2 {
+  font-size: 1.15rem;
+  margin: 0.2rem 0;
+}
+
+a {
+  color: var(--turf);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 0.55rem 1.1rem;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+button.primary {
+  background: var(--turf);
+  border-color: var(--turf);
+  color: var(--turf-ink);
+  font-weight: 600;
+}
+
+button.secondary {
+  margin-top: 0.75rem;
+}
+
+button.small {
+  padding: 0.3rem 0.8rem;
+  font-size: 0.9rem;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* Header */
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.6rem 16px;
+  background: var(--turf);
+  color: var(--turf-ink);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.logo {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.tabs a {
+  color: inherit;
+  text-decoration: none;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  opacity: 0.8;
+}
+
+.tabs a[aria-current="page"] {
+  background: rgb(255 255 255 / 0.18);
+  opacity: 1;
+  font-weight: 600;
+}
+
+/* Pick page: stacked on phones, side panel + map on wide screens */
+.pick-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.side {
+  padding: 12px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.map {
+  height: 50vh;
+  min-height: 280px;
+  order: -1;
+}
+
+@media (min-width: 860px) {
+  .pick-page {
+    flex-direction: row;
+    height: calc(100vh - 52px);
+  }
+
+  .side {
+    width: 400px;
+    flex: none;
+    overflow-y: auto;
+    border-right: 1px solid var(--line);
+  }
+
+  .map {
+    order: 0;
+    flex: 1;
+    height: auto;
+  }
+}
+
+.pick-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pick-form details {
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+.pick-form details label {
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.pick-form label.check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.banner {
+  background: var(--surface);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.8rem;
+}
+
+.banner p {
+  margin: 0 0 0.4rem;
+}
+
+.message {
+  margin: 0;
+}
+
+.message.error {
+  color: var(--bad);
+}
+
+.note {
+  color: var(--muted);
+  font-size: 0.92rem;
+  margin: 0.25rem 0;
+}
+
+.note.good {
+  color: var(--good);
+}
+
+.where {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  margin: 0.5rem 0;
+}
+
+.spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--line);
+  border-top-color: var(--turf);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+}
+
+/* Race card */
+.race {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.8rem;
+  margin-top: 0.75rem;
+}
+
+.race summary {
+  cursor: pointer;
+}
+
+.countdown {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.race-name {
+  margin: 0.3rem 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.card {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.card li {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+  border-top: 1px solid var(--line);
+  font-size: 0.93rem;
+}
+
+.card .num {
+  font-weight: 700;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.card .horse,
+.card .country {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card li.scratched {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.card li.winner {
+  background: color-mix(in srgb, var(--gold) 18%, transparent);
+  font-weight: 700;
+}
+
+/* Winner and results */
+.winner-box {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: var(--surface);
+  border: 2px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 0.7rem 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.winner-box .flag {
+  font-size: 2.6rem;
+  line-height: 1;
+}
+
+.winner-box p {
+  margin: 0;
+}
+
+.winner-box .label {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.winner-box .country-name {
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.results {
+  margin-top: 0.75rem;
+}
+
+.restaurant {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.7rem 0.9rem;
+}
+
+.restaurant.pick {
+  border: 2px solid var(--pin-chosen);
+}
+
+.restaurant .label {
+  margin: 0;
+  color: var(--pin-chosen);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.restaurant .meta,
+.restaurant .links,
+.restaurant .likely {
+  margin: 0.25rem 0;
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+.badge {
+  display: inline-block;
+  background: var(--gold);
+  color: #1d1406;
+  border-radius: 999px;
+  padding: 0 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.4rem;
+}
+
+.count {
+  margin: 0.8rem 0 0.3rem;
+  font-weight: 600;
+}
+
+.matches {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.match {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 8px;
+  border-color: transparent;
+  text-align: left;
+  padding: 0.4rem 0.5rem;
+}
+
+.match.active {
+  border-color: var(--line);
+}
+
+.match .name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.match .dist {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  flex: none;
+  background: var(--pin-new);
+}
+
+.dot-picked {
+  background: var(--pin-picked);
+}
+
+.dot-visited {
+  background: var(--pin-visited);
+}
+
+.dot-chosen {
+  background: var(--pin-chosen);
+}
+
+/* Map pins */
+.pin {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 2px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+  background: var(--pin-new);
+}
+
+.pin-picked {
+  background: var(--pin-picked);
+}
+
+.pin-visited {
+  background: var(--pin-visited);
+}
+
+.pin-chosen {
+  background: var(--pin-chosen);
+  width: 30px;
+  height: 30px;
+}
+
+.centre-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--turf);
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px var(--turf);
+}
+
+/* Passport and History */
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.progress {
+  height: 10px;
+  background: var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--turf);
+}
+
+.stamps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.5rem;
+}
+
+.stamp {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 0.4rem;
+  align-items: center;
+  background: var(--surface);
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  padding: 0.45rem 0.6rem;
+  color: var(--muted);
+}
+
+.stamp.visited {
+  border: 2px solid var(--turf);
+  color: var(--text);
+}
+
+.stamp .flag {
+  font-size: 1.3rem;
+  grid-row: span 2;
+}
+
+.stamp .when {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.history {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.event {
+  display: grid;
+  grid-template-columns: 1fr;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+@media (min-width: 600px) {
+  .event {
+    grid-template-columns: 11rem 11rem 1fr;
+  }
+}
+
+.event .when {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.event-visited .what {
+  color: var(--good);
+  font-weight: 600;
+}
+
+/* Key screen */
+.key-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.key-form {
+  width: min(360px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
