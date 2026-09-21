@@ -1,0 +1,23 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API (hand-written fixture in the real response format)",
+  "osm3s": { "timestamp_osm_base": "2026-09-21T10:00:00Z", "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL." },
+  "elements": [
+    { "type": "node", "id": 1001, "lat": -36.8480, "lon": 174.7625,
+      "tags": { "amenity": "restaurant", "name": "Sakura Sushi", "cuisine": "Japanese; sushi",
+                "addr:housenumber": "12", "addr:street": "Victoria Street West", "addr:city": "Auckland",
+                "website": "https://example.com/sakura", "opening_hours": "Mo-Su 11:00-21:00" } },
+    { "type": "way", "id": 2002, "center": { "lat": -36.8490, "lon": 174.7615 },
+      "tags": { "amenity": "fast_food", "name": "Taco Loco", "cuisine": "mexican", "brand": "Taco Loco" } },
+    { "type": "node", "id": 1003, "lat": -36.8486, "lon": 174.7630,
+      "tags": { "amenity": "restaurant", "name": "Le Chalet", "description": "Fondue and raclette", "menu": "https://example.com/menu" } },
+    { "type": "node", "id": 1004, "lat": -36.8481, "lon": 174.7620,
+      "tags": { "amenity": "restaurant" } },
+    { "type": "relation", "id": 3005, "center": { "lat": -36.8483, "lon": 174.7623 },
+      "tags": { "amenity": "restaurant", "name": "Food Hall", "cuisine": "asian;international" } },
+    { "type": "node", "id": 1006, "lat": -36.8700, "lon": 174.7800,
+      "tags": { "amenity": "restaurant", "name": "Too Far", "cuisine": "thai" } },
+    { "type": "way", "id": 2007,
+      "tags": { "amenity": "restaurant", "name": "No Geometry" } }
+  ]
+}
