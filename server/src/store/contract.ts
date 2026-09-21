@@ -190,7 +190,9 @@ export async function runContract(make: () => Store | Promise<Store>): Promise<v
     try {
       await run(await make());
     } catch (e) {
-      throw new Error(`store contract "${name}" failed: ${e instanceof Error ? e.message : String(e)}`, { cause: e });
+      throw new Error(`store contract "${name}" failed: ${e instanceof Error ? e.message : String(e)}`, {
+        cause: e,
+      });
     }
   }
 }

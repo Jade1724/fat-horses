@@ -27,7 +27,8 @@ export interface Restaurant {
   reason: string | null;
 }
 
-export type Event = { kind: "pick"; pick_id: string } | { kind: "visit" } | { kind: "skip" } | { kind: "supersede" };
+export type Event =
+  { kind: "pick"; pick_id: string } | { kind: "visit" } | { kind: "skip" } | { kind: "supersede" };
 
 export type LogReason = "picked" | "visited" | "skipped" | "superseded";
 

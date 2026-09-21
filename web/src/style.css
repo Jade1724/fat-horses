@@ -15,7 +15,12 @@
   --pin-chosen: #d4412b;
   --radius: 12px;
   color-scheme: light dark;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   line-height: 1.45;
 }
 

@@ -1,5 +1,15 @@
 // HTTP with the app's User-Agent and a timeout (SPEC.md N4).
 
+import { setDefaultAutoSelectFamilyAttemptTimeout } from "node:net";
+
+/**
+ * Node tries each address of a host ("happy eyeballs") for only 250 ms by
+ * default. Where IPv6 is unreachable and IPv4 connects slowly (seen with
+ * overpass-api.de), every attempt then fails with ETIMEDOUT while curl works.
+ */
+export const CONNECT_ATTEMPT_TIMEOUT_MS = 2000;
+setDefaultAutoSelectFamilyAttemptTimeout(CONNECT_ATTEMPT_TIMEOUT_MS);
+
 export const VERSION = "0.1.0";
 
 /** Identifies the app to the services it calls, as their usage policies ask. */

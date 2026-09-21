@@ -69,11 +69,11 @@ const eventResponse = z.object({
     .object({
       race: z.object({ status: z.string(), advertised_start: z.number() }),
       runners: z
-        .array(z.object({ runner_number: z.number(), name: z.string(), is_scratched: z.boolean().default(false) }))
+        .array(
+          z.object({ runner_number: z.number(), name: z.string(), is_scratched: z.boolean().default(false) }),
+        )
         .default([]),
-      results: z
-        .array(z.object({ position: z.number(), runner_number: z.number() }))
-        .nullish(),
+      results: z.array(z.object({ position: z.number(), runner_number: z.number() })).nullish(),
     })
     .optional(),
 });
@@ -186,7 +186,9 @@ export class TabNz implements RaceProvider {
     const event = parseEvent(await this.get(`/racing/events/${race.id}`), race);
     if (event.found) return event.update;
     // Abandoned races disappear from the event endpoint; the meeting still lists them.
-    const listed = parseMeetings(await this.get(`/racing/meetings/${race.meeting_id}`)).find((r) => r.id === race.id);
+    const listed = parseMeetings(await this.get(`/racing/meetings/${race.meeting_id}`)).find(
+      (r) => r.id === race.id,
+    );
     if (!listed) throw new RaceSourceUnavailable(`race ${race.id} not found`);
     return { race: { ...race, status: listed.status }, placings: [] };
   }

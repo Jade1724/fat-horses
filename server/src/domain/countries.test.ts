@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { Countries, bundledCountries, validateCountries, type Country, type CountriesFile } from "./countries";
+import {
+  Countries,
+  bundledCountries,
+  validateCountries,
+  type Country,
+  type CountriesFile,
+} from "./countries";
 
 function country(over: Partial<Country> = {}): Country {
   return {

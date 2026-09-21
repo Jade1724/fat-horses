@@ -51,7 +51,11 @@ describe("DynamoDB store (no network)", () => {
   const pick = (id: string) => applyEvent(contractRestaurant(id, "JP"), { kind: "pick", pick_id: "p" }, NOW);
 
   it("sets, clears or checks the PICKED pointer", () => {
-    expect(pointerOp({ transitions: [pick("a")], expected_picked: null })).toEqual({ op: "set", expected: null, to: "a" });
+    expect(pointerOp({ transitions: [pick("a")], expected_picked: null })).toEqual({
+      op: "set",
+      expected: null,
+      to: "a",
+    });
     const skip = applyEvent(pick("a").restaurant, { kind: "skip" }, NOW);
     expect(pointerOp({ transitions: [skip], expected_picked: "a" })).toEqual({ op: "clear", expected: "a" });
     const visit = applyEvent(contractRestaurant("b", "IT"), { kind: "visit" }, NOW);

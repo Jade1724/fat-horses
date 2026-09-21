@@ -36,9 +36,9 @@ describe("API Gateway mapping", () => {
   });
 
   it("decodes base64 bodies and treats empty as none", () => {
-    expect(toApiRequest(event({ body: Buffer.from('{"a":1}').toString("base64"), isBase64Encoded: true })).body).toBe(
-      '{"a":1}',
-    );
+    expect(
+      toApiRequest(event({ body: Buffer.from('{"a":1}').toString("base64"), isBase64Encoded: true })).body,
+    ).toBe('{"a":1}');
     expect(toApiRequest(event({ body: "" })).body).toBeUndefined();
   });
 

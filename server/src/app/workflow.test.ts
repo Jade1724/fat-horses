@@ -147,7 +147,15 @@ const guess = (id: string, tag: string): Guess => ({
 
 describe("runPick", () => {
   it("normal pick", async () => {
-    const d = deps({ updates: openThen(update("final", [[1, 2], [2, 1], [3, 3]])) });
+    const d = deps({
+      updates: openThen(
+        update("final", [
+          [1, 2],
+          [2, 1],
+          [3, 3],
+        ]),
+      ),
+    });
     const { s, statuses } = await run(d);
     expect(s.status).toBe("done");
     expect(s.winner).toMatchObject({ number: 2, reason: "result" });
@@ -166,7 +174,17 @@ describe("runPick", () => {
   });
 
   it("dead heat", async () => {
-    const { s } = await run(deps({ updates: openThen(update("final", [[1, 1], [1, 3], [3, 2]])) }));
+    const { s } = await run(
+      deps({
+        updates: openThen(
+          update("final", [
+            [1, 1],
+            [1, 3],
+            [3, 2],
+          ]),
+        ),
+      }),
+    );
     expect(s.winner?.reason).toBe("dead_heat");
     expect(s.winner?.tied).toEqual([1, 3]);
     expect([1, 3]).toContain(s.winner?.number);
@@ -219,7 +237,11 @@ describe("runPick", () => {
     const { s } = await run(
       deps({
         updates: openThen(update("final", [[1, 1]])),
-        places: new FakePlaces([place("osm:node/1", "Sakura", ""), place("osm:node/2", "Roma", ""), place("osm:node/3", "Taq", "")]),
+        places: new FakePlaces([
+          place("osm:node/1", "Sakura", ""),
+          place("osm:node/2", "Roma", ""),
+          place("osm:node/3", "Taq", ""),
+        ]),
         classifier: fake,
       }),
     );
@@ -231,7 +253,8 @@ describe("runPick", () => {
 
   it("fallback when there is no primary match", async () => {
     let fake = new FakeClassifier();
-    for (const n of ["Japan", "Italy", "Mexico"]) fake = fake.withDishMatch(n, "osm:node/9", "has the dishes");
+    for (const n of ["Japan", "Italy", "Mexico"])
+      fake = fake.withDishMatch(n, "osm:node/9", "has the dishes");
     const { s } = await run(
       deps({
         updates: openThen(update("final", [[1, 1]])),
@@ -270,7 +293,11 @@ describe("runPick", () => {
 
   it("world complete when every country is visited", async () => {
     const store = new MemoryStore();
-    for (const [id, iso] of [["osm:node/1", "JP"], ["osm:node/2", "IT"], ["osm:node/3", "MX"]] as const) {
+    for (const [id, iso] of [
+      ["osm:node/1", "JP"],
+      ["osm:node/2", "IT"],
+      ["osm:node/3", "MX"],
+    ] as const) {
       await recordVisit(store, id, contractRestaurant(id, iso), T0);
     }
     const { s } = await run(deps({ store, updates: openThen(update("final", [[1, 1]])) }));
@@ -280,7 +307,10 @@ describe("runPick", () => {
 
   it("visited countries are drawn last", async () => {
     const store = new MemoryStore();
-    for (const [id, iso] of [["osm:node/1", "JP"], ["osm:node/2", "IT"]] as const) {
+    for (const [id, iso] of [
+      ["osm:node/1", "JP"],
+      ["osm:node/2", "IT"],
+    ] as const) {
       await recordVisit(store, id, contractRestaurant(id, iso), T0);
     }
     const { s } = await run(deps({ store, updates: openThen(update("final", [[1, 1]])) }));

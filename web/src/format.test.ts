@@ -59,9 +59,7 @@ describe("status and error text", () => {
   });
   it("explains unusual wins", () => {
     expect(winReasonText("result")).toBeNull();
-    expect(winReasonText("dead_heat", [1, 4])).toBe(
-      "Dead heat between #1 and #4, drawn at random",
-    );
+    expect(winReasonText("dead_heat", [1, 4])).toBe("Dead heat between #1 and #4, drawn at random");
     expect(winReasonText("abandoned")).toContain("abandoned");
     expect(winReasonText("timeout")).toContain("No result");
   });

@@ -58,14 +58,20 @@ export class StateStore implements Store {
   async apply(change: Change) {
     if (this.data.picked !== change.expected_picked) throw new ConflictError();
     for (const t of change.transitions) {
-      if ((this.data.restaurants[t.restaurant.id]?.status ?? null) !== t.expected_status) throw new ConflictError();
+      if ((this.data.restaurants[t.restaurant.id]?.status ?? null) !== t.expected_status)
+        throw new ConflictError();
     }
     await this.write((d) => {
       d.picked = pickedAfter(change);
       for (const t of change.transitions) {
         if (t.country_visited) {
           const iso = t.log.country_iso;
-          const c = (d.countries[iso] ??= { iso2: iso, visit_count: 0, first_visited_at: null, last_visited_at: null });
+          const c = (d.countries[iso] ??= {
+            iso2: iso,
+            visit_count: 0,
+            first_visited_at: null,
+            last_visited_at: null,
+          });
           c.visit_count += 1;
           c.first_visited_at ??= t.log.at;
           c.last_visited_at = t.log.at;

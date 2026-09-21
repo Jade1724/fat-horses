@@ -111,7 +111,12 @@ export function logKey(entry: LogEntry): string {
  * restaurant and mark this one PICKED, atomically. A stored record's status and
  * visit count win over the candidate's.
  */
-export async function recordPick(store: Store, candidate: Restaurant, pickId: string, now: Iso): Promise<Restaurant> {
+export async function recordPick(
+  store: Store,
+  candidate: Restaurant,
+  pickId: string,
+  now: Iso,
+): Promise<Restaurant> {
   const currentPicked = await store.currentlyPicked();
   const stored = await store.getRestaurant(candidate.id);
   const base: Restaurant = stored
@@ -136,7 +141,12 @@ export async function recordPick(store: Store, candidate: Restaurant, pickId: st
 }
 
 /** "We went here" (F8.2). `details` is required if the restaurant isn't stored. */
-export async function recordVisit(store: Store, id: string, details: Restaurant | null, now: Iso): Promise<Restaurant> {
+export async function recordVisit(
+  store: Store,
+  id: string,
+  details: Restaurant | null,
+  now: Iso,
+): Promise<Restaurant> {
   const current = (await store.getRestaurant(id)) ?? details;
   if (!current) throw new NotFoundError(`restaurant ${id} not found`);
   return changeOne(store, current, { kind: "visit" }, now);

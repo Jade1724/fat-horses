@@ -57,7 +57,10 @@ export function pointerOp(change: Change): PointerOp {
 function pointerCondition(expected: string | null) {
   return expected === null
     ? { ConditionExpression: "attribute_not_exists(pk)" }
-    : { ConditionExpression: "restaurant_id = :expected", ExpressionAttributeValues: { ":expected": expected } };
+    : {
+        ConditionExpression: "restaurant_id = :expected",
+        ExpressionAttributeValues: { ":expected": expected },
+      };
 }
 
 const ttl = (createdAt: string, ttlMs: number) => Math.floor((ms(createdAt) + ttlMs) / 1000);
@@ -74,7 +77,9 @@ export class DynamoStore implements Store {
 
   private async get(pk: string, sk: string): Promise<Record<string, unknown> | null> {
     try {
-      const out = await this.doc.send(new GetCommand({ TableName: this.table, Key: { pk, sk }, ConsistentRead: true }));
+      const out = await this.doc.send(
+        new GetCommand({ TableName: this.table, Key: { pk, sk }, ConsistentRead: true }),
+      );
       return out.Item ?? null;
     } catch (e) {
       throw new StoreUnavailable(String(e));
@@ -89,7 +94,10 @@ export class DynamoStore implements Store {
   private async putData(pk: string, sk: string, value: unknown, ttlSeconds?: number): Promise<void> {
     try {
       await this.doc.send(
-        new PutCommand({ TableName: this.table, Item: { pk, sk, data: JSON.stringify(value), ttl: ttlSeconds } }),
+        new PutCommand({
+          TableName: this.table,
+          Item: { pk, sk, data: JSON.stringify(value), ttl: ttlSeconds },
+        }),
       );
     } catch (e) {
       throw new StoreUnavailable(String(e));
@@ -117,7 +125,10 @@ export class DynamoStore implements Store {
           ExpressionAttributeNames: { "#s": "status" },
           ...(t.expected_status === null
             ? { ConditionExpression: "attribute_not_exists(#s)" }
-            : { ConditionExpression: "#s = :expected_status", ExpressionAttributeValues: { ":expected_status": t.expected_status } }),
+            : {
+                ConditionExpression: "#s = :expected_status",
+                ExpressionAttributeValues: { ":expected_status": t.expected_status },
+              }),
         },
       });
       items.push({
@@ -141,7 +152,11 @@ export class DynamoStore implements Store {
       items.push({ ConditionCheck: { TableName: this.table, Key: key, ...pointerCondition(p.expected) } });
     } else if (p.op === "set") {
       items.push({
-        Put: { TableName: this.table, Item: { ...key, restaurant_id: p.to }, ...pointerCondition(p.expected) },
+        Put: {
+          TableName: this.table,
+          Item: { ...key, restaurant_id: p.to },
+          ...pointerCondition(p.expected),
+        },
       });
     } else {
       items.push({ Delete: { TableName: this.table, Key: key, ...pointerCondition(p.expected) } });
@@ -221,7 +236,12 @@ export class DynamoStore implements Store {
   }
 
   putGuess(g: CachedGuess) {
-    return this.putData(`PLACE#${g.guess.place_id}`, `GUESS#v${g.prompt_version}`, g, ttl(g.created_at, GUESS_TTL_MS));
+    return this.putData(
+      `PLACE#${g.guess.place_id}`,
+      `GUESS#v${g.prompt_version}`,
+      g,
+      ttl(g.created_at, GUESS_TTL_MS),
+    );
   }
 
   getGeocode(key: string) {

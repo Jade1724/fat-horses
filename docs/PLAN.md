@@ -1,5 +1,7 @@
 # fat-horses — Plan
 
+> **Update (2026-09-21):** the backend moved from Rust to TypeScript on Lambda's managed Node.js runtime, at the owner's request (easier to manage). Rust mentions below are historical; `SPEC.md` is current.
+
 A restaurant picker driven by a real horse race: each horse gets a country, the winning
 horse's country decides the cuisine, and the app picks a nearby restaurant serving it.
 

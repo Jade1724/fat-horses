@@ -1,19 +1,9 @@
 // Typed client for the HTTP API (SPEC.md §5).
 
 export type PickStatus =
-  | "finding_race"
-  | "waiting_start"
-  | "running"
-  | "resolving"
-  | "searching"
-  | "done"
-  | "failed";
+  "finding_race" | "waiting_start" | "running" | "resolving" | "searching" | "done" | "failed";
 
-export type PickError =
-  | "no_upcoming_race"
-  | "race_source_unavailable"
-  | "places_unavailable"
-  | "internal";
+export type PickError = "no_upcoming_race" | "race_source_unavailable" | "places_unavailable" | "internal";
 
 export type RestaurantStatus = "PICKED" | "VISITED" | null;
 export type MatchKind = "tagged" | "inferred" | "fallback";

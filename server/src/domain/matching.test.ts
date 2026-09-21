@@ -76,14 +76,20 @@ describe("classifier output validation (L4)", () => {
     const g = validateGuesses(
       JSON.stringify({
         guesses: [
-          { place_id: "osm:node/1", cuisines: [{ tag: "japanese", confidence: 0.9 }], reason: "Sakura Sushi" },
+          {
+            place_id: "osm:node/1",
+            cuisines: [{ tag: "japanese", confidence: 0.9 }],
+            reason: "Sakura Sushi",
+          },
           { place_id: "osm:node/99", cuisines: [], reason: "x" },
         ],
       }),
       ids,
       tags,
     );
-    expect(g).toEqual([{ place_id: "osm:node/1", cuisines: [{ tag: "japanese", confidence: 0.9 }], reason: "Sakura Sushi" }]);
+    expect(g).toEqual([
+      { place_id: "osm:node/1", cuisines: [{ tag: "japanese", confidence: 0.9 }], reason: "Sakura Sushi" },
+    ]);
   });
 
   it("drops unknown tags and bad confidence, keeps one guess per place", () => {
@@ -106,7 +112,9 @@ describe("classifier output validation (L4)", () => {
       ids,
       tags,
     );
-    expect(g).toEqual([{ place_id: "osm:node/1", cuisines: [{ tag: "japanese", confidence: 0.8 }], reason: "first" }]);
+    expect(g).toEqual([
+      { place_id: "osm:node/1", cuisines: [{ tag: "japanese", confidence: 0.8 }], reason: "first" },
+    ]);
   });
 
   it("clamps long reasons", () => {
@@ -154,7 +162,12 @@ describe("classifier output validation (L4)", () => {
 describe("matching (F6.2–F6.4)", () => {
   it("tier 1 matches any cuisine value", () => {
     const ms = taggedMatches(
-      [place("osm:node/1", "Japanese; sushi"), place("osm:way/2", "ramen"), place("osm:node/3", "italian"), place("osm:node/4", "")],
+      [
+        place("osm:node/1", "Japanese; sushi"),
+        place("osm:way/2", "ramen"),
+        place("osm:node/3", "italian"),
+        place("osm:node/4", ""),
+      ],
       japan,
     );
     expect(ms.map((m) => m.place_id)).toEqual(["osm:node/1", "osm:way/2"]);
@@ -162,11 +175,19 @@ describe("matching (F6.2–F6.4)", () => {
   });
 
   it("tier 2 needs the threshold and an untagged place", () => {
-    const places = [place("osm:node/1", ""), place("osm:node/2", ""), place("osm:node/3", ""), place("osm:node/4", "italian")];
+    const places = [
+      place("osm:node/1", ""),
+      place("osm:node/2", ""),
+      place("osm:node/3", ""),
+      place("osm:node/4", "italian"),
+    ];
     const guesses = [
       guess("osm:node/1", [["japanese", 0.7]]),
       guess("osm:node/2", [["japanese", 0.69]]),
-      guess("osm:node/3", [["italian", 0.95], ["sushi", 0.8]]),
+      guess("osm:node/3", [
+        ["italian", 0.95],
+        ["sushi", 0.8],
+      ]),
       guess("osm:node/4", [["japanese", 0.99]]),
     ];
     const ms = inferredMatches(places, guesses, japan, 0.7);
@@ -176,7 +197,12 @@ describe("matching (F6.2–F6.4)", () => {
   });
 
   it("primary is tagged then inferred", () => {
-    const ms = primaryMatches([place("osm:node/1", ""), place("osm:node/2", "sushi")], [guess("osm:node/1", [["ramen", 0.9]])], japan, 0.7);
+    const ms = primaryMatches(
+      [place("osm:node/1", ""), place("osm:node/2", "sushi")],
+      [guess("osm:node/1", [["ramen", 0.9]])],
+      japan,
+      0.7,
+    );
     expect(ms.map((m) => [m.place_id, m.match])).toEqual([
       ["osm:node/2", "tagged"],
       ["osm:node/1", "inferred"],
@@ -188,8 +214,10 @@ describe("choosing the restaurant (F7)", () => {
   const m = (id: string, match: Match["match"] = "tagged"): Match => ({ place_id: id, match, reason: null });
   const picks = (primary: Match[], fallback: Match[], visited: string[]) =>
     new Set(
-      Array.from({ length: 100 }, (_, s) =>
-        chooseRestaurant(primary, fallback, (id) => (visited.includes(id) ? 1 : 0), seeded(s))?.place_id,
+      Array.from(
+        { length: 100 },
+        (_, s) =>
+          chooseRestaurant(primary, fallback, (id) => (visited.includes(id) ? 1 : 0), seeded(s))?.place_id,
       ),
     );
 
@@ -234,7 +262,12 @@ describe("status state machine (F8)", () => {
 
   it("null → PICKED", () => {
     const t = applyEvent(restaurant(), pick, NOW);
-    expect(t.restaurant).toMatchObject({ status: "PICKED", status_before_pick: null, picked_at: NOW, pick_id: "p1" });
+    expect(t.restaurant).toMatchObject({
+      status: "PICKED",
+      status_before_pick: null,
+      picked_at: NOW,
+      pick_id: "p1",
+    });
     expect(t.expected_status).toBeNull();
     expect(t.country_visited).toBe(false);
     expect(t.log).toMatchObject({ reason: "picked", from: null, to: "PICKED", pick_id: "p1" });
@@ -249,7 +282,12 @@ describe("status state machine (F8)", () => {
 
   it("PICKED → VISITED", () => {
     const t = applyEvent(applyEvent(restaurant(), pick, NOW).restaurant, { kind: "visit" }, NOW);
-    expect(t.restaurant).toMatchObject({ status: "VISITED", status_before_pick: null, visit_count: 1, visited_at: NOW });
+    expect(t.restaurant).toMatchObject({
+      status: "VISITED",
+      status_before_pick: null,
+      visit_count: 1,
+      visited_at: NOW,
+    });
     expect(t.country_visited).toBe(true);
     expect(t.expected_status).toBe("PICKED");
     expect(t.log).toMatchObject({ reason: "visited", pick_id: "p1" });
@@ -268,7 +306,10 @@ describe("status state machine (F8)", () => {
     expect(applyEvent(picked, { kind: "skip" }, NOW).restaurant.status).toBeNull();
     expect(applyEvent(picked, { kind: "supersede" }, NOW).log.reason).toBe("superseded");
     const pickedVisited = applyEvent(restaurant("VISITED"), pick, NOW).restaurant;
-    expect(applyEvent(pickedVisited, { kind: "skip" }, NOW).restaurant).toMatchObject({ status: "VISITED", visit_count: 1 });
+    expect(applyEvent(pickedVisited, { kind: "skip" }, NOW).restaurant).toMatchObject({
+      status: "VISITED",
+      visit_count: 1,
+    });
   });
 
   it.each([null, "VISITED"] as const)("skip or supersede from %s is invalid", (s) => {
@@ -310,7 +351,13 @@ describe("cached guessing (L5, L6)", () => {
 
   it("asks only about untagged places", async () => {
     const fake = new FakeClassifier().withGuess(guess("osm:node/1", [["japanese", 0.9]]));
-    const out = await guessUntagged([place("osm:node/1", ""), place("osm:node/2", "thai")], fake, cache(), config(), NOW);
+    const out = await guessUntagged(
+      [place("osm:node/1", ""), place("osm:node/2", "thai")],
+      fake,
+      cache(),
+      config(),
+      NOW,
+    );
     expect(out.guesses.map((g) => g.place_id)).toEqual(["osm:node/1"]);
     expect(fake.guessedPlaces).toEqual(["osm:node/1"]);
     expect(out.llm_unavailable).toBe(false);
@@ -352,7 +399,13 @@ describe("cached guessing (L5, L6)", () => {
   });
 
   it("failure marks llm_unavailable", async () => {
-    const out = await guessUntagged([place("osm:node/1", "")], FakeClassifier.failing(), cache(), config(), NOW);
+    const out = await guessUntagged(
+      [place("osm:node/1", "")],
+      FakeClassifier.failing(),
+      cache(),
+      config(),
+      NOW,
+    );
     expect(out).toEqual({ guesses: [], llm_unavailable: true });
   });
 

@@ -59,10 +59,7 @@ export class PickMap {
     dot.title = "Search centre";
     this.centre = new maplibregl.Marker({ element: dot }).setLngLat([lon, lat]).addTo(this.map);
     const ring = circleRing(lat, lon, radiusM, 16);
-    const bounds = ring.reduce(
-      (b, p) => b.extend(p),
-      new maplibregl.LngLatBounds(ring[0], ring[0]),
-    );
+    const bounds = ring.reduce((b, p) => b.extend(p), new maplibregl.LngLatBounds(ring[0], ring[0]));
     this.map.fitBounds(bounds, { padding: 32, maxZoom: 17, duration: 600 });
   }
 
@@ -74,9 +71,7 @@ export class PickMap {
   ): void {
     for (const m of this.markers) m.remove();
     this.markers = [];
-    const ordered = [...restaurants].sort(
-      (a, b) => Number(a.id === chosenId) - Number(b.id === chosenId),
-    );
+    const ordered = [...restaurants].sort((a, b) => Number(a.id === chosenId) - Number(b.id === chosenId));
     for (const r of ordered) {
       const el = document.createElement("button");
       el.type = "button";
@@ -88,9 +83,7 @@ export class PickMap {
         onClick(r);
       });
       this.markers.push(
-        new maplibregl.Marker({ element: el, anchor: "bottom" })
-          .setLngLat([r.lon, r.lat])
-          .addTo(this.map),
+        new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat([r.lon, r.lat]).addTo(this.map),
       );
     }
   }

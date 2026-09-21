@@ -111,17 +111,17 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 ## 3. LLM rules (Bedrock)
 
 - **L1 Scope:** the LLM does exactly two things: `guess_cuisines` (F6.3) and `match_dishes` (F6.5). It never chooses the race, a country, the winner or the picked restaurant.
-- **L2 Interface:** trait `Classifier` in `crates/domain`:
+- **L2 Interface:** interface `Classifier` in `server/src/domain/classify.ts`:
   - `guess_cuisines(places: &[PlaceInput]) -> Result<Vec<Guess>>`, where `Guess = {place_id, cuisines: [{tag, confidence}], reason}`
   - `match_dishes(places: &[PlaceInput], country: &CountryDishes) -> Result<Vec<DishMatch>>`, where `DishMatch = {place_id, reason}`
-  - Implementations: `BedrockClassifier` (crate `classify`) and `FakeClassifier` (deterministic, configured from a map; for tests and offline runs).
+  - Implementations: `BedrockClassifier` (`server/src/adapters/bedrock.ts`) and `FakeClassifier` (deterministic, configured from a map; for tests and offline runs).
 - **L3 Input:** only public OSM data (name, tags, `website`/`menu` URLs if present) and the country's name and dishes. Never the user's address, coordinates, history or API key.
 - **L4 Output validation:** the model returns JSON (via tool use / JSON-schema output in the Converse API). Drop any entry whose `place_id` wasn't in the input, any `tag` not in the known tag set (union of all `cuisine_tags`), and any confidence outside [0, 1]. Clamp `reason` to 120 characters. Invalid JSON → one retry → otherwise error (F6.8).
 - **L5 Limits:** at most **50 places per call** and **200 places per pick** (closest first); max output tokens per call set in config; per-call timeout **20 s**.
 - **L6 Caching:** a Guess is cached per `(place_id, prompt_version)` together with `input_hash` = SHA-256 of the name and sorted tags. A cached Guess is reused only if the hash matches. TTL 180 days. `match_dishes` results are not cached.
-- **L7 Prompts:** versioned files `crates/classify/prompts/guess_cuisines.v<N>.md` and `match_dishes.v<N>.md`; the version number is part of the cache key.
+- **L7 Prompts:** versioned files `server/prompts/guess_cuisines.v<N>.md` and `match_dishes.v<N>.md`; the version number is part of the cache key.
 - **L8 Model:** configured by env var `BEDROCK_MODEL_ID` (a model ID or inference profile ARN); default a small Claude model (e.g. Claude Haiku 4.5), final choice from spike T1.3. Region is configured separately (`BEDROCK_REGION`).
-- **L9 Evaluation:** `fat-horses eval` runs a labelled set (`crates/classify/eval/*.json`) through the configured classifier and prints precision/recall per tier. It is run by hand, never by `make check`.
+- **L9 Evaluation:** `fat-horses eval` runs a labelled set (`server/eval/*.json`) through the configured classifier and prints precision/recall per tier. It is run by hand, never by `make check`.
 
 ---
 
@@ -153,7 +153,7 @@ Keys `pk` (S), `sk` (S); attribute `ttl` (N, epoch seconds) for TTL. On-demand b
 | Restaurant | `RESTAURANT#<place_id>` | `META` | name, lat, lon, address, cuisine (list), country_iso, status (`PICKED`/`VISITED`; absent = `null`), status_before_pick, picked_at, visited_at, visit_count, match, reason |
 | Currently picked | `STATE` | `PICKED` | restaurant_id. Written in the same transaction as every change to or from `PICKED` (enforces F8.3) |
 | Country | `COUNTRY` | `<iso2>` | visit_count, first_visited_at, last_visited_at (one partition, so the Passport is a single Query) |
-| Log entry | `LOG` | `<RFC3339 µs timestamp>#<restaurant_id>#<reason>` | the fields of F8.6 |
+| Log entry | `LOG` | `<RFC3339 µs timestamp>#<restaurant_id>#<reason>` (JS has millisecond precision; the microseconds are zero-padded) | the fields of F8.6 |
 | Pick session | `PICK#<pick_id>` | `META` | request, location, status, pool size, world_complete, race card, winner, places, matches, pick, llm_unavailable, error; `ttl` = +30 days |
 | Guess | `PLACE#<place_id>` | `GUESS#v<prompt_version>` | cuisines, reason, model_id, input_hash, created_at; `ttl` = +180 days |
 | Geocode cache | `GEOCODE#<normalised address>` | `META` | lat, lon, display_name; `ttl` = +30 days |
@@ -162,7 +162,7 @@ Records are stored as JSON in a `data` attribute; attributes used in conditions 
 
 A status change = one `TransactWriteItems` with a condition on the restaurant's current status (and on `STATE/PICKED`), a country update if visited, and a log put.
 
-Storage traits live in `crates/domain` (`VisitStore`, `PickStore`, `GuessCache`, `GeocodeCache`). They have an in-memory implementation (tests), a JSON-file implementation (CLI) and a DynamoDB implementation (`crates/store`). **One shared contract test suite** runs against every implementation.
+The `Store` interface lives in `server/src/domain/store.ts`. It has an in-memory implementation (tests), a JSON-file implementation (CLI) and a DynamoDB implementation (`server/src/store/`). **One shared contract test suite** runs against every implementation.
 
 ---
 
@@ -195,7 +195,7 @@ Pick view:
 
 ## 6. Workflow and architecture
 
-Pick workflow (AWS Step Functions Standard; each task is a Rust Lambda; the same step functions are plain async functions in `crates/app`, which the CLI calls in-process):
+Pick workflow (AWS Step Functions Standard; each task invokes the `workflow` Lambda with `{step, pick_id}`; the same steps are plain async functions in `server/src/app/workflow.ts`, which the CLI calls in-process):
 
 1. `FindRace` (F3) → `AssignCountries` (F2, F4) → status `waiting_start`
 2. `PrepareNearby`: Overpass places (F6.1) + guesses for untagged places (F6.3), stored on the session
@@ -208,7 +208,7 @@ Any unhandled step error → status `failed` with the error code. Step retries: 
 
 Infrastructure (Terraform in `infra/`, S3 state backend with native lock file):
 - CloudFront: `/` → private S3 site bucket (OAC); `/api/*` → API Gateway HTTP API → `api` Lambda.
-- Lambdas: Rust, `provided.al2023`, arm64, built with `cargo lambda`.
+- Lambdas: TypeScript on the managed **Node.js 22** runtime (`nodejs22.x`), arm64, one esbuild bundle per handler (`make build-lambdas`); the AWS SDK v3 comes from the runtime. Chosen over Rust on the OS-only runtime because a managed runtime is easier to operate.
 - Step Functions state machine, DynamoDB table (§4.2), SSM SecureString `/fat-horses/api-key`.
 - IAM: least privilege per Lambda; `bedrock:InvokeModel` only on the configured model/profile.
 - AWS Budgets alarm (default USD 10/month) emailing the owner.
@@ -219,16 +219,16 @@ Infrastructure (Terraform in `infra/`, S3 state backend with native lock file):
 ## 7. Code layout
 
 ```
-Cargo.toml              workspace
-crates/domain/          types, rules F2–F8, traits (RaceProvider, Geocoder, Places, Classifier, stores, Clock). No I/O
-crates/race/            TabNz RaceProvider
-crates/places/          Nominatim Geocoder, Overpass Places
-crates/classify/        BedrockClassifier, FakeClassifier, prompts/, eval/
-crates/store/           memory, JSON-file and DynamoDB stores + shared contract tests
-crates/app/             workflow steps + API handlers, generic over the traits
-crates/lambdas/         one binary per Lambda; wiring only
-crates/cli/             binary `fat-horses`: pick, visit, skip, passport, history, eval
-data/countries.json
+server/                 TypeScript, Node.js 22
+  src/domain/           types, rules F2–F8, interfaces (RaceProvider, Geocoder, Places, Classifier, Store, Clock). No I/O
+  src/adapters/         TAB NZ, Nominatim, Overpass (and Bedrock, T3.9)
+  src/store/            memory, JSON-file and DynamoDB stores + shared contract suite
+  src/app/              workflow steps, start, API handlers
+  src/lambda/           `api` and `workflow` handlers; wiring only
+  src/cli/              `fat-horses`: pick, visit, skip, passport, history, serve (eval later)
+  test/fixtures/        recorded TAB NZ, Nominatim and Overpass responses
+  scripts/              Lambda bundling, DynamoDB Local contract run
+data/countries.json     bundled into the server
 web/                    Vite + TypeScript + MapLibre GL JS
 infra/                  Terraform
 ```
@@ -238,12 +238,12 @@ infra/                  Terraform
 ## 8. Non-functional requirements
 
 - **N1 Testability:** randomness (`rand::Rng`) and time (`Clock`) are injected everywhere; every rule in F2–F8 has unit tests with a seeded RNG and a fixed clock.
-- **N2 Offline gate:** `make check` needs no network and no AWS credentials. External clients are tested against recorded fixtures in `crates/*/tests/fixtures/`.
+- **N2 Offline gate:** `make check` needs no network and no AWS credentials. External clients are tested against recorded fixtures in `server/test/fixtures/`.
 - **N3 Integration tests** (DynamoDB Local, live TAB/Overpass/Bedrock) run only through separate make targets (`make it`, `make live`), never through `make check`.
 - **N4 Etiquette:** Nominatim and Overpass calls send `User-Agent: fat-horses/<version> (<contact>)`. At most 1 Nominatim request per second.
 - **N5 Cost:** expected < USD 5/month at personal use; nothing billed while idle except storage.
 - **N6 Latency:** `POST /picks` < 3 s; `GET /picks/{id}` < 500 ms warm.
-- **N7 Logs:** structured JSON logs (`tracing`) with `pick_id` on every line; no API key or address in logs above debug level.
+- **N7 Logs:** structured JSON logs (`server/src/log.ts`) with `pick_id` where there is one; no API key or address in logs above debug level.
 
 ---
 

@@ -54,7 +54,12 @@ export interface Classifier {
 function clampReason(reason: string): string {
   const r = reason.trim();
   const chars = [...r];
-  return chars.length <= MAX_REASON_CHARS ? r : `${chars.slice(0, MAX_REASON_CHARS - 1).join("").trimEnd()}…`;
+  return chars.length <= MAX_REASON_CHARS
+    ? r
+    : `${chars
+        .slice(0, MAX_REASON_CHARS - 1)
+        .join("")
+        .trimEnd()}…`;
 }
 
 const rawGuesses = z.object({

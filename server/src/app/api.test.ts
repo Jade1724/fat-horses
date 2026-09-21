@@ -64,13 +64,15 @@ describe("startPick (F1)", () => {
     { address: "Sky Tower", radius_m: 49 },
     { address: "Sky Tower", radius_m: 2001 },
   ])("rejects %j", async (input) => {
-    await expect(startPick(new FakeGeocoder(), new MemoryStore(), input, "p", NOW)).rejects.toThrow(InvalidRequest);
+    await expect(startPick(new FakeGeocoder(), new MemoryStore(), input, "p", NOW)).rejects.toThrow(
+      InvalidRequest,
+    );
   });
 
   it("unknown address and outage", async () => {
-    await expect(startPick(new FakeGeocoder(), new MemoryStore(), address("nowhere st"), "p", NOW)).rejects.toThrow(
-      AddressNotFound,
-    );
+    await expect(
+      startPick(new FakeGeocoder(), new MemoryStore(), address("nowhere st"), "p", NOW),
+    ).rejects.toThrow(AddressNotFound);
     await expect(startPick(new FakeGeocoder(), new MemoryStore(), address("down"), "p", NOW)).rejects.toThrow(
       GeocoderUnavailable,
     );
@@ -87,10 +89,25 @@ describe("startPick (F1)", () => {
 
 function api(starter = new FakeStarter()) {
   const store = new MemoryStore();
-  return { api: new Api({ geocoder: new FakeGeocoder(), store, starter, countries: bundledCountries(), apiKey: KEY }), store, starter };
+  return {
+    api: new Api({
+      geocoder: new FakeGeocoder(),
+      store,
+      starter,
+      countries: bundledCountries(),
+      apiKey: KEY,
+    }),
+    store,
+    starter,
+  };
 }
 
-const req = (method: string, path: string, body?: unknown, query: Record<string, string> = {}): ApiRequest => ({
+const req = (
+  method: string,
+  path: string,
+  body?: unknown,
+  query: Record<string, string> = {},
+): ApiRequest => ({
   method,
   path,
   query,
@@ -107,8 +124,14 @@ function errorOf(r: { status: number; body: unknown }) {
 describe("API (§5)", () => {
   it("requires the key", async () => {
     const { api: a } = api();
-    expect(errorOf(await a.handle({ ...get("/history"), apiKey: undefined }, NOW))).toEqual([401, "unauthorized"]);
-    expect(errorOf(await a.handle({ ...get("/history"), apiKey: "wrong" }, NOW))).toEqual([401, "unauthorized"]);
+    expect(errorOf(await a.handle({ ...get("/history"), apiKey: undefined }, NOW))).toEqual([
+      401,
+      "unauthorized",
+    ]);
+    expect(errorOf(await a.handle({ ...get("/history"), apiKey: "wrong" }, NOW))).toEqual([
+      401,
+      "unauthorized",
+    ]);
     expect((await a.handle(get("/history"), NOW)).status).toBe(200);
     expect(constantTimeEqual("abc", "abc")).toBe(true);
     expect(constantTimeEqual("abc", "abcd")).toBe(false);
@@ -116,7 +139,12 @@ describe("API (§5)", () => {
 
   it("unknown routes are 404", async () => {
     const { api: a } = api();
-    for (const r of [get("/nope"), get("/picks/"), post("/restaurants/osm:node/1/eat"), req("DELETE", "/picks")]) {
+    for (const r of [
+      get("/nope"),
+      get("/picks/"),
+      post("/restaurants/osm:node/1/eat"),
+      req("DELETE", "/picks"),
+    ]) {
       expect(errorOf(await a.handle(r, NOW))).toEqual([404, "not_found"]);
     }
   });
@@ -140,13 +168,25 @@ describe("API (§5)", () => {
 
   it("start errors", async () => {
     const { api: a, starter } = api();
-    expect(errorOf(await a.handle(post("/picks", { address: "x", radius_m: 5 }), NOW))).toEqual([422, "invalid_request"]);
+    expect(errorOf(await a.handle(post("/picks", { address: "x", radius_m: 5 }), NOW))).toEqual([
+      422,
+      "invalid_request",
+    ]);
     expect(errorOf(await a.handle(post("/picks", {}), NOW))).toEqual([422, "invalid_request"]);
-    expect(errorOf(await a.handle({ ...post("/picks"), body: "{not json" }, NOW))).toEqual([422, "invalid_request"]);
-    expect(errorOf(await a.handle(post("/picks", { address: "nowhere" }), NOW))).toEqual([422, "address_not_found"]);
+    expect(errorOf(await a.handle({ ...post("/picks"), body: "{not json" }, NOW))).toEqual([
+      422,
+      "invalid_request",
+    ]);
+    expect(errorOf(await a.handle(post("/picks", { address: "nowhere" }), NOW))).toEqual([
+      422,
+      "address_not_found",
+    ]);
     expect(starter.started).toEqual([]);
     const failing = api(new FakeStarter(true)).api;
-    expect(errorOf(await failing.handle(post("/picks", { lat: -36.8, lon: 174.7 }), NOW))).toEqual([503, "internal"]);
+    expect(errorOf(await failing.handle(post("/picks", { lat: -36.8, lon: 174.7 }), NOW))).toEqual([
+      503,
+      "internal",
+    ]);
     expect(errorOf(await a.handle(get("/picks/nope"), NOW))).toEqual([404, "not_found"]);
   });
 
@@ -154,10 +194,16 @@ describe("API (§5)", () => {
     const { api: a, store } = api();
     expect((await a.handle(get("/restaurants/picked"), NOW)).body).toBeNull();
     await recordPick(store, contractRestaurant("osm:node/1", "JP"), "p1", NOW);
-    expect((await a.handle(get("/restaurants/picked"), NOW)).body).toMatchObject({ id: "osm:node/1", status: "PICKED" });
+    expect((await a.handle(get("/restaurants/picked"), NOW)).body).toMatchObject({
+      id: "osm:node/1",
+      status: "PICKED",
+    });
     const v = await a.handle(post("/restaurants/osm%3Anode%2F1/visit"), NOW);
     expect(v.body).toMatchObject({ status: "VISITED", visit_count: 1 });
-    expect(errorOf(await a.handle(post("/restaurants/osm:node/1/skip"), NOW))).toEqual([409, "invalid_transition"]);
+    expect(errorOf(await a.handle(post("/restaurants/osm:node/1/skip"), NOW))).toEqual([
+      409,
+      "invalid_transition",
+    ]);
   });
 
   it("skip a picked restaurant", async () => {
@@ -169,9 +215,17 @@ describe("API (§5)", () => {
 
   it("a map visit needs details", async () => {
     const { api: a } = api();
-    expect(errorOf(await a.handle(post("/restaurants/osm:node/5/visit"), NOW))).toEqual([422, "invalid_request"]);
-    const details = (iso: string) => ({ restaurant: { name: "Taqueria", lat: -36.8, lon: 174.7, cuisine: ["mexican"], country_iso: iso } });
-    expect(errorOf(await a.handle(post("/restaurants/osm:node/5/visit", details("XX")), NOW))).toEqual([422, "invalid_request"]);
+    expect(errorOf(await a.handle(post("/restaurants/osm:node/5/visit"), NOW))).toEqual([
+      422,
+      "invalid_request",
+    ]);
+    const details = (iso: string) => ({
+      restaurant: { name: "Taqueria", lat: -36.8, lon: 174.7, cuisine: ["mexican"], country_iso: iso },
+    });
+    expect(errorOf(await a.handle(post("/restaurants/osm:node/5/visit", details("XX")), NOW))).toEqual([
+      422,
+      "invalid_request",
+    ]);
     const ok = await a.handle(post("/restaurants/osm:node/5/visit", details("MX")), NOW);
     expect(ok.status).toBe(200);
     expect(ok.body).toMatchObject({ country_iso: "MX", status: "VISITED" });
@@ -189,9 +243,14 @@ describe("API (§5)", () => {
     expect(c.total).toBe(95);
     expect(c.visited).toBe(1);
     expect(c.countries.find((x) => x.iso2 === "JP")).toMatchObject({ visited: true, visit_count: 1 });
-    const small = (await a.handle(get("/countries", { min_population: "100000000" }), NOW)).body as { total: number };
+    const small = (await a.handle(get("/countries", { min_population: "100000000" }), NOW)).body as {
+      total: number;
+    };
     expect(small.total).toBeLessThan(20);
-    expect(errorOf(await a.handle(get("/countries", { min_population: "lots" }), NOW))).toEqual([422, "invalid_request"]);
+    expect(errorOf(await a.handle(get("/countries", { min_population: "lots" }), NOW))).toEqual([
+      422,
+      "invalid_request",
+    ]);
     const h = (await a.handle(get("/history"), NOW)).body as { entries: { reason: string }[] };
     expect(h.entries.map((e) => e.reason)).toEqual(["visited", "picked"]);
   });

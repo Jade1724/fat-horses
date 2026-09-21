@@ -61,7 +61,8 @@ async function main(argv: string[]): Promise<void> {
   switch (command) {
     case "pick": {
       if (!arg) fail("pick needs an address");
-      if (!values["fake-llm"]) fail("the Bedrock classifier isn't built yet (TASKS.md T3.9); pass --fake-llm");
+      if (!values["fake-llm"])
+        fail("the Bedrock classifier isn't built yet (TASKS.md T3.9); pass --fake-llm");
       let session;
       try {
         session = await startPick(
@@ -100,7 +101,8 @@ async function main(argv: string[]): Promise<void> {
       try {
         process.stdout.write(render.restaurant(await recordVisit(store, arg, null, now()), countries));
       } catch (e) {
-        if (e instanceof NotFoundError) fail(`${arg} isn't a stored restaurant; only picked restaurants can be visited from the CLI`);
+        if (e instanceof NotFoundError)
+          fail(`${arg} isn't a stored restaurant; only picked restaurants can be visited from the CLI`);
         throw e;
       }
       return;
@@ -113,12 +115,19 @@ async function main(argv: string[]): Promise<void> {
       process.stdout.write(render.passport(countries, await store.countryVisits(), minPopulation));
       return;
     case "history":
-      process.stdout.write(render.history(await store.history(values.cursor ?? null, HISTORY_PAGE), countries));
+      process.stdout.write(
+        render.history(await store.history(values.cursor ?? null, HISTORY_PAGE), countries),
+      );
       return;
     case "serve": {
       const key = values["api-key"] ?? process.env.FAT_HORSES_API_KEY;
       if (!key) fail("serve needs --api-key or FAT_HORSES_API_KEY");
-      serve(store, values.port ? Number(values.port) : 8080, key, values.web ? resolve(values.web) : undefined);
+      serve(
+        store,
+        values.port ? Number(values.port) : 8080,
+        key,
+        values.web ? resolve(values.web) : undefined,
+      );
       return;
     }
     default:

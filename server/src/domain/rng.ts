@@ -18,7 +18,8 @@ export function seeded(seed: number): Rng {
 }
 
 /** Cryptographically random, for real picks. */
-export const systemRng: Rng = () => randomInt(0, 2 ** 48) / 2 ** 48;
+// randomInt's range must be below 2^48; dividing by 2^48 keeps the result < 1.
+export const systemRng: Rng = () => randomInt(0, 2 ** 48 - 1) / 2 ** 48;
 
 /** Uniform integer in [0, n). */
 export function randomIndex(n: number, rng: Rng): number {

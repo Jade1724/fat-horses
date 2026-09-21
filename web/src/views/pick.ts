@@ -219,30 +219,17 @@ export class PickPage {
       h(
         "li",
         {
-          class: [
-            r.scratched ? "scratched" : "",
-            winner?.number === r.number ? "winner" : "",
-          ].join(" "),
+          class: [r.scratched ? "scratched" : "", winner?.number === r.number ? "winner" : ""].join(" "),
         },
         h("span", { class: "num" }, String(r.number)),
         h("span", { class: "horse" }, r.horse),
-        h(
-          "span",
-          { class: "country" },
-          r.country ? `${r.country.flag} ${r.country.name}` : "—",
-        ),
+        h("span", { class: "country" }, r.country ? `${r.country.flag} ${r.country.name}` : "—"),
       ),
     );
     return h(
       "details",
       { class: "race", open: !winner },
-      h(
-        "summary",
-        {},
-        h("strong", {}, `🏇 ${race.venue} R${race.race_number}`),
-        " ",
-        clock,
-      ),
+      h("summary", {}, h("strong", {}, `🏇 ${race.venue} R${race.race_number}`), " ", clock),
       h("p", { class: "race-name" }, race.name),
       h("ol", { class: "card" }, ...rows),
     );
@@ -267,9 +254,7 @@ export class PickPage {
   private renderResults(p: PickView): HTMLElement {
     const box = h("div", { class: "results" });
     if (p.llm_unavailable) {
-      box.append(
-        h("p", { class: "note" }, "Cuisine guessing unavailable, showing tagged places only."),
-      );
+      box.append(h("p", { class: "note" }, "Cuisine guessing unavailable, showing tagged places only."));
     }
     if (p.restaurants.length === 0) {
       box.append(h("p", { class: "message" }, "No match nearby."));
@@ -334,9 +319,7 @@ export class PickPage {
       r.match !== "tagged"
         ? h("p", { class: "likely" }, h("span", { class: "badge" }, "likely"), " ", r.reason ?? "")
         : null,
-      r.status === "VISITED"
-        ? h("p", { class: "note good" }, `✅ Visited ${r.visit_count}×`)
-        : null,
+      r.status === "VISITED" ? h("p", { class: "note good" }, `✅ Visited ${r.visit_count}×`) : null,
       h(
         "p",
         { class: "links" },

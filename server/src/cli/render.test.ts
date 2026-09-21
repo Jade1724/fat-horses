@@ -50,7 +50,17 @@ describe("CLI output", () => {
     s.status = "done";
     s.winner = { number: 1, country_iso: "JP", reason: "result", tied: [] };
     s.places = [
-      { id: "osm:node/1", name: "Sakura", lat: -36.8, lon: 174.7, address: "1 Queen St", amenity: "restaurant", cuisine: ["sushi"], tags: {}, distance_m: 120 },
+      {
+        id: "osm:node/1",
+        name: "Sakura",
+        lat: -36.8,
+        lon: 174.7,
+        address: "1 Queen St",
+        amenity: "restaurant",
+        cuisine: ["sushi"],
+        tags: {},
+        distance_m: 120,
+      },
     ];
     s.matches = [{ place_id: "osm:node/1", match: "tagged", reason: null }];
     s.pick = "osm:node/1";
@@ -69,9 +79,9 @@ describe("CLI output", () => {
     expect(text).toContain("race abandoned");
     expect(text).toContain("No match nearby.");
     expect(text).toContain("sushi");
-    expect(render.summary({ ...session(), status: "failed", error: "no_upcoming_race" }, countries)).toContain(
-      "no_upcoming_race",
-    );
+    expect(
+      render.summary({ ...session(), status: "failed", error: "no_upcoming_race" }, countries),
+    ).toContain("no_upcoming_race");
   });
 
   it("passport and history from a store", async () => {

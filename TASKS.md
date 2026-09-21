@@ -16,6 +16,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 
 - [x] **T0.1 Convert to a Cargo workspace.** Root `Cargo.toml` becomes a workspace. Move `src/main.rs` to `crates/cli` (binary `fat-horses`). Add an empty `crates/domain` library with one placeholder test. Update the layout note in `CLAUDE.md`.
   Done when: `cargo run -p fat-horses-cli` prints something; `make check` passes and runs the domain test.
+- [x] **T0.2 Port the backend to TypeScript.** At the owner's request (managed Node.js runtime is easier to run than Rust on the OS-only runtime): everything under `crates/` moved to `server/` with its tests and fixtures; `make check` runs prettier, tsc, eslint and vitest for `server/` and `web/`. Tasks ticked before this were done in Rust and ported.
 
 ## M1 Spikes (findings go to `docs/spikes/`)
 
@@ -25,10 +26,10 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
   Needs: T1.1.
 - [ ] **T1.3 [human] Bedrock access.** The owner enables model access for a small Claude model in the chosen region (or a cross-region inference profile), creates local AWS credentials for development, and writes the model ID/profile ARN and region into `docs/spikes/bedrock.md`.
 - [ ] **T1.4 [human] Sample addresses.** The owner adds 3–5 addresses they would really use to `docs/spikes/overpass.md`.
-- [ ] **T1.5 Overpass coverage spike.** For each T1.4 address, query places within 200 m and 500 m; record counts of total places, places with a `cuisine` tag and the most common tags. Save the raw responses as fixtures in `crates/places/tests/fixtures/`.
+- [ ] **T1.5 Overpass coverage spike.** For each T1.4 address, query places within 200 m and 500 m; record counts of total places, places with a `cuisine` tag and the most common tags. Save the raw responses as fixtures in `server/test/fixtures/overpass/`.
   Needs: T1.4. Done when: the table is in `docs/spikes/overpass.md` and the fixtures are saved.
 
-## M2 Domain rules (`crates/domain`, pure, seeded RNG + fixed clock)
+## M2 Domain rules (`server/src/domain`, pure, seeded RNG + fixed clock)
 
 - [x] **T2.1 Countries data model and loader.** Types for §4.1, a loader from JSON, and the §4.1 validation as a function with tests (a valid sample passes; each rule has a failing sample).
 - [x] **T2.2 Populate `data/countries.json`.** Every country with population ≥ 10 M from World Bank `SP.POP.TOTL` (latest full year), with flag, `cuisine_tags` (OSM values where they exist) and 3–12 `dishes`. A test loads the real file and validates it.
@@ -54,7 +55,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
   Needs: T2.11.
 - [x] **T3.5 JSON-file stores.** For the CLI, stored under `~/.local/share/fat-horses/`. Pass the T3.4 contract suite.
   Needs: T3.4.
-- [ ] **T3.6 DynamoDB stores.** `crates/store` implementation with `TransactWriteItems` and the `STATE/PICKED` item. Add `make it`, which starts DynamoDB Local (docker) and runs the contract suite against it; not part of `make check`.
+- [ ] **T3.6 DynamoDB stores.** `server/src/store/dynamo.ts` with `TransactWriteItems` and the `STATE/PICKED` item. Add `make it`, which starts DynamoDB Local (docker) and runs the contract suite against it; not part of `make check`.
   Needs: T3.4.
   Status: code, unit tests and `make it` are written; **not yet run** because this machine's user can't reach the Docker socket (not in the `docker` group). Tick once `make it` passes.
 
@@ -63,7 +64,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 - [x] **T3.7 `Classifier` trait, `FakeClassifier` and output validation (L2, L4).** Validation as a pure function with tests: unknown place IDs, unknown tags, confidence out of range, long reasons, bad JSON.
 - [x] **T3.8 Guess caching (L6).** Wraps any `Classifier`: uses the `GuessCache`, recomputes when `input_hash` or prompt version changes, batches of 50, cap 200 closest places (L5). Tests with `FakeClassifier` that count calls.
   Needs: T3.4, T3.7.
-- [ ] **T3.9 `BedrockClassifier` (L3, L5, L7, L8).** Converse API with tool-use JSON output, prompts in `crates/classify/prompts/`, timeout and one retry. Unit tests build the request from fixtures and parse recorded responses (no network). `make live` runs one real call.
+- [ ] **T3.9 `BedrockClassifier` (L3, L5, L7, L8).** `@aws-sdk/client-bedrock-runtime` Converse API with tool-use JSON output, prompts in `server/prompts/`, timeout and one retry. Unit tests build the request from fixtures and parse recorded responses (no network). `make live` runs one real call.
   Needs: T1.3, T3.7.
 - [ ] **T3.10 Eval set and `fat-horses eval` (L9).** At least 40 labelled places from T1.5 fixtures; prints precision/recall per tier.
   Needs: T1.5, T3.9.
@@ -97,7 +98,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 - [ ] **T6.2 Terraform scaffold.** Providers, S3 backend (native lock file), variables, `make check` gains `terraform fmt -check` and `terraform validate` (with `-backend=false`).
   Needs: T6.1.
 - [ ] **T6.3 Data resources.** DynamoDB table (§4.2: keys, TTL, PITR, on-demand) and the SSM parameter (value set by hand, not in state).
-- [ ] **T6.4 Lambdas.** `make build-lambdas` (cargo lambda, arm64); Terraform Lambda functions, log groups (14-day retention), least-privilege IAM, including Bedrock (§6).
+- [ ] **T6.4 Lambdas.** `make build-lambdas` (esbuild bundles); Terraform Lambda functions on `nodejs22.x`, arm64, log groups (14-day retention), least-privilege IAM, including Bedrock (§6).
 - [ ] **T6.5 Step Functions state machine (§6).** Definition file with Wait states, the result loop, retries, the 45-min timeout and the failure path.
 - [ ] **T6.6 API Gateway + CloudFront + S3 site (§6, F11.2).** Throttling, OAC, `/api/*` behaviour, SPA fallback to `index.html`.
 - [ ] **T6.7 Budget alarm (§6).**

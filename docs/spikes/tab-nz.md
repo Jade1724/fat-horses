@@ -84,7 +84,7 @@ grace is rarely needed but harmless.
   edited to 1, and is labelled synthetic in its header.
 - **Non-gallops (F3.1):** `category` `H`/`G` on the meeting.
 
-## Fixtures (`crates/race/tests/fixtures/tab_nz/`)
+## Fixtures (`server/test/fixtures/tab_nz/`)
 
 Real responses, with bulky betting sections we never read (`big_bets`, `live_bets`, `money_tracker`,
 `tote_pools`, `derivatives`) removed. `meetings_list.json` is trimmed to 3 meetings per category plus

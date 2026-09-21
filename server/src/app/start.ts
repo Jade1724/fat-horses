@@ -48,8 +48,13 @@ export async function startPick(
   if (address !== undefined && input.lat === undefined && input.lon === undefined) {
     location = await geocode(geocoder, cache, address, now);
   } else if (address === undefined && input.lat !== undefined && input.lon !== undefined) {
-    if (Math.abs(input.lat) > 90 || Math.abs(input.lon) > 180) throw new InvalidRequest("lat/lon out of range");
-    location = { lat: input.lat, lon: input.lon, display_name: `${input.lat.toFixed(5)}, ${input.lon.toFixed(5)}` };
+    if (Math.abs(input.lat) > 90 || Math.abs(input.lon) > 180)
+      throw new InvalidRequest("lat/lon out of range");
+    location = {
+      lat: input.lat,
+      lon: input.lon,
+      display_name: `${input.lat.toFixed(5)}, ${input.lon.toFixed(5)}`,
+    };
   } else {
     throw new InvalidRequest("give exactly one of address or lat+lon");
   }
@@ -76,7 +81,9 @@ async function geocode(
   if (cached && isFresh(cached.created_at, GEOCODE_TTL_MS, now)) return cached.location;
   const location = await geocoder.geocode(address);
   if (!location) throw new AddressNotFound();
-  await cache.putGeocode(key, { location, created_at: now }).catch((e) => log.warn("geocode cache write failed", { error: String(e) }));
+  await cache
+    .putGeocode(key, { location, created_at: now })
+    .catch((e) => log.warn("geocode cache write failed", { error: String(e) }));
   return location;
 }
 

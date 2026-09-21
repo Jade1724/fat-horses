@@ -52,7 +52,11 @@ describe("pool (F2)", () => {
     const p = pool(all, DEFAULT_MIN_POPULATION, new Set(["IT"]), false);
     expect(isos(p.countries)).toEqual(["JP", "PT"]);
     expect(isos(p.full)).toEqual(["JP", "IT", "PT"]);
-    expect(isos(pool(all, DEFAULT_MIN_POPULATION, new Set(["IT"]), true).countries)).toEqual(["JP", "IT", "PT"]);
+    expect(isos(pool(all, DEFAULT_MIN_POPULATION, new Set(["IT"]), true).countries)).toEqual([
+      "JP",
+      "IT",
+      "PT",
+    ]);
   });
 
   it("world complete uses the whole pool", () => {
@@ -99,7 +103,11 @@ describe("race selection (F3)", () => {
   });
 
   it("orders candidates by start time", () => {
-    expect(candidates([race("c", 30), race("a", 3), race("b", 10)], NOW).map((r) => r.id)).toEqual(["a", "b", "c"]);
+    expect(candidates([race("c", 30), race("a", 3), race("b", 10)], NOW).map((r) => r.id)).toEqual([
+      "a",
+      "b",
+      "c",
+    ]);
     expect(selectRace([], NOW)).toBeUndefined();
   });
 });
@@ -109,7 +117,12 @@ describe("assignment (F4)", () => {
   const assigned = (card: RaceCard) => card.entries.map((e) => e.country_iso).filter((x) => x !== null);
 
   it("is distinct when the pool is big enough", () => {
-    const p = pool(["JP", "IT", "MX", "IN", "TH", "FR", "ET", "PE"].map((i) => c(i)), 0, new Set(), false);
+    const p = pool(
+      ["JP", "IT", "MX", "IN", "TH", "FR", "ET", "PE"].map((i) => c(i)),
+      0,
+      new Set(),
+      false,
+    );
     for (let seed = 0; seed < 50; seed++) {
       const got = assigned(assign(runners(8), p, seeded(seed)));
       expect(new Set(got).size).toBe(8);
@@ -117,14 +130,24 @@ describe("assignment (F4)", () => {
   });
 
   it("uses unvisited countries when there are enough", () => {
-    const p = pool(["JP", "IT", "MX", "IN", "TH"].map((i) => c(i)), 0, new Set(["JP", "IT"]), false);
+    const p = pool(
+      ["JP", "IT", "MX", "IN", "TH"].map((i) => c(i)),
+      0,
+      new Set(["JP", "IT"]),
+      false,
+    );
     for (let seed = 0; seed < 50; seed++) {
       expect(assigned(assign(runners(3), p, seeded(seed))).sort()).toEqual(["IN", "MX", "TH"]);
     }
   });
 
   it("tops up with visited countries before repeating", () => {
-    const p = pool(["JP", "IT", "MX", "IN"].map((i) => c(i)), 0, new Set(["JP", "IT"]), false);
+    const p = pool(
+      ["JP", "IT", "MX", "IN"].map((i) => c(i)),
+      0,
+      new Set(["JP", "IT"]),
+      false,
+    );
     for (let seed = 0; seed < 50; seed++) {
       expect(assigned(assign(runners(4), p, seeded(seed))).sort()).toEqual(["IN", "IT", "JP", "MX"]);
     }
@@ -138,7 +161,12 @@ describe("assignment (F4)", () => {
   });
 
   it("gives scratched runners no country", () => {
-    const p = pool(["JP", "IT", "MX"].map((i) => c(i)), 0, new Set(), false);
+    const p = pool(
+      ["JP", "IT", "MX"].map((i) => c(i)),
+      0,
+      new Set(),
+      false,
+    );
     const card = assign([runner(1), runner(2, true), runner(3)], p, seeded(7));
     expect(cardEntry(card, 2)).toMatchObject({ country_iso: null, scratched: true });
     expect(cardEntry(card, 1)?.country_iso).not.toBeNull();
@@ -146,9 +174,16 @@ describe("assignment (F4)", () => {
   });
 
   it("same seed, same card; different seeds vary", () => {
-    const p = pool(["JP", "IT", "MX", "IN", "TH", "FR"].map((i) => c(i)), 0, new Set(), false);
+    const p = pool(
+      ["JP", "IT", "MX", "IN", "TH", "FR"].map((i) => c(i)),
+      0,
+      new Set(),
+      false,
+    );
     expect(assign(runners(6), p, seeded(42))).toEqual(assign(runners(6), p, seeded(42)));
-    const cards = new Set(Array.from({ length: 20 }, (_, s) => assigned(assign(runners(6), p, seeded(s))).join()));
+    const cards = new Set(
+      Array.from({ length: 20 }, (_, s) => assigned(assign(runners(6), p, seeded(s))).join()),
+    );
     expect(cards.size).toBeGreaterThan(1);
   });
 
@@ -157,7 +192,12 @@ describe("assignment (F4)", () => {
   });
 
   it("records late scratchings", () => {
-    const p = pool(["JP", "IT", "MX"].map((i) => c(i)), 0, new Set(), false);
+    const p = pool(
+      ["JP", "IT", "MX"].map((i) => c(i)),
+      0,
+      new Set(),
+      false,
+    );
     const card = applyScratchings(assign(runners(3), p, seeded(3)), [runner(2, true), runner(3)]);
     expect(cardEntry(card, 2)?.scratched).toBe(true);
     expect(cardEntry(card, 2)?.country_iso).not.toBeNull();
@@ -188,7 +228,20 @@ describe("winner (F5)", () => {
   };
 
   it("official result", () => {
-    const w = win(resolve(card, snap("final", [[1, 2], [2, 1], [3, 4]]), NOW, at(3), null, seeded(9)));
+    const w = win(
+      resolve(
+        card,
+        snap("final", [
+          [1, 2],
+          [2, 1],
+          [3, 4],
+        ]),
+        NOW,
+        at(3),
+        null,
+        seeded(9),
+      ),
+    );
     expect(w).toEqual({ number: 2, country_iso: "IT", reason: "result", tied: [] });
   });
 
@@ -200,7 +253,11 @@ describe("winner (F5)", () => {
   });
 
   it("dead heat picks one of the tied at random", () => {
-    const s = snap("final", [[1, 1], [1, 4], [3, 2]]);
+    const s = snap("final", [
+      [1, 1],
+      [1, 4],
+      [3, 2],
+    ]);
     const seen = new Set<number>();
     for (let seed = 0; seed < 40; seed++) {
       const w = win(resolve(card, s, NOW, at(3), null, seeded(seed)));
@@ -230,8 +287,37 @@ describe("winner (F5)", () => {
   });
 
   it("scratched or unknown runners cannot win", () => {
-    expect(win(resolve(card, snap("final", [[1, 3], [2, 2], [3, 1]]), NOW, at(3), null, seeded(9))).number).toBe(2);
-    expect(win(resolve(card, snap("final", [[1, 99], [2, 4]]), NOW, at(3), null, seeded(9))).number).toBe(4);
+    expect(
+      win(
+        resolve(
+          card,
+          snap("final", [
+            [1, 3],
+            [2, 2],
+            [3, 1],
+          ]),
+          NOW,
+          at(3),
+          null,
+          seeded(9),
+        ),
+      ).number,
+    ).toBe(2);
+    expect(
+      win(
+        resolve(
+          card,
+          snap("final", [
+            [1, 99],
+            [2, 4],
+          ]),
+          NOW,
+          at(3),
+          null,
+          seeded(9),
+        ),
+      ).number,
+    ).toBe(4);
     expect(resolve(card, snap("open", []), NOW, at(-1), null, seeded(9))).toBeNull();
   });
 });

@@ -181,7 +181,9 @@ export class Api {
       await this.deps.starter.start(session.pick_id);
     } catch (e) {
       log.error("workflow start failed", { pick_id: session.pick_id, error: String(e) });
-      await this.deps.store.putPick({ ...session, status: "failed", error: "internal" }).catch(() => undefined);
+      await this.deps.store
+        .putPick({ ...session, status: "failed", error: "internal" })
+        .catch(() => undefined);
       return error(503, "internal", "could not start the pick");
     }
     return { status: 202, body: { pick_id: session.pick_id } };
@@ -248,7 +250,10 @@ export class Api {
         : null,
       restaurants,
       pick: s.pick,
-      dishes: w && s.status === "done" && s.matches.length === 0 ? (countries.get(w.country_iso)?.dishes ?? null) : null,
+      dishes:
+        w && s.status === "done" && s.matches.length === 0
+          ? (countries.get(w.country_iso)?.dishes ?? null)
+          : null,
       llm_unavailable: s.llm_unavailable,
     };
   }
@@ -259,7 +264,8 @@ export class Api {
     let details: Restaurant | null = null;
     if (parsed.restaurant) {
       const d = parsed.restaurant;
-      if (!this.deps.countries.get(d.country_iso)) return error(422, "invalid_request", "unknown country_iso");
+      if (!this.deps.countries.get(d.country_iso))
+        return error(422, "invalid_request", "unknown country_iso");
       details = {
         id,
         name: d.name,
@@ -282,7 +288,11 @@ export class Api {
       return ok(await recordVisit(this.deps.store, id, details, now));
     } catch (e) {
       if (e instanceof NotFoundError) {
-        return error(422, "invalid_request", "restaurant details are required for a restaurant that was never picked");
+        return error(
+          422,
+          "invalid_request",
+          "restaurant details are required for a restaurant that was never picked",
+        );
       }
       throw e;
     }

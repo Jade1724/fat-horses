@@ -7,11 +7,14 @@ import { hasEnoughRunners } from "../domain/race";
 import { buildQuery, Nominatim, Overpass, parseOverpass, parseSearch } from "./osm";
 import { parseEvent, parseMeetings, raceDays, RaceSourceUnavailable, TabNz } from "./tabNz";
 
-const fixture = (path: string) => readFileSync(new URL(`../../test/fixtures/${path}`, import.meta.url), "utf8");
+const fixture = (path: string) =>
+  readFileSync(new URL(`../../test/fixtures/${path}`, import.meta.url), "utf8");
 const tab = (name: string) => fixture(`tab_nz/${name}`);
 
 function scottsville(): Race {
-  const r = parseMeetings(tab("meeting_open.json")).find((x) => x.id === "f0eb3cef-e900-48bd-be5c-fe7b0330239f");
+  const r = parseMeetings(tab("meeting_open.json")).find(
+    (x) => x.id === "f0eb3cef-e900-48bd-be5c-fe7b0330239f",
+  );
   expect(r).toBeDefined();
   return r!;
 }
@@ -35,7 +38,9 @@ describe("TAB NZ", () => {
     expect(laurel.every((r) => r.race_type === "gallops")).toBe(true);
     expect(laurel[0]!.venue_country).toBe("USA");
     expect(races.filter((r) => r.venue === "Orkla").every((r) => r.race_type === "harness")).toBe(true);
-    expect(races.filter((r) => r.venue === "Shepparton").every((r) => r.race_type === "greyhound")).toBe(true);
+    expect(races.filter((r) => r.venue === "Shepparton").every((r) => r.race_type === "greyhound")).toBe(
+      true,
+    );
     expect(races.some((r) => r.status === "open")).toBe(true);
     expect(races.some((r) => r.status === "final")).toBe(true);
     expect(races.every((r) => r.runners.length === 0)).toBe(true);
@@ -64,7 +69,9 @@ describe("TAB NZ", () => {
   });
 
   it("dead heat has two winners", () => {
-    expect(found(tab("event_dead_heat_synthetic.json")).placings.filter((p) => p.position === 1)).toHaveLength(2);
+    expect(
+      found(tab("event_dead_heat_synthetic.json")).placings.filter((p) => p.position === 1),
+    ).toHaveLength(2);
   });
 
   it("abandoned: event not found, meeting says abandoned", () => {
@@ -112,10 +119,15 @@ describe("Nominatim", () => {
   it("waits a second between requests", async () => {
     let now = 1_000;
     const waits: number[] = [];
-    const n = new Nominatim("https://n.test", fetch, () => now, async (ms) => {
-      waits.push(ms);
-      now += ms;
-    });
+    const n = new Nominatim(
+      "https://n.test",
+      fetch,
+      () => now,
+      async (ms) => {
+        waits.push(ms);
+        now += ms;
+      },
+    );
     await n.throttle();
     now += 300;
     await n.throttle();
@@ -125,7 +137,8 @@ describe("Nominatim", () => {
 
 describe("Overpass", () => {
   const ORIGIN = [-36.8484632, 174.762183] as const;
-  const parse = (radius: number) => parseOverpass(fixture("overpass/hand_written.json"), ORIGIN[0], ORIGIN[1], radius);
+  const parse = (radius: number) =>
+    parseOverpass(fixture("overpass/hand_written.json"), ORIGIN[0], ORIGIN[1], radius);
 
   it("builds the query", () => {
     expect(buildQuery(-36.8, 174.7, 200, ["restaurant", "fast_food"])).toBe(
@@ -157,9 +170,19 @@ describe("Overpass", () => {
       tags: { website: "https://example.com/sakura" },
     });
     expect(sakura.tags).not.toHaveProperty("opening_hours");
-    expect(places.find((p) => p.id === "osm:way/2002")).toMatchObject({ lat: -36.849, lon: 174.7615, amenity: "fast_food" });
-    expect(places.find((p) => p.id === "osm:node/1003")).toMatchObject({ cuisine: [], tags: { description: "Fondue and raclette" } });
-    expect(places.find((p) => p.id === "osm:node/1004")).toMatchObject({ name: "Unnamed restaurant", address: null });
+    expect(places.find((p) => p.id === "osm:way/2002")).toMatchObject({
+      lat: -36.849,
+      lon: 174.7615,
+      amenity: "fast_food",
+    });
+    expect(places.find((p) => p.id === "osm:node/1003")).toMatchObject({
+      cuisine: [],
+      tags: { description: "Fondue and raclette" },
+    });
+    expect(places.find((p) => p.id === "osm:node/1004")).toMatchObject({
+      name: "Unnamed restaurant",
+      address: null,
+    });
   });
 
   it("parses a real response", () => {
@@ -176,7 +199,9 @@ describe("Overpass", () => {
 
   it("errors on HTML pages and error remarks", () => {
     expect(() => parseOverpass(fixture("overpass/runtime_error.html"), 0, 0, 200)).toThrow(/bad Overpass/);
-    expect(() => parseOverpass('{"elements":[],"remark":"runtime error: Query timed out"}', 0, 0, 200)).toThrow();
+    expect(() =>
+      parseOverpass('{"elements":[],"remark":"runtime error: Query timed out"}', 0, 0, 200),
+    ).toThrow();
     expect(parseOverpass('{"elements":[],"remark":"note: fine"}', 0, 0, 200)).toEqual([]);
   });
 
@@ -185,7 +210,9 @@ describe("Overpass", () => {
     const fetchFn = vi.fn(async (url: string | URL | Request) => {
       void url;
       calls++;
-      return calls < 4 ? new Response("busy", { status: 504 }) : new Response(fixture("overpass/hand_written.json"));
+      return calls < 4
+        ? new Response("busy", { status: 504 })
+        : new Response(fixture("overpass/hand_written.json"));
     });
     const o = new Overpass(["https://a.test", "https://b.test"], fetchFn as typeof fetch, async () => {});
     const places = await o.nearby(ORIGIN[0], ORIGIN[1], 200, ["restaurant"]);

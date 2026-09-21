@@ -9,13 +9,7 @@ import type { Iso } from "./time";
 import type { Placing, Winner } from "./winner";
 
 export type PickStatus =
-  | "finding_race"
-  | "waiting_start"
-  | "running"
-  | "resolving"
-  | "searching"
-  | "done"
-  | "failed";
+  "finding_race" | "waiting_start" | "running" | "resolving" | "searching" | "done" | "failed";
 
 export type PickError = "no_upcoming_race" | "race_source_unavailable" | "places_unavailable" | "internal";
 
@@ -51,7 +45,12 @@ export interface PickSession {
   llm_unavailable: boolean;
 }
 
-export function newSession(pickId: string, createdAt: Iso, request: PickRequest, location: Location): PickSession {
+export function newSession(
+  pickId: string,
+  createdAt: Iso,
+  request: PickRequest,
+  location: Location,
+): PickSession {
   return {
     pick_id: pickId,
     created_at: createdAt,

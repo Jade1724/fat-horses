@@ -5,7 +5,12 @@ import { applyScratchings, assign, EmptyPoolError } from "../domain/assign";
 import { placeInput, type Classifier } from "../domain/classify";
 import type { Countries } from "../domain/countries";
 import { guessUntagged, MAX_PLACES, type GuessConfig } from "../domain/guessing";
-import { chooseRestaurant, DEFAULT_CONFIDENCE_THRESHOLD, primaryMatches, type Match } from "../domain/matching";
+import {
+  chooseRestaurant,
+  DEFAULT_CONFIDENCE_THRESHOLD,
+  primaryMatches,
+  type Match,
+} from "../domain/matching";
 import { DEFAULT_AMENITIES, type Place, type Places } from "../domain/places";
 import { pool } from "../domain/pool";
 import { candidates, hasEnoughRunners, snapshot, type RaceProvider } from "../domain/race";
@@ -64,10 +69,17 @@ export async function findRace(deps: Deps, s: PickSession, now: Iso): Promise<Pi
 /** Step 2: build the pool and draw countries (F2, F4). Sets `waiting_start`. */
 export async function assignCountries(deps: Deps, s: PickSession, rng: Rng): Promise<PickSession> {
   if (!s.race) return failed(s, "internal");
-  const visited = new Set((await deps.store.countryVisits()).filter((c) => c.visit_count > 0).map((c) => c.iso2));
+  const visited = new Set(
+    (await deps.store.countryVisits()).filter((c) => c.visit_count > 0).map((c) => c.iso2),
+  );
   const p = pool(deps.countries.all, s.request.min_population, visited, s.request.include_visited);
   try {
-    return { ...s, card: assign(s.race.runners, p, rng), world_complete: p.world_complete, status: "waiting_start" };
+    return {
+      ...s,
+      card: assign(s.race.runners, p, rng),
+      world_complete: p.world_complete,
+      status: "waiting_start",
+    };
   } catch (e) {
     if (e instanceof EmptyPoolError) return failed(s, "internal");
     throw e;
@@ -82,7 +94,12 @@ export async function assignCountries(deps: Deps, s: PickSession, rng: Rng): Pro
 export async function prepareNearby(deps: Deps, s: PickSession, now: Iso): Promise<PickSession> {
   let places: Place[];
   try {
-    places = await deps.places.nearby(s.location.lat, s.location.lon, s.request.radius_m, deps.config.amenities);
+    places = await deps.places.nearby(
+      s.location.lat,
+      s.location.lon,
+      s.request.radius_m,
+      deps.config.amenities,
+    );
   } catch (e) {
     log.warn("places unavailable; will retry after the race", { pick_id: s.pick_id, error: String(e) });
     return s;
@@ -153,7 +170,10 @@ export async function fallbackMatch(deps: Deps, s: PickSession): Promise<PickSes
       name: country.name,
       dishes: country.dishes,
     });
-    return { ...s, matches: found.map((m) => ({ place_id: m.place_id, match: "fallback", reason: m.reason })) };
+    return {
+      ...s,
+      matches: found.map((m) => ({ place_id: m.place_id, match: "fallback", reason: m.reason })),
+    };
   } catch (e) {
     log.warn("dish matching failed", { pick_id: s.pick_id, error: String(e) });
     return { ...s, llm_unavailable: true };
@@ -185,7 +205,8 @@ export function restaurantFrom(p: Place, countryIso: string, m: Match): Restaura
 export async function pickRestaurant(deps: Deps, s: PickSession, now: Iso, rng: Rng): Promise<PickSession> {
   if (!s.winner) return failed(s, "internal");
   const counts = new Map<string, number>();
-  for (const m of s.matches) counts.set(m.place_id, (await deps.store.getRestaurant(m.place_id))?.visit_count ?? 0);
+  for (const m of s.matches)
+    counts.set(m.place_id, (await deps.store.getRestaurant(m.place_id))?.visit_count ?? 0);
   const primary = s.matches.filter((m) => m.match !== "fallback");
   const fallback = s.matches.filter((m) => m.match === "fallback");
   const chosen = chooseRestaurant(primary, fallback, (id) => counts.get(id) ?? 0, rng);
@@ -270,7 +291,13 @@ function output(s: PickSession): StepOutput {
 }
 
 /** Load the session, run one step, save it. Safe to retry: finished work is skipped. */
-export async function runStep(deps: Deps, step: Step, pickId: string, now: Iso, rng: Rng): Promise<StepOutput> {
+export async function runStep(
+  deps: Deps,
+  step: Step,
+  pickId: string,
+  now: Iso,
+  rng: Rng,
+): Promise<StepOutput> {
   let s = await deps.store.getPick(pickId);
   if (!s) throw new NotFoundError(`pick ${pickId} not found`);
   if (s.status === "failed" || s.status === "done") return output(s);
@@ -283,7 +310,8 @@ export async function runStep(deps: Deps, step: Step, pickId: string, now: Iso, 
     s = await checkResult(deps, s, now, rng);
   } else if (step === "finish") {
     s = await ensurePlaces(deps, s, now);
-    if (s.status !== "failed") s = await pickRestaurant(deps, await fallbackMatch(deps, matchRestaurants(deps, s)), now, rng);
+    if (s.status !== "failed")
+      s = await pickRestaurant(deps, await fallbackMatch(deps, matchRestaurants(deps, s)), now, rng);
   }
   await deps.store.putPick(s);
   return output(s);

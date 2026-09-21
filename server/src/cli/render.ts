@@ -14,10 +14,14 @@ function label(countries: Countries, iso2: string): string {
 export function raceCard(s: PickSession, countries: Countries): string {
   if (!s.race || !s.card) return "";
   const hhmm = s.race.start_time.slice(11, 16);
-  const lines = [`🏇 ${s.race.venue} R${s.race.race_number} — ${s.race.name} (${s.race.venue_country}), starts ${hhmm} UTC`];
+  const lines = [
+    `🏇 ${s.race.venue} R${s.race.race_number} — ${s.race.name} (${s.race.venue_country}), starts ${hhmm} UTC`,
+  ];
   for (const e of s.card.entries) {
     const who = e.country_iso ? label(countries, e.country_iso) : "—";
-    lines.push(`  ${String(e.number).padStart(2)}  ${e.horse.padEnd(24)} ${who}${e.scratched ? "  (scratched)" : ""}`);
+    lines.push(
+      `  ${String(e.number).padStart(2)}  ${e.horse.padEnd(24)} ${who}${e.scratched ? "  (scratched)" : ""}`,
+    );
   }
   if (s.world_complete) lines.push("🌍 World complete! Every country is back in the draw.");
   return lines.join("\n") + "\n";
@@ -116,10 +120,18 @@ export function passport(countries: Countries, visits: CountryVisits[], minPopul
     });
   const visited = rows.filter((r) => r.visited).length;
   const sorted = [...rows.filter((r) => r.visited), ...rows.filter((r) => !r.visited)];
-  return [`Passport: visited ${visited} of ${rows.length} countries`, ...sorted.map((r) => r.line)].join("\n") + "\n";
+  return (
+    [`Passport: visited ${visited} of ${rows.length} countries`, ...sorted.map((r) => r.line)].join("\n") +
+    "\n"
+  );
 }
 
-const REASON = { picked: "picked", visited: "visited", skipped: "skipped", superseded: "replaced by a newer pick" };
+const REASON = {
+  picked: "picked",
+  visited: "visited",
+  skipped: "skipped",
+  superseded: "replaced by a newer pick",
+};
 
 /** One page of history (F9.2). */
 export function history(page: HistoryPage, countries: Countries): string {

@@ -84,12 +84,7 @@ export function isFinished(status: PickStatus): boolean {
 }
 
 /** A closed ring approximating a circle, for the radius overlay (GeoJSON order: lon, lat). */
-export function circleRing(
-  lat: number,
-  lon: number,
-  radiusM: number,
-  steps = 64,
-): [number, number][] {
+export function circleRing(lat: number, lon: number, radiusM: number, steps = 64): [number, number][] {
   const earth = 6_371_008.8;
   const dLat = (radiusM / earth) * (180 / Math.PI);
   const dLon = dLat / Math.cos((lat * Math.PI) / 180);
