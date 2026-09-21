@@ -3,10 +3,10 @@
 
 CARGO ?= cargo
 
-.PHONY: check fmt fmt-check lint test fix it
+.PHONY: check fmt fmt-check lint test fix it web-check web-build
 
 ## Run every gate: format, lint, test. Stops at the first failure.
-check: fmt-check lint test
+check: fmt-check lint test web-check
 	@echo "check: OK"
 
 ## Fail if any file is not rustfmt-formatted.
@@ -40,3 +40,15 @@ it:
 	@for i in $$(seq 1 30); do curl -s -o /dev/null localhost:8000 && break; sleep 1; done
 	FAT_HORSES_DYNAMODB_ENDPOINT=http://localhost:8000 $(CARGO) run --locked -q -p fat-horses-store --example dynamo_contract; \
 	  status=$$?; docker stop fat-horses-ddb >/dev/null; exit $$status
+
+## Install web dependencies when the lock file changes.
+web/node_modules/.package-lock.json: web/package-lock.json
+	cd web && npm ci --no-audit --no-fund
+
+## Web UI: typecheck, lint, unit tests.
+web-check: web/node_modules/.package-lock.json
+	cd web && npm run -s typecheck && npm run -s lint && npm test -s
+
+## Production build of the web UI into web/dist.
+web-build: web/node_modules/.package-lock.json
+	cd web && npm run -s build

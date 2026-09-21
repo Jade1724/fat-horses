@@ -83,7 +83,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 
 ## M5 Web UI (`web/`)
 
-- [ ] **T5.1 Scaffold.** Vite + TypeScript + ESLint + Vitest. Extend `make check` with `web` typecheck, lint and test. `make check` runs `npm ci` first rather than skipping the web checks when `web/node_modules` is missing.
+- [x] **T5.1 Scaffold.** Vite + TypeScript + ESLint + Vitest. Extend `make check` with `web` typecheck, lint and test. `make check` runs `npm ci` first rather than skipping the web checks when `web/node_modules` is missing.
 - [ ] **T5.2 API client and key screen (F10.2).** Typed client for §5; 401 clears the key. Unit tests with mocked fetch.
 - [ ] **T5.3 Pick form + map (F10.3).** MapLibre with OpenFreeMap tiles, radius circle, advanced options.
 - [ ] **T5.4 Race progress (F10.4).** Polling, status text, race card with countdown. Unit tests for the countdown/status mapping.
