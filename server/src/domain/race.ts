@@ -35,6 +35,8 @@ export interface Race {
   status: RaceStatus;
   start_time: Iso;
   runners: Runner[];
+  /** The race's page on the source's website, where it can be watched (F10.4). */
+  url?: string;
 }
 
 /** A fresh look at one race: status, runners (with scratchings), placings. */

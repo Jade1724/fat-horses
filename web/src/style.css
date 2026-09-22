@@ -648,3 +648,20 @@ select {
   text-align: left;
   border-radius: 8px;
 }
+
+.watch {
+  display: block;
+  margin-top: 0.6rem;
+  padding: 0.55rem 0.8rem;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--gold);
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.watch:hover,
+.watch:focus-visible {
+  background: color-mix(in srgb, var(--gold) 15%, var(--surface));
+}

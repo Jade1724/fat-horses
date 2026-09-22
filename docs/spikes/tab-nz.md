@@ -37,6 +37,12 @@ personal use. It must not become a public site showing TAB data without permissi
 `/racing/list?date_from=now` exists but has no race type, and filtering it by `meet_types` returned
 HTTP 500, so we use `meetings`.
 
+## Race page on tab.co.nz
+
+`https://www.tab.co.nz/racing/race/<race id>` (the Affiliates API's UUID) opens the race's page with its card,
+odds and the Trackside stream (checked in Chromium, 2026-09-22). `/racing/meeting/<id>/race/<id>` redirects to
+the racing home page, with either the UUIDs or the older numeric ids.
+
 ## Fields we read
 
 Meeting: `meeting` (id), `name`, `category` (`T` thoroughbred = gallops, `H` harness, `G` greyhounds),

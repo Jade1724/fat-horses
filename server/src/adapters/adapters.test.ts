@@ -40,6 +40,13 @@ describe("TAB NZ", () => {
     expect(raceDays("2026-09-21T02:00:00.000Z")).toEqual(["2026-09-21"]);
   });
 
+  it("links each race to its page on tab.co.nz", () => {
+    const race = scottsville();
+    expect(race.url).toBe("https://www.tab.co.nz/racing/race/f0eb3cef-e900-48bd-be5c-fe7b0330239f");
+    // A race card update keeps the link.
+    expect(found(tab("event_open_scratched.json")).race.url).toBe(race.url);
+  });
+
   it("maps meeting types and statuses", () => {
     const races = parseMeetings(tab("meetings_list.json"));
     const laurel = races.filter((r) => r.venue === "Laurel Park");

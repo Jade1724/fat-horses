@@ -28,6 +28,8 @@ export interface Race {
   name: string;
   start_time: string;
   runners: Runner[];
+  /** The race's page on tab.co.nz, where it can be watched; null for older picks. */
+  url: string | null;
 }
 
 export interface Winner {

@@ -23,6 +23,15 @@ export function identityFromEnv(env: NodeJS.ProcessEnv = process.env): TabIdenti
 
 export class RaceSourceUnavailable extends Error {}
 
+/**
+ * The race's page on tab.co.nz (race card, odds and the Trackside stream).
+ * Checked in a browser: /racing/race/<race id> opens the race;
+ * /racing/meeting/<id>/race/<id> redirects to the racing home page.
+ */
+export function tabRaceUrl(raceId: string): string {
+  return `https://www.tab.co.nz/racing/race/${encodeURIComponent(raceId)}`;
+}
+
 const TYPES: Record<string, RaceType> = { T: "gallops", H: "harness", G: "greyhound" };
 const STATUSES: Record<string, RaceStatus> = {
   Open: "open",
@@ -121,6 +130,7 @@ export function parseMeetings(body: string): Race[] {
         status,
         start_time: new Date(race.start_time).toISOString(),
         runners: [],
+        url: tabRaceUrl(race.id),
       });
     }
   }

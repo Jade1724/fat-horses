@@ -83,6 +83,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
   Needs: T4.4.
 - [x] **T4.6 Maximum wait and cancelling (F3.2, F10.5a, F12).** Requested by the owner: races must start within `max_wait_min` (default 10) or the pick fails at once; `POST /picks/{id}/cancel` plus a Cancel button; cancelled is final in every store. Tested in the stores' contract, workflow, API and web tests, and in a browser against live TAB data.
 - [x] **T4.7 Addresses in New Zealand, with a choice (F1.2, F1.3, F10.3).** Requested by the owner after "50 Albert Street" went to London: Nominatim limited to `GEOCODE_COUNTRIES` (default `nz`), up to 5 matches merged within 100 m, `GET /geocode`, 409 `ambiguous_address`, a "Which …?" list in the UI. Tested with recorded Nominatim responses and in a browser against live Nominatim.
+- [x] **T4.8 "Watch on TAB" link (F10.4).** Requested by the owner: each race carries its tab.co.nz page (`/racing/race/<race id>`, found by trying URLs in a browser); the pick view returns it as `race.url` and the page links to it. Tested with fixtures and in a browser against a live race.
 
 ## M5 Web UI (`web/`)
 

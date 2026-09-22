@@ -28,6 +28,16 @@ import { storage } from "../storage";
 
 const POLL_MS = 5000;
 
+/** "Watch the race on TAB", opening the race's page in a new tab (F10.4); null without a link. */
+export function watchLink(race: Race): HTMLAnchorElement | null {
+  if (!race.url) return null;
+  return h(
+    "a",
+    { class: "watch", href: race.url, target: "_blank", rel: "noopener noreferrer" },
+    `📺 Watch ${race.venue} R${race.race_number} on TAB`,
+  );
+}
+
 export class PickPage {
   readonly root: HTMLElement;
   private readonly panel: HTMLElement;
@@ -271,7 +281,11 @@ export class PickPage {
     }
     if (p.winner) this.panel.append(this.renderWinner(p.winner));
     if (p.status === "done") this.panel.append(this.renderResults(p));
-    if (p.race) this.panel.append(this.renderRace(p.race, p.winner, isFinished(p.status)));
+    if (p.race) {
+      const watch = watchLink(p.race);
+      if (watch) this.panel.append(watch);
+      this.panel.append(this.renderRace(p.race, p.winner, isFinished(p.status)));
+    }
 
     this.map.showRestaurants(p.restaurants, p.pick, (r) => {
       this.selected = r.id;

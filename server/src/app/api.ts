@@ -287,6 +287,7 @@ export class Api {
               race_number: s.race.race_number,
               name: s.race.name,
               start_time: s.race.start_time,
+              url: s.race.url ?? null,
               runners: s.card.entries.map((e) => ({
                 number: e.number,
                 horse: e.horse,

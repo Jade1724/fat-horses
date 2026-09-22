@@ -215,6 +215,38 @@ describe("API (§5)", () => {
     }
   });
 
+  it("the pick view links the race to TAB when known", async () => {
+    const { api: a } = api();
+    const session = await startPick(
+      new FakeGeocoder(),
+      new MemoryStore(),
+      { address: "Sky Tower" },
+      "p1",
+      NOW,
+    );
+    const race = {
+      id: "r1",
+      meeting_id: "m1",
+      venue: "Vaal",
+      venue_country: "SAF",
+      race_number: 2,
+      name: "Maiden Plate",
+      race_type: "gallops" as const,
+      status: "open" as const,
+      start_time: NOW,
+      runners: [],
+      url: "https://www.tab.co.nz/racing/race/r1",
+    };
+    const card = { entries: [] };
+    expect((await a.pickView({ ...session, race, card })).race?.url).toBe(
+      "https://www.tab.co.nz/racing/race/r1",
+    );
+    // Picks saved before links existed have none.
+    const { url: _unused, ...old } = race;
+    void _unused;
+    expect((await a.pickView({ ...session, race: old, card })).race?.url).toBeNull();
+  });
+
   it("starts, stores and shows a pick", async () => {
     const { api: a, store, starter } = api();
     const r = await a.handle(post("/picks", { address: "Sky Tower" }), NOW);

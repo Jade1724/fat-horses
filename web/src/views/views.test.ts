@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { historyRow } from "./history";
 import { renderPassport } from "./passport";
+import { watchLink } from "./pick";
 
 describe("renderPassport", () => {
   it("shows progress and puts visited countries first", () => {
@@ -63,5 +64,28 @@ describe("historyRow", () => {
     );
     expect(li.querySelector("img")).toBeNull();
     expect(li.textContent).toContain("<img");
+  });
+});
+
+describe("watchLink", () => {
+  const race = {
+    venue: "Vaal",
+    race_number: 2,
+    name: "Maiden Plate",
+    start_time: "2026-09-22T10:50:00Z",
+    runners: [],
+    url: "https://www.tab.co.nz/racing/race/a9f3d00d",
+  };
+
+  it("opens the race on TAB in a new tab", () => {
+    const a = watchLink(race)!;
+    expect(a.href).toBe("https://www.tab.co.nz/racing/race/a9f3d00d");
+    expect(a.target).toBe("_blank");
+    expect(a.rel).toBe("noopener noreferrer");
+    expect(a.textContent).toBe("📺 Watch Vaal R2 on TAB");
+  });
+
+  it("is absent for picks saved before links existed", () => {
+    expect(watchLink({ ...race, url: null })).toBeNull();
   });
 });

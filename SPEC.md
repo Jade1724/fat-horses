@@ -96,7 +96,7 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 - **F10.1** One-page app with three views: **Pick** (default), **Passport**, **History**. Must be usable at 360 px width.
 - **F10.2** First visit: ask for the API key and keep it in `localStorage`. A 401 response clears it and asks again.
 - **F10.3** Pick view: address field; advanced options (radius, min population, include visited). An ambiguous address shows "Which …?" with the matches, without the country, as buttons (F1.2). A map (MapLibre + OpenFreeMap tiles) centred on the location with the radius circle.
-- **F10.4** While the pick runs: poll `GET /api/picks/{id}` every **5 s**; show the status and the race card (number, horse, flag + country, scratched state) with a countdown to the start, and a **Cancel** button (F12). The countdown stops once the pick has finished or been cancelled.
+- **F10.4** While the pick runs: poll `GET /api/picks/{id}` every **5 s**; show the status and the race card (number, horse, flag + country, scratched state) with a countdown to the start, and a **Cancel** button (F12). Above the card, "📺 Watch <venue> R<n> on TAB" opens the race's page on tab.co.nz (`https://www.tab.co.nz/racing/race/<race id>`, with TAB's Trackside stream) in a new tab; shown whenever the race is known. The countdown stops once the pick has finished or been cancelled.
 - **F10.5** When done: the winner (horse + country, with a note for dead heat, abandoned or timeout); a pin for every match. Pin colours by status: new, `PICKED`, `VISITED`. The pick is highlighted with a card showing name, cuisine, address, match type (`likely` badge + reason for inferred/fallback) and a directions link (`https://www.google.com/maps/dir/?api=1&destination=<lat>,<lon>`).
 - **F10.5a** Options include "Race must start within": 10 minutes (default), 30 minutes, 1 hour, 3 hours (F3.2).
 - **F10.6** Buttons: "We went here", "Skip", "Race again". Clicking a non-picked pin offers "We went here" (F8.2 last row).
@@ -191,7 +191,7 @@ All paths are under `/api`; JSON in and out; errors are `{"error": "<code>", "me
 Pick view:
 ```
 { pick_id, status, error?, created_at, location: {lat, lon, display_name, radius_m},
-  world_complete, race?: {venue, race_number, name, start_time,
+  world_complete, race?: {venue, race_number, name, start_time, url,
      runners: [{number, horse, country: {iso2, name, flag}, scratched}]},
   winner?: {number, horse, country, reason: "result"|"dead_heat"|"abandoned"|"timeout", tied?: [...]},
   restaurants: [{id, name, lat, lon, address, cuisine, match, reason?, status, visit_count}],
