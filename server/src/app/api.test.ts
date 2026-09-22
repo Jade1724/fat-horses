@@ -5,7 +5,7 @@ import { bundledCountries } from "../domain/countries";
 import { GeocoderUnavailable, type Geocoder, type Location } from "../domain/places";
 import { recordPick } from "../domain/store";
 import { contractRestaurant } from "../store/contract";
-import { MemoryStore } from "../store/state";
+import { MemoryStore, MemoryStores } from "../store/state";
 import { Api, constantTimeEqual, type ApiRequest, type WorkflowStarter } from "./api";
 import {
   AddressNotFound,
@@ -154,16 +154,17 @@ describe("startPick (F1)", () => {
 });
 
 function api(starter = new FakeStarter()) {
-  const store = new MemoryStore();
+  const stores = new MemoryStores();
   return {
     api: new Api({
       geocoder: new FakeGeocoder(),
-      store,
+      stores,
       starter,
       countries: bundledCountries(),
-      apiKey: KEY,
+      apiKeys: { me: KEY },
     }),
-    store,
+    store: stores.forUser("me"),
+    stores,
     starter,
   };
 }
@@ -238,13 +239,14 @@ describe("API (§5)", () => {
       url: "https://www.tab.co.nz/racing/race/r1",
     };
     const card = { entries: [] };
-    expect((await a.pickView({ ...session, race, card })).race?.url).toBe(
+    const store = new MemoryStore();
+    expect((await a.pickView({ ...session, race, card }, store)).race?.url).toBe(
       "https://www.tab.co.nz/racing/race/r1",
     );
     // Picks saved before links existed have none.
     const { url: _unused, ...old } = race;
     void _unused;
-    expect((await a.pickView({ ...session, race: old, card })).race?.url).toBeNull();
+    expect((await a.pickView({ ...session, race: old, card }, store)).race?.url).toBeNull();
   });
 
   it("starts, stores and shows a pick", async () => {

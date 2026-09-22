@@ -85,6 +85,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 - [x] **T4.7 Addresses in New Zealand, with a choice (F1.2, F1.3, F10.3).** Requested by the owner after "50 Albert Street" went to London: Nominatim limited to `GEOCODE_COUNTRIES` (default `nz`), up to 5 matches merged within 100 m, `GET /geocode`, 409 `ambiguous_address`, a "Which …?" list in the UI. Tested with recorded Nominatim responses and in a browser against live Nominatim.
 - [x] **T4.8 "Watch on TAB" link (F10.4).** Requested by the owner: each race carries its tab.co.nz page (`/racing/race/<race id>`, found by trying URLs in a browser); the pick view returns it as `race.url` and the page links to it. Tested with fixtures and in a browser against a live race.
 - [x] **T4.9 Resume picks after a local server restart (F13).** Found by the owner: picks stayed at "Waiting for the start" after the race. Cause: a pick runs inside `serve`, and restarting the server (to pick up rebuilt code) killed it; nothing resumed it. Now `runPick` skips steps already done and `serve` resumes unfinished picks on start. Also fixed lost updates when two writes to the local stores overlapped.
+- [x] **T4.10 Users (F14).** Requested by the owner, to share the app with a friend: each API key is a user with separate picks, passport and history (`U#<user>#` keys in DynamoDB, a section per user in the JSON file, existing local data → `me`); caches shared; keys from SSM JSON on AWS or `FAT_HORSES_API_KEYS` locally.
 
 ## M5 Web UI (`web/`)
 

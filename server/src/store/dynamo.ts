@@ -34,13 +34,14 @@ import {
   type CountryVisits,
   type HistoryPage,
   type Store,
+  type Stores,
 } from "../domain/store";
 import { ms } from "../domain/time";
+import { DEFAULT_USER } from "../domain/users";
 
 type TransactItem = NonNullable<TransactWriteCommandInput["TransactItems"]>[number];
 
 const META = "META";
-const restaurantPk = (id: string) => `RESTAURANT#${id}`;
 
 /** The single operation on the STATE/PICKED pointer within a change. */
 export type PointerOp =
@@ -70,11 +71,25 @@ const ttl = (createdAt: string, ttlMs: number) => Math.floor((ms(createdAt) + tt
 export class DynamoStore implements Store {
   private readonly doc: DynamoDBDocumentClient;
 
+  /**
+   * `user`'s view of the table (F14): user-owned items (restaurants, the PICKED
+   * pointer, countries, history, picks) have keys prefixed `U#<user>#`; the
+   * guess and geocode caches are shared.
+   */
   constructor(
     private readonly table: string,
     client: DynamoDBClient = new DynamoDBClient({}),
+    readonly user: string = DEFAULT_USER,
   ) {
     this.doc = DynamoDBDocumentClient.from(client, { marshallOptions: { removeUndefinedValues: true } });
+  }
+
+  private own(key: string): string {
+    return `U#${this.user}#${key}`;
+  }
+
+  private restaurantPk(id: string): string {
+    return this.own(`RESTAURANT#${id}`);
   }
 
   private async get(pk: string, sk: string): Promise<Record<string, unknown> | null> {
@@ -107,11 +122,11 @@ export class DynamoStore implements Store {
   }
 
   getRestaurant(id: string) {
-    return this.getData<Restaurant>(restaurantPk(id), META);
+    return this.getData<Restaurant>(this.restaurantPk(id), META);
   }
 
   async currentlyPicked() {
-    const item = await this.get("STATE", "PICKED");
+    const item = await this.get(this.own("STATE"), "PICKED");
     return item ? this.getRestaurant(item.restaurant_id as string) : null;
   }
 
@@ -123,7 +138,12 @@ export class DynamoStore implements Store {
       items.push({
         Put: {
           TableName: this.table,
-          Item: { pk: restaurantPk(r.id), sk: META, data: JSON.stringify(r), status: r.status ?? undefined },
+          Item: {
+            pk: this.restaurantPk(r.id),
+            sk: META,
+            data: JSON.stringify(r),
+            status: r.status ?? undefined,
+          },
           ExpressionAttributeNames: { "#s": "status" },
           ...(t.expected_status === null
             ? { ConditionExpression: "attribute_not_exists(#s)" }
@@ -134,13 +154,16 @@ export class DynamoStore implements Store {
         },
       });
       items.push({
-        Put: { TableName: this.table, Item: { pk: "LOG", sk: logKey(t.log), data: JSON.stringify(t.log) } },
+        Put: {
+          TableName: this.table,
+          Item: { pk: this.own("LOG"), sk: logKey(t.log), data: JSON.stringify(t.log) },
+        },
       });
       if (t.country_visited) {
         items.push({
           Update: {
             TableName: this.table,
-            Key: { pk: "COUNTRY", sk: t.log.country_iso },
+            Key: { pk: this.own("COUNTRY"), sk: t.log.country_iso },
             UpdateExpression:
               "ADD visit_count :one SET last_visited_at = :at, first_visited_at = if_not_exists(first_visited_at, :at)",
             ExpressionAttributeValues: { ":one": 1, ":at": t.log.at },
@@ -148,7 +171,7 @@ export class DynamoStore implements Store {
         });
       }
     }
-    const key = { pk: "STATE", sk: "PICKED" };
+    const key = { pk: this.own("STATE"), sk: "PICKED" };
     const p = pointerOp(change);
     if (p.op === "check") {
       items.push({ ConditionCheck: { TableName: this.table, Key: key, ...pointerCondition(p.expected) } });
@@ -188,7 +211,7 @@ export class DynamoStore implements Store {
         new QueryCommand({
           TableName: this.table,
           KeyConditionExpression: "pk = :pk",
-          ExpressionAttributeValues: { ":pk": "COUNTRY" },
+          ExpressionAttributeValues: { ":pk": this.own("COUNTRY") },
           ExclusiveStartKey: start,
           ConsistentRead: true,
         }),
@@ -211,7 +234,8 @@ export class DynamoStore implements Store {
       new QueryCommand({
         TableName: this.table,
         KeyConditionExpression: cursor === null ? "pk = :pk" : "pk = :pk AND sk < :cursor",
-        ExpressionAttributeValues: cursor === null ? { ":pk": "LOG" } : { ":pk": "LOG", ":cursor": cursor },
+        ExpressionAttributeValues:
+          cursor === null ? { ":pk": this.own("LOG") } : { ":pk": this.own("LOG"), ":cursor": cursor },
         ScanIndexForward: false,
         Limit: limit + 1,
         ConsistentRead: true,
@@ -226,7 +250,7 @@ export class DynamoStore implements Store {
   }
 
   getPick(pickId: string) {
-    return this.getData<PickSession>(`PICK#${pickId}`, META);
+    return this.getData<PickSession>(this.own(`PICK#${pickId}`), META);
   }
 
   /** A cancelled pick carries a top-level `cancelled` flag; other writes must not find it (F12.2). */
@@ -237,7 +261,7 @@ export class DynamoStore implements Store {
         new PutCommand({
           TableName: this.table,
           Item: {
-            pk: `PICK#${s.pick_id}`,
+            pk: this.own(`PICK#${s.pick_id}`),
             sk: META,
             data: JSON.stringify(s),
             ttl: ttl(s.created_at, PICK_TTL_MS),
@@ -290,4 +314,16 @@ export async function createTable(config: DynamoDBClientConfig, table: string): 
       BillingMode: "PAY_PER_REQUEST",
     }),
   );
+}
+
+/** Every user's store over one table (F14). */
+export class DynamoStores implements Stores {
+  constructor(
+    private readonly table: string,
+    private readonly client: DynamoDBClient = new DynamoDBClient({}),
+  ) {}
+
+  forUser(user: string): DynamoStore {
+    return new DynamoStore(this.table, this.client, user);
+  }
 }

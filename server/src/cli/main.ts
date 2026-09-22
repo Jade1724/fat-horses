@@ -18,11 +18,12 @@ import { bundledCountries } from "../domain/countries";
 import { DEFAULT_MIN_POPULATION } from "../domain/pool";
 import { systemRng } from "../domain/rng";
 import { HISTORY_PAGE, NotFoundError, recordSkip, recordVisit } from "../domain/store";
-import { defaultStorePath, FileStore } from "../store/file";
+import { apiKeysFromEnv, DEFAULT_USER, isValidUser, type ApiKeys } from "../domain/users";
+import { defaultStorePath, FileStores } from "../store/file";
 import * as render from "./render";
 import { serve } from "./serve";
 
-const USAGE = `Usage: fat-horses [--store PATH] <command>
+const USAGE = `Usage: fat-horses [--store PATH] [--user NAME] <command>
 
 Commands:
   pick <address> [--radius M] [--max-wait MIN] [--min-population N] [--include-visited] --fake-llm
@@ -30,7 +31,11 @@ Commands:
   skip <restaurant-id>
   passport [--min-population N]
   history [--cursor C]
-  serve --api-key KEY [--port 8080] [--web DIR]   (or FAT_HORSES_API_KEY)
+  serve [--api-key KEY] [--port 8080] [--web DIR]
+
+--user picks whose data pick/visit/skip/passport/history use (default "me").
+serve takes users' keys from FAT_HORSES_API_KEYS="haruka:key1,friend:key2",
+or one key for "me" from --api-key / FAT_HORSES_API_KEY.
 `;
 
 function fail(message: string): never {
@@ -44,6 +49,7 @@ async function main(argv: string[]): Promise<void> {
     allowPositionals: true,
     options: {
       store: { type: "string" },
+      user: { type: "string" },
       radius: { type: "string" },
       "max-wait": { type: "string" },
       "min-population": { type: "string" },
@@ -61,7 +67,10 @@ async function main(argv: string[]): Promise<void> {
     process.stdout.write(USAGE);
     return;
   }
-  const store = new FileStore(values.store ?? defaultStorePath());
+  const stores = new FileStores(values.store ?? defaultStorePath());
+  const user = values.user ?? DEFAULT_USER;
+  if (!isValidUser(user)) fail(`bad --user "${user}": use a-z, 0-9, _ or -`);
+  const store = stores.forUser(user);
   const countries = bundledCountries();
   const now = () => new Date().toISOString();
   const minPopulation = values["min-population"] ? Number(values["min-population"]) : DEFAULT_MIN_POPULATION;
@@ -135,12 +144,18 @@ async function main(argv: string[]): Promise<void> {
       );
       return;
     case "serve": {
-      const key = values["api-key"] ?? process.env.FAT_HORSES_API_KEY;
-      if (!key) fail("serve needs --api-key or FAT_HORSES_API_KEY");
+      let keys: ApiKeys;
+      try {
+        keys = values["api-key"] ? { [DEFAULT_USER]: values["api-key"] } : apiKeysFromEnv();
+      } catch (e) {
+        fail(e instanceof Error ? e.message : String(e));
+      }
+      if (Object.keys(keys).length === 0)
+        fail("serve needs FAT_HORSES_API_KEYS, FAT_HORSES_API_KEY or --api-key");
       serve(
-        store,
+        stores,
         values.port ? Number(values.port) : 8080,
-        key,
+        keys,
         values.web ? resolve(values.web) : undefined,
       );
       return;

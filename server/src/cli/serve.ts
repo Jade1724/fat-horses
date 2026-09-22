@@ -12,42 +12,47 @@ import { FakeClassifier } from "../domain/classify";
 import { bundledCountries } from "../domain/countries";
 import { systemRng } from "../domain/rng";
 import type { PickSession } from "../domain/session";
-import type { StateStore } from "../store/state";
+import type { ApiKeys } from "../domain/users";
+import type { StateStores } from "../store/state";
 import { log } from "../log";
 
-/** Runs each pick as a background task in this process. */
+/** Runs each pick as a background task in this process, against its user's store. */
 export class LocalStarter implements WorkflowStarter {
   private readonly running = new Map<string, AbortController>();
 
-  constructor(private readonly deps: Deps) {}
+  constructor(
+    private readonly deps: Omit<Deps, "store">,
+    private readonly stores: StateStores,
+  ) {}
 
-  async start(pickId: string): Promise<void> {
-    const session = await this.deps.store.getPick(pickId);
+  async start(pickId: string, user: string): Promise<void> {
+    const session = await this.stores.forUser(user).getPick(pickId);
     if (!session) throw new Error("pick not stored");
-    this.run(session);
+    this.run(session, user);
   }
 
   /**
    * Carry on with picks a previous server left unfinished (F13): a pick runs
    * inside the server, so stopping the server stops it mid-way.
    */
-  async resume(store: StateStore): Promise<number> {
-    const picks = await store.unfinishedPicks();
-    for (const s of picks) {
-      log.info("resuming pick", { pick_id: s.pick_id, status: s.status });
-      this.run(s);
+  async resume(): Promise<number> {
+    const picks = await this.stores.unfinishedPicks();
+    for (const { user, session } of picks) {
+      log.info("resuming pick", { pick_id: session.pick_id, user, status: session.status });
+      this.run(session, user);
     }
     return picks.length;
   }
 
-  private run(session: PickSession): void {
+  private run(session: PickSession, user: string): void {
     const pickId = session.pick_id;
     if (this.running.has(pickId)) return;
     const abort = new AbortController();
     this.running.set(pickId, abort);
-    void runPick(this.deps, session, systemClock, systemRng, () => {}, abort.signal)
-      .then((s) => log.info("pick finished", { pick_id: pickId, status: s.status }))
-      .catch((e: unknown) => log.error("pick failed", { pick_id: pickId, error: String(e) }))
+    const deps: Deps = { ...this.deps, store: this.stores.forUser(user) };
+    void runPick(deps, session, systemClock, systemRng, () => {}, abort.signal)
+      .then((s) => log.info("pick finished", { pick_id: pickId, user, status: s.status }))
+      .catch((e: unknown) => log.error("pick failed", { pick_id: pickId, user, error: String(e) }))
       .finally(() => this.running.delete(pickId));
   }
 
@@ -85,26 +90,26 @@ function serveStatic(webDir: string, path: string, res: ServerResponse): void {
   createReadStream(file).pipe(res);
 }
 
-export function serve(store: StateStore, port: number, apiKey: string, webDir?: string): void {
-  const deps: Deps = {
+export function serve(stores: StateStores, port: number, apiKeys: ApiKeys, webDir?: string): void {
+  const deps: Omit<Deps, "store"> = {
     races: new TabNz(identityFromEnv()),
     places: new Overpass(),
     classifier: new FakeClassifier(),
-    store,
     countries: bundledCountries(),
     config: defaultConfig(),
   };
-  const starter = new LocalStarter(deps);
-  void starter.resume(store).then((n) => {
+  const starter = new LocalStarter(deps, stores);
+  void starter.resume().then((n) => {
     if (n > 0) console.log(`Resumed ${n} unfinished pick${n === 1 ? "" : "s"}`);
   });
   const api = new Api({
     geocoder: nominatimFromEnv(),
-    store,
+    stores,
     starter,
     countries: deps.countries,
-    apiKey,
+    apiKeys,
   });
+  console.log(`Users: ${Object.keys(apiKeys).join(", ")}`);
   const server = createServer((req, res) => {
     const url = new URL(req.url ?? "/", "http://localhost");
     if (url.pathname.startsWith("/api/")) {

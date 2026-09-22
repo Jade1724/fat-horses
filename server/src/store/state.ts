@@ -1,4 +1,5 @@
-// In-process store state shared by the memory and JSON-file stores.
+// In-process stores (memory and JSON file): one root object with a section per
+// user (F14) and the shared caches.
 
 import { isFinished, type PickSession } from "../domain/session";
 import type { LogEntry, Restaurant } from "../domain/status";
@@ -13,77 +14,134 @@ import {
   type CountryVisits,
   type HistoryPage,
   type Store,
+  type Stores,
 } from "../domain/store";
+import { DEFAULT_USER } from "../domain/users";
 
-export interface StateData {
+/** One user's data. */
+export interface UserData {
   restaurants: Record<string, Restaurant>;
   picked: string | null;
   countries: Record<string, CountryVisits>;
   /** Keyed by logKey; read in reverse key order for newest first. */
   log: Record<string, LogEntry>;
   picks: Record<string, PickSession>;
-  /** Keyed by `<place_id>#v<prompt_version>`. */
+}
+
+export interface RootData {
+  users: Record<string, UserData>;
+  /** Shared: public map data only. Keyed by `<place_id>#v<prompt_version>`. */
   guesses: Record<string, CachedGuess>;
   geocodes: Record<string, CachedLocation>;
 }
 
-export function emptyState(): StateData {
-  return { restaurants: {}, picked: null, countries: {}, log: {}, picks: {}, guesses: {}, geocodes: {} };
+export const emptyUser = (): UserData => ({
+  restaurants: {},
+  picked: null,
+  countries: {},
+  log: {},
+  picks: {},
+});
+export const emptyRoot = (): RootData => ({ users: {}, guesses: {}, geocodes: {} });
+
+/** Read a stored root, moving data saved before users existed to the default user. */
+export function upgradeRoot(raw: Record<string, unknown>): RootData {
+  if (raw.users) return { ...emptyRoot(), ...(raw as Partial<RootData>) } as RootData;
+  const old = raw as Partial<UserData> & Partial<RootData>;
+  return {
+    users: {
+      [DEFAULT_USER]: {
+        restaurants: old.restaurants ?? {},
+        picked: old.picked ?? null,
+        countries: old.countries ?? {},
+        log: old.log ?? {},
+        picks: old.picks ?? {},
+      },
+    },
+    guesses: old.guesses ?? {},
+    geocodes: old.geocodes ?? {},
+  };
 }
 
 const clone = <T>(v: T): T => structuredClone(v);
 
-/** A Store over a plain object. `save` persists after every write (no-op in memory). */
-export class StateStore implements Store {
-  /** Writes run one at a time, so none starts from a copy another is about to replace. */
+/** Every user's data plus the caches; `save` persists after each write (no-op in memory). */
+export class StateStores implements Stores {
+  /** Writes run one at a time, so none starts from a copy another is about to replace (F13.2). */
   private queue: Promise<unknown> = Promise.resolve();
 
   constructor(
-    protected data: StateData,
-    private readonly save: (data: StateData) => Promise<void> = async () => {},
+    private root: RootData,
+    private readonly save: (data: RootData) => Promise<void> = async () => {},
   ) {}
 
-  private exclusive<T>(fn: () => Promise<T>): Promise<T> {
-    const run = this.queue.then(fn, fn);
+  forUser(user: string): UserStore {
+    return new UserStore(this, user);
+  }
+
+  /** Apply `f` to a copy, save it, then keep it; on error nothing changes. */
+  write(f: (d: RootData) => void): Promise<void> {
+    const run = this.queue.then(async () => {
+      const next = clone(this.root);
+      f(next);
+      await this.save(next);
+      this.root = next;
+    });
     this.queue = run.catch(() => undefined);
     return run;
   }
 
-  /** Apply `f` to a copy, save it, then keep it; on error nothing changes. */
-  private write(f: (d: StateData) => void): Promise<void> {
-    return this.exclusive(async () => {
-      const next = clone(this.data);
-      f(next);
-      await this.save(next);
-      this.data = next;
-    });
+  read<T>(f: (d: RootData) => T): T {
+    return clone(f(this.root));
   }
 
-  /** Picks that are neither done, failed nor cancelled (F13). Not part of `Store`: AWS has Step Functions. */
-  async unfinishedPicks(): Promise<PickSession[]> {
-    return clone(Object.values(this.data.picks).filter((p) => !isFinished(p.status)));
+  /** Picks that are neither done, failed nor cancelled, for every user (F13.1). */
+  async unfinishedPicks(): Promise<{ user: string; session: PickSession }[]> {
+    return this.read((d) =>
+      Object.entries(d.users).flatMap(([user, u]) =>
+        Object.values(u.picks)
+          .filter((p) => !isFinished(p.status))
+          .map((session) => ({ user, session })),
+      ),
+    );
+  }
+}
+
+/** One user's view of a StateStores. */
+export class UserStore implements Store {
+  constructor(
+    private readonly all: StateStores,
+    readonly user: string,
+  ) {}
+
+  private get<T>(f: (u: UserData) => T): T {
+    return this.all.read((d) => f(d.users[this.user] ?? emptyUser()));
+  }
+
+  private write(f: (u: UserData, d: RootData) => void): Promise<void> {
+    return this.all.write((d) => f((d.users[this.user] ??= emptyUser()), d));
   }
 
   async getRestaurant(id: string) {
-    return clone(this.data.restaurants[id] ?? null);
+    return this.get((u) => u.restaurants[id] ?? null);
   }
 
   async currentlyPicked() {
-    return this.data.picked ? clone(this.data.restaurants[this.data.picked] ?? null) : null;
+    return this.get((u) => (u.picked ? (u.restaurants[u.picked] ?? null) : null));
   }
 
   async apply(change: Change) {
     // Conditions are checked inside the write, against the latest state.
-    await this.write((d) => {
-      if (d.picked !== change.expected_picked) throw new ConflictError();
+    await this.write((u) => {
+      if (u.picked !== change.expected_picked) throw new ConflictError();
       for (const t of change.transitions) {
-        if ((d.restaurants[t.restaurant.id]?.status ?? null) !== t.expected_status) throw new ConflictError();
+        if ((u.restaurants[t.restaurant.id]?.status ?? null) !== t.expected_status) throw new ConflictError();
       }
-      d.picked = pickedAfter(change);
+      u.picked = pickedAfter(change);
       for (const t of change.transitions) {
         if (t.country_visited) {
           const iso = t.log.country_iso;
-          const c = (d.countries[iso] ??= {
+          const c = (u.countries[iso] ??= {
             iso2: iso,
             visit_count: 0,
             first_visited_at: null,
@@ -93,65 +151,79 @@ export class StateStore implements Store {
           c.first_visited_at ??= t.log.at;
           c.last_visited_at = t.log.at;
         }
-        d.log[logKey(t.log)] = t.log;
-        d.restaurants[t.restaurant.id] = t.restaurant;
+        u.log[logKey(t.log)] = t.log;
+        u.restaurants[t.restaurant.id] = t.restaurant;
       }
     });
   }
 
   async countryVisits() {
-    return clone(Object.values(this.data.countries).sort((a, b) => a.iso2.localeCompare(b.iso2)));
+    return this.get((u) => Object.values(u.countries).sort((a, b) => a.iso2.localeCompare(b.iso2)));
   }
 
   async history(cursor: string | null, limit: number): Promise<HistoryPage> {
-    const keys = Object.keys(this.data.log)
-      .sort()
-      .reverse()
-      .filter((k) => cursor === null || k < cursor);
-    const page = keys.slice(0, limit);
-    return {
-      entries: clone(page.map((k) => this.data.log[k] as LogEntry)),
-      next_cursor: keys.length > limit ? (page.at(-1) ?? null) : null,
-    };
-  }
-
-  async getPick(pickId: string) {
-    return clone(this.data.picks[pickId] ?? null);
-  }
-
-  async putPick(session: PickSession) {
-    await this.write((d) => {
-      if (d.picks[session.pick_id]?.status === "cancelled" && session.status !== "cancelled") {
-        throw new PickCancelled(session.pick_id);
-      }
-      d.picks[session.pick_id] = clone(session);
+    return this.get((u) => {
+      const keys = Object.keys(u.log)
+        .sort()
+        .reverse()
+        .filter((k) => cursor === null || k < cursor);
+      const page = keys.slice(0, limit);
+      return {
+        entries: page.map((k) => u.log[k] as LogEntry),
+        next_cursor: keys.length > limit ? (page.at(-1) ?? null) : null,
+      };
     });
   }
 
+  async getPick(pickId: string) {
+    return this.get((u) => u.picks[pickId] ?? null);
+  }
+
+  async putPick(session: PickSession) {
+    await this.write((u) => {
+      if (u.picks[session.pick_id]?.status === "cancelled" && session.status !== "cancelled") {
+        throw new PickCancelled(session.pick_id);
+      }
+      u.picks[session.pick_id] = clone(session);
+    });
+  }
+
+  /** This user's unfinished picks (F13.1). */
+  async unfinishedPicks(): Promise<PickSession[]> {
+    return this.get((u) => Object.values(u.picks).filter((p) => !isFinished(p.status)));
+  }
+
   async getGuess(placeId: string, promptVersion: number) {
-    return clone(this.data.guesses[`${placeId}#v${promptVersion}`] ?? null);
+    return this.all.read((d) => d.guesses[`${placeId}#v${promptVersion}`] ?? null);
   }
 
   async putGuess(guess: CachedGuess) {
-    await this.write((d) => {
+    await this.write((_u, d) => {
       d.guesses[`${guess.guess.place_id}#v${guess.prompt_version}`] = clone(guess);
     });
   }
 
   async getGeocode(key: string) {
-    return clone(this.data.geocodes[key] ?? null);
+    return this.all.read((d) => d.geocodes[key] ?? null);
   }
 
   async putGeocode(key: string, value: CachedLocation) {
-    await this.write((d) => {
+    await this.write((_u, d) => {
       d.geocodes[key] = clone(value);
     });
   }
 }
 
-/** In-memory store for tests and offline runs. */
-export class MemoryStore extends StateStore {
+/** In-memory stores for tests and offline runs. */
+export class MemoryStores extends StateStores {
   constructor() {
-    super(emptyState());
+    super(emptyRoot());
+  }
+}
+
+/** A fresh in-memory store for the default user. */
+export class MemoryStore extends UserStore {
+  constructor() {
+    super(new MemoryStores(), DEFAULT_USER);
   }
 }

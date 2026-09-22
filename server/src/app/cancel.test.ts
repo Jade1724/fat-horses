@@ -11,7 +11,7 @@ import { newSession, type PickSession } from "../domain/session";
 import { cancelPick } from "../domain/store";
 import { addMs, ms, MINUTE, type Iso } from "../domain/time";
 import { executionArn } from "../lambda/env";
-import { MemoryStore } from "../store/state";
+import { MemoryStore, MemoryStores } from "../store/state";
 import { Api, type ApiRequest, type WorkflowStarter } from "./api";
 import { defaultConfig, runPick, runStep, systemClock, type Clock, type Deps } from "./workflow";
 
@@ -196,10 +196,10 @@ describe("cancel API (F12)", () => {
   });
 
   function setup() {
-    const store = new MemoryStore();
+    const stores = new MemoryStores();
     const starter = new Starter();
-    const api = new Api({ geocoder, store, starter, countries: bundledCountries(), apiKey: "k" });
-    return { store, starter, api };
+    const api = new Api({ geocoder, stores, starter, countries: bundledCountries(), apiKeys: { me: "k" } });
+    return { store: stores.forUser("me"), starter, api };
   }
 
   it("cancels a running pick and stops its workflow", async () => {

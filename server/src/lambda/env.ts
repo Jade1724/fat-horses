@@ -10,7 +10,7 @@ import type { ApiRequest, ApiResponse, WorkflowStarter } from "../app/api";
 import { defaultConfig, type Deps } from "../app/workflow";
 import { FakeClassifier } from "../domain/classify";
 import { bundledCountries } from "../domain/countries";
-import { DynamoStore } from "../store/dynamo";
+import { DynamoStores } from "../store/dynamo";
 
 export function env(name: string): string {
   const v = process.env[name];
@@ -18,11 +18,12 @@ export function env(name: string): string {
   return v;
 }
 
-export function dynamoStore(): DynamoStore {
-  return new DynamoStore(env("TABLE_NAME"));
+/** Every user's store over TABLE_NAME (F14). */
+export function dynamoStores(): DynamoStores {
+  return new DynamoStores(env("TABLE_NAME"));
 }
 
-/** Read a SecureString parameter (the API key, F11.1). */
+/** Read a SecureString parameter (the API keys, F11.1). */
 export async function secureParameter(name: string): Promise<string> {
   const out = await new SSMClient({}).send(new GetParameterCommand({ Name: name, WithDecryption: true }));
   const value = out.Parameter?.Value;
@@ -35,12 +36,12 @@ export class SfnStarter implements WorkflowStarter {
   private readonly client = new SFNClient({});
   constructor(private readonly stateMachineArn: string) {}
 
-  async start(pickId: string): Promise<void> {
+  async start(pickId: string, user: string): Promise<void> {
     await this.client.send(
       new StartExecutionCommand({
         stateMachineArn: this.stateMachineArn,
         name: pickId,
-        input: JSON.stringify({ pick_id: pickId }),
+        input: JSON.stringify({ pick_id: pickId, user }),
       }),
     );
   }
@@ -64,14 +65,14 @@ export function executionArn(stateMachineArn: string, pickId: string): string {
  * Workflow dependencies. The classifier guesses nothing until Bedrock is wired
  * in (T3.9), so only tagged matches (tier 1) are found.
  */
-export function workflowDeps(): Deps {
+/** Workflow dependencies except the store, which is per user. */
+export function workflowDeps(): Omit<Deps, "store"> {
   const config = defaultConfig();
   config.guess.model_id = process.env.BEDROCK_MODEL_ID ?? "none";
   return {
     races: new TabNz(identityFromEnv()),
     places: new Overpass(),
     classifier: new FakeClassifier(),
-    store: dynamoStore(),
     countries: bundledCountries(),
     config,
   };

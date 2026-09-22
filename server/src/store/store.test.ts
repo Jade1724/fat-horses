@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { applyEvent } from "../domain/status";
 import { recordPick, recordVisit } from "../domain/store";
 import { contractRestaurant, runContract } from "./contract";
-import { DynamoStore, pointerOp } from "./dynamo";
+import { DynamoStore, DynamoStores, pointerOp } from "./dynamo";
 import { defaultStorePath, FileStore } from "./file";
 import { MemoryStore } from "./state";
 
@@ -69,7 +69,18 @@ describe("DynamoDB store (no network)", () => {
     expect(items[0]?.Put?.ConditionExpression).toBe("attribute_not_exists(#s)");
     expect(items[0]?.Put?.Item?.status).toBe("VISITED");
     expect(items[1]?.Put?.Item?.sk).toBe("2026-09-21T10:00:00.000000Z#b#visited");
-    expect(items[2]?.Update?.Key).toEqual({ pk: "COUNTRY", sk: "IT" });
+    expect(items[2]?.Update?.Key).toEqual({ pk: "U#me#COUNTRY", sk: "IT" });
     expect(items[3]?.ConditionCheck?.ConditionExpression).toBe("attribute_not_exists(pk)");
+  });
+
+  it("keeps each user's items under their own prefix (F14)", () => {
+    const visit = applyEvent(contractRestaurant("b", "IT"), { kind: "visit" }, NOW);
+    const items = new DynamoStores("t")
+      .forUser("friend")
+      .transactItems({ transitions: [visit], expected_picked: null });
+    expect(items[0]?.Put?.Item?.pk).toBe("U#friend#RESTAURANT#b");
+    expect(items[1]?.Put?.Item?.pk).toBe("U#friend#LOG");
+    expect(items[2]?.Update?.Key).toEqual({ pk: "U#friend#COUNTRY", sk: "IT" });
+    expect(items[3]?.ConditionCheck?.Key).toEqual({ pk: "U#friend#STATE", sk: "PICKED" });
   });
 });

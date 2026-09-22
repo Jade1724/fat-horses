@@ -104,7 +104,7 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 - **F10.8** The current `PICKED` restaurant (if any) is shown on load, so you can mark it visited later.
 
 ### F11. Access
-- **F11.1** Every `/api/*` request needs header `x-api-key`, compared in constant time with the value in SSM, read once when the Lambda starts (a changed key takes effect as containers recycle, or at once after redeploying). Missing or wrong → 401.
+- **F11.1** Every `/api/*` request needs header `x-api-key`, compared in constant time with every user's key (F14) from SSM, read once when the Lambda starts (a changed key takes effect as containers recycle, or at once after redeploying). Missing or wrong → 401.
 - **F11.2** API Gateway throttling: 5 requests/s rate, burst 10.
 
 ### F12. Cancelling a pick
@@ -115,6 +115,11 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 ### F13. Local runs survive restarts
 - **F13.1** With `fat-horses serve`, a pick runs inside the server process. When the server starts, it resumes every unfinished pick (not `done`, `failed` or `cancelled`) from its stored state: steps already done (race and countries, places) are kept, not re-drawn, and a race that finished meanwhile is resolved from its result.
 - **F13.2** The in-memory and JSON-file stores apply writes one at a time, with their conditions checked inside the write, so concurrent writes (two picks, a pick and a visit) never lose an update. (On AWS, Step Functions keeps picks running and DynamoDB's conditional writes cover F13.2.)
+
+### F14. Users
+- **F14.1** Each API key belongs to one user (name: `[a-z0-9_-]{1,32}`). A user's picks, restaurant statuses, passport and history are theirs alone: another user's pick is 404 to them, and one user's pick never replaces another's `PICKED` restaurant. The geocode and cuisine-guess caches hold only public map data and are shared.
+- **F14.2** Keys on AWS: SSM SecureString `/fat-horses/api-keys` holding `{"<user>": "<key>", …}`. Locally: `FAT_HORSES_API_KEYS="haruka:key1,friend:key2"`, or the single `FAT_HORSES_API_KEY` for the user `me`. Adding a user = adding a key.
+- **F14.3** Local data saved before users existed belongs to `me`. The CLI's `--user` (default `me`) chooses whose data `pick`, `visit`, `skip`, `passport` and `history` use.
 
 ---
 
@@ -158,13 +163,15 @@ Validation (a unit test): `iso2` unique and 2 uppercase letters; `population > 0
 ### 4.2 DynamoDB single table `fat-horses`
 Keys `pk` (S), `sk` (S); attribute `ttl` (N, epoch seconds) for TTL. On-demand billing, point-in-time recovery on.
 
+User-owned items are prefixed `U#<user>#` (F14); the Guess and Geocode cache items are shared.
+
 | Item | pk | sk | Attributes |
 |---|---|---|---|
-| Restaurant | `RESTAURANT#<place_id>` | `META` | name, lat, lon, address, cuisine (list), country_iso, status (`PICKED`/`VISITED`; absent = `null`), status_before_pick, picked_at, visited_at, visit_count, match, reason |
-| Currently picked | `STATE` | `PICKED` | restaurant_id. Written in the same transaction as every change to or from `PICKED` (enforces F8.3) |
-| Country | `COUNTRY` | `<iso2>` | visit_count, first_visited_at, last_visited_at (one partition, so the Passport is a single Query) |
-| Log entry | `LOG` | `<RFC3339 µs timestamp>#<restaurant_id>#<reason>` (JS has millisecond precision; the microseconds are zero-padded) | the fields of F8.6 |
-| Pick session | `PICK#<pick_id>` | `META` | request, location, status, pool size, world_complete, race card, winner, places, matches, pick, llm_unavailable, error; `ttl` = +30 days |
+| Restaurant | `U#<user>#RESTAURANT#<place_id>` | `META` | name, lat, lon, address, cuisine (list), country_iso, status (`PICKED`/`VISITED`; absent = `null`), status_before_pick, picked_at, visited_at, visit_count, match, reason |
+| Currently picked | `U#<user>#STATE` | `PICKED` | restaurant_id. Written in the same transaction as every change to or from `PICKED` (enforces F8.3) |
+| Country | `U#<user>#COUNTRY` | `<iso2>` | visit_count, first_visited_at, last_visited_at (one partition, so the Passport is a single Query) |
+| Log entry | `U#<user>#LOG` | `<RFC3339 µs timestamp>#<restaurant_id>#<reason>` (JS has millisecond precision; the microseconds are zero-padded) | the fields of F8.6 |
+| Pick session | `U#<user>#PICK#<pick_id>` | `META` | request, location, status, pool size, world_complete, race card, winner, places, matches, pick, llm_unavailable, error; `ttl` = +30 days |
 | Guess | `PLACE#<place_id>` | `GUESS#v<prompt_version>` | cuisines, reason, model_id, input_hash, created_at; `ttl` = +180 days |
 | Geocode cache | `GEOCODE#<normalised address>` | `META` | lat, lon, display_name; `ttl` = +30 days |
 
@@ -222,7 +229,7 @@ Infrastructure (Terraform in `infra/`, S3 state backend with native lock file):
 - CloudFront: `/` → private S3 site bucket (OAC); `/api/*` → API Gateway HTTP API → `api` Lambda.
 - `api` Lambda environment includes `GEOCODE_COUNTRIES` (default `nz`, F1.2).
 - Lambdas: TypeScript on the managed **Node.js 22** runtime (`nodejs22.x`), arm64, one esbuild bundle per handler (`make build-lambdas`); the AWS SDK v3 comes from the runtime. Chosen over Rust on the OS-only runtime because a managed runtime is easier to operate.
-- Step Functions state machine, DynamoDB table (§4.2), SSM SecureString `/fat-horses/api-key`.
+- Step Functions state machine, DynamoDB table (§4.2), SSM SecureString `/fat-horses/api-keys` (F14.2). The Step Functions input is `{pick_id, user}`, passed to each `workflow` step.
 - IAM: least privilege per Lambda; `bedrock:InvokeModel` only on the configured model/profile; the `api` Lambda may `states:StartExecution` and `states:StopExecution` on the pick state machine only.
 - AWS Budgets alarm (default USD 10/month) emailing the owner.
 - Region: **`ap-southeast-2`** (default; subject to Bedrock model availability, confirmed in T1.3).
@@ -262,7 +269,7 @@ infra/                  Terraform
 
 ## 9. Out of scope (v1)
 
-Betting or TAB login; multiple users; ratings, notes or reviews; ranking by rating, price or opening hours; web search; automatic radius widening; native apps; an LLM "what to order" line.
+Betting or TAB login; user accounts beyond API keys (sign-up, passwords); sharing data between users; ratings, notes or reviews; ranking by rating, price or opening hours; web search; automatic radius widening; native apps; an LLM "what to order" line.
 
 ## 10. Defaults chosen for PLAN's open questions (confirm or change)
 
