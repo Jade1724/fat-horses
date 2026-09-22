@@ -1,6 +1,6 @@
 // In-process store state shared by the memory and JSON-file stores.
 
-import type { PickSession } from "../domain/session";
+import { isFinished, type PickSession } from "../domain/session";
 import type { LogEntry, Restaurant } from "../domain/status";
 import {
   ConflictError,
@@ -35,17 +35,33 @@ const clone = <T>(v: T): T => structuredClone(v);
 
 /** A Store over a plain object. `save` persists after every write (no-op in memory). */
 export class StateStore implements Store {
+  /** Writes run one at a time, so none starts from a copy another is about to replace. */
+  private queue: Promise<unknown> = Promise.resolve();
+
   constructor(
     protected data: StateData,
     private readonly save: (data: StateData) => Promise<void> = async () => {},
   ) {}
 
+  private exclusive<T>(fn: () => Promise<T>): Promise<T> {
+    const run = this.queue.then(fn, fn);
+    this.queue = run.catch(() => undefined);
+    return run;
+  }
+
   /** Apply `f` to a copy, save it, then keep it; on error nothing changes. */
-  private async write(f: (d: StateData) => void): Promise<void> {
-    const next = clone(this.data);
-    f(next);
-    await this.save(next);
-    this.data = next;
+  private write(f: (d: StateData) => void): Promise<void> {
+    return this.exclusive(async () => {
+      const next = clone(this.data);
+      f(next);
+      await this.save(next);
+      this.data = next;
+    });
+  }
+
+  /** Picks that are neither done, failed nor cancelled (F13). Not part of `Store`: AWS has Step Functions. */
+  async unfinishedPicks(): Promise<PickSession[]> {
+    return clone(Object.values(this.data.picks).filter((p) => !isFinished(p.status)));
   }
 
   async getRestaurant(id: string) {
@@ -57,12 +73,12 @@ export class StateStore implements Store {
   }
 
   async apply(change: Change) {
-    if (this.data.picked !== change.expected_picked) throw new ConflictError();
-    for (const t of change.transitions) {
-      if ((this.data.restaurants[t.restaurant.id]?.status ?? null) !== t.expected_status)
-        throw new ConflictError();
-    }
+    // Conditions are checked inside the write, against the latest state.
     await this.write((d) => {
+      if (d.picked !== change.expected_picked) throw new ConflictError();
+      for (const t of change.transitions) {
+        if ((d.restaurants[t.restaurant.id]?.status ?? null) !== t.expected_status) throw new ConflictError();
+      }
       d.picked = pickedAfter(change);
       for (const t of change.transitions) {
         if (t.country_visited) {
@@ -104,10 +120,10 @@ export class StateStore implements Store {
   }
 
   async putPick(session: PickSession) {
-    if (this.data.picks[session.pick_id]?.status === "cancelled" && session.status !== "cancelled") {
-      throw new PickCancelled(session.pick_id);
-    }
     await this.write((d) => {
+      if (d.picks[session.pick_id]?.status === "cancelled" && session.status !== "cancelled") {
+        throw new PickCancelled(session.pick_id);
+      }
       d.picks[session.pick_id] = clone(session);
     });
   }

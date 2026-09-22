@@ -248,9 +248,10 @@ export const systemClock: Clock = {
 };
 
 /**
- * Run a whole pick in-process (CLI, local server, tests), saving after every
- * step. Stops early, returning a cancelled session, when `signal` aborts or
- * the stored pick has been cancelled (F12).
+ * Run a pick in-process (CLI, local server, tests), saving after every step.
+ * Resumes a partly run session from where it stopped (F13). Stops early,
+ * returning a cancelled session, when `signal` aborts or the stored pick has
+ * been cancelled (F12).
  */
 export async function runPick(
   deps: Deps,
@@ -279,20 +280,28 @@ export async function runPick(
     return s.status === "failed";
   };
   const end = () => (signal?.aborted || s.status !== "failed" ? cancelled() : s);
+  // Each phase is skipped when the session shows it is done, so a pick stored by
+  // a server that stopped carries on where it was (F13) instead of starting over.
   if (await save()) return end();
-  s = await findRace(deps, s, clock.now());
-  if (await save()) return end();
-  s = await assignCountries(deps, s, rng);
-  if (await save()) return end();
-  s = await prepareNearby(deps, s, clock.now());
-  if (await save()) return end();
-  if (s.race) await clock.sleepUntil(s.race.start_time, signal);
-  for (;;) {
-    if (signal?.aborted) return cancelled();
-    s = await checkResult(deps, s, clock.now(), rng);
+  if (!s.card) {
+    s = await findRace(deps, s, clock.now());
     if (await save()) return end();
-    if (s.winner) break;
-    await clock.sleepUntil(addMs(clock.now(), POLL_INTERVAL_MS), signal);
+    s = await assignCountries(deps, s, rng);
+    if (await save()) return end();
+  }
+  if (!s.places_loaded) {
+    s = await prepareNearby(deps, s, clock.now());
+    if (await save()) return end();
+  }
+  if (!s.winner) {
+    if (s.race) await clock.sleepUntil(s.race.start_time, signal);
+    for (;;) {
+      if (signal?.aborted) return cancelled();
+      s = await checkResult(deps, s, clock.now(), rng);
+      if (await save()) return end();
+      if (s.winner) break;
+      await clock.sleepUntil(addMs(clock.now(), POLL_INTERVAL_MS), signal);
+    }
   }
   s = await ensurePlaces(deps, s, clock.now());
   if (await save()) return end();

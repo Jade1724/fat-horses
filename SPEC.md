@@ -112,6 +112,10 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 - **F12.2** `cancelled` is final: stores refuse to overwrite a cancelled pick with any other status (DynamoDB: a conditional put on a top-level `cancelled` attribute), so a step that was already running can't undo it.
 - **F12.3** No restaurant becomes `PICKED` by a cancelled pick: the pick is checked again just before recording the chosen restaurant. Cancelling writes nothing to history.
 
+### F13. Local runs survive restarts
+- **F13.1** With `fat-horses serve`, a pick runs inside the server process. When the server starts, it resumes every unfinished pick (not `done`, `failed` or `cancelled`) from its stored state: steps already done (race and countries, places) are kept, not re-drawn, and a race that finished meanwhile is resolved from its result.
+- **F13.2** The in-memory and JSON-file stores apply writes one at a time, with their conditions checked inside the write, so concurrent writes (two picks, a pick and a visit) never lose an update. (On AWS, Step Functions keeps picks running and DynamoDB's conditional writes cover F13.2.)
+
 ---
 
 ## 3. LLM rules (Bedrock)

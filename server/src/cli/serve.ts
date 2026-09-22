@@ -11,7 +11,8 @@ import { defaultConfig, runPick, systemClock, type Deps } from "../app/workflow"
 import { FakeClassifier } from "../domain/classify";
 import { bundledCountries } from "../domain/countries";
 import { systemRng } from "../domain/rng";
-import type { Store } from "../domain/store";
+import type { PickSession } from "../domain/session";
+import type { StateStore } from "../store/state";
 import { log } from "../log";
 
 /** Runs each pick as a background task in this process. */
@@ -23,6 +24,25 @@ export class LocalStarter implements WorkflowStarter {
   async start(pickId: string): Promise<void> {
     const session = await this.deps.store.getPick(pickId);
     if (!session) throw new Error("pick not stored");
+    this.run(session);
+  }
+
+  /**
+   * Carry on with picks a previous server left unfinished (F13): a pick runs
+   * inside the server, so stopping the server stops it mid-way.
+   */
+  async resume(store: StateStore): Promise<number> {
+    const picks = await store.unfinishedPicks();
+    for (const s of picks) {
+      log.info("resuming pick", { pick_id: s.pick_id, status: s.status });
+      this.run(s);
+    }
+    return picks.length;
+  }
+
+  private run(session: PickSession): void {
+    const pickId = session.pick_id;
+    if (this.running.has(pickId)) return;
     const abort = new AbortController();
     this.running.set(pickId, abort);
     void runPick(this.deps, session, systemClock, systemRng, () => {}, abort.signal)
@@ -65,7 +85,7 @@ function serveStatic(webDir: string, path: string, res: ServerResponse): void {
   createReadStream(file).pipe(res);
 }
 
-export function serve(store: Store, port: number, apiKey: string, webDir?: string): void {
+export function serve(store: StateStore, port: number, apiKey: string, webDir?: string): void {
   const deps: Deps = {
     races: new TabNz(identityFromEnv()),
     places: new Overpass(),
@@ -74,10 +94,14 @@ export function serve(store: Store, port: number, apiKey: string, webDir?: strin
     countries: bundledCountries(),
     config: defaultConfig(),
   };
+  const starter = new LocalStarter(deps);
+  void starter.resume(store).then((n) => {
+    if (n > 0) console.log(`Resumed ${n} unfinished pick${n === 1 ? "" : "s"}`);
+  });
   const api = new Api({
     geocoder: nominatimFromEnv(),
     store,
-    starter: new LocalStarter(deps),
+    starter,
     countries: deps.countries,
     apiKey,
   });
