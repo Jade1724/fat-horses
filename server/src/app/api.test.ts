@@ -58,7 +58,7 @@ describe("startPick (F1)", () => {
   it("uses defaults and geocodes", async () => {
     const s = await startPick(new FakeGeocoder(), new MemoryStore(), address("Sky Tower"), "p1", NOW);
     expect(s.request).toEqual({
-      radius_m: 200,
+      radius_m: 500,
       min_population: 10_000_000,
       include_visited: false,
       max_wait_min: 10,
@@ -226,7 +226,7 @@ describe("API (§5)", () => {
     expect(view.status).toBe(200);
     expect(view.body).toMatchObject({
       status: "finding_race",
-      location: { radius_m: 200, display_name: "Sky Tower, Auckland" },
+      location: { radius_m: 500, display_name: "Sky Tower, Auckland" },
       restaurants: [],
       race: null,
     });

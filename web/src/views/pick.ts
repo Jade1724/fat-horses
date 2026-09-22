@@ -82,7 +82,7 @@ export class PickPage {
       min: "50",
       max: "2000",
       step: "50",
-      value: "200",
+      value: "500",
     });
     const minPop = h("select", { name: "min_population" });
     for (const [value, label] of [

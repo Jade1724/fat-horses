@@ -10,7 +10,7 @@ import { GEOCODE_TTL_MS, isFresh, type Store } from "../domain/store";
 import type { Iso } from "../domain/time";
 import { log } from "../log";
 
-export const DEFAULT_RADIUS_M = 200;
+export const DEFAULT_RADIUS_M = 500;
 export const RADIUS_MIN = 50;
 export const RADIUS_MAX = 2000;
 

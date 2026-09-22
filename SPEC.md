@@ -26,7 +26,7 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 ## 2. Functional requirements
 
 ### F1. Starting a pick
-- **F1.1** Input: `address` (free text) **or** `{lat, lon}`; `radius_m` (default **200**, allowed 50–2000); `min_population` (default **10 000 000**); `include_visited` (default **false**); `max_wait_min` (default **10**, allowed 5–180).
+- **F1.1** Input: `address` (free text) **or** `{lat, lon}`; `radius_m` (default **500**, allowed 50–2000); `min_population` (default **10 000 000**); `include_visited` (default **false**); `max_wait_min` (default **10**, allowed 5–180).
 - **F1.2** Addresses are geocoded with Nominatim, **limited to the countries in `GEOCODE_COUNTRIES`** (default `nz`; empty = worldwide), up to 5 matches. Matches within 100 m of a better one are the same place and are merged. The web UI calls `GET /geocode` first: one match starts the pick at its coordinates (with the address as `label`); several are shown for the user to choose; none → "Couldn't find that address". `POST /picks` with a free-text address: no match → HTTP 422 `address_not_found`; several → HTTP 409 `ambiguous_address` with the matches; nothing is stored in either case. The CLI lists the matches and asks for a more specific address.
 - **F1.3** Geocode matches are cached (key = geocoder scope, e.g. `nz`, plus the normalised address, lowercase + collapsed whitespace; 30 days).
 - **F1.4** Starting a pick stores a pick session with status `finding_race` and starts the workflow (§6). Returns `pick_id` immediately.
