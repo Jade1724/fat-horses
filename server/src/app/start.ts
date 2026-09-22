@@ -2,7 +2,7 @@
 
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
-import { normaliseAddress, type Geocoder, type Location } from "../domain/places";
+import { distinctLocations, normaliseAddress, type Geocoder, type Location } from "../domain/places";
 import { DEFAULT_MIN_POPULATION } from "../domain/pool";
 import { DEFAULT_MAX_WAIT_MIN, MAX_WAIT_MIN_RANGE } from "../domain/race";
 import { newSession, type PickSession } from "../domain/session";
@@ -23,6 +23,8 @@ export const startInput = z.object({
   min_population: z.number().int().nonnegative().optional(),
   include_visited: z.boolean().optional(),
   max_wait_min: z.number().int().optional(),
+  /** With lat+lon: the address to show, e.g. a match chosen from `GET /geocode` (F1.2). */
+  label: z.string().max(300).optional(),
 });
 export type StartInput = z.infer<typeof startInput>;
 
@@ -30,6 +32,13 @@ export class InvalidRequest extends Error {}
 export class AddressNotFound extends Error {
   constructor() {
     super("address not found");
+  }
+}
+
+/** More than one place matches; the caller must choose (F1.2). */
+export class AmbiguousAddress extends Error {
+  constructor(readonly matches: Location[]) {
+    super(`${matches.length} places match that address`);
   }
 }
 
@@ -53,14 +62,18 @@ export async function startPick(
   const address = input.address?.trim() || undefined;
   let location: Location;
   if (address !== undefined && input.lat === undefined && input.lon === undefined) {
-    location = await geocode(geocoder, cache, address, now);
+    const matches = await lookupAddress(geocoder, cache, address, now);
+    const [only, ...others] = matches;
+    if (!only) throw new AddressNotFound();
+    if (others.length > 0) throw new AmbiguousAddress(matches);
+    location = only;
   } else if (address === undefined && input.lat !== undefined && input.lon !== undefined) {
     if (Math.abs(input.lat) > 90 || Math.abs(input.lon) > 180)
       throw new InvalidRequest("lat/lon out of range");
     location = {
       lat: input.lat,
       lon: input.lon,
-      display_name: `${input.lat.toFixed(5)}, ${input.lon.toFixed(5)}`,
+      display_name: input.label?.trim() || `${input.lat.toFixed(5)}, ${input.lon.toFixed(5)}`,
     };
   } else {
     throw new InvalidRequest("give exactly one of address or lat+lon");
@@ -78,21 +91,26 @@ export async function startPick(
   );
 }
 
-async function geocode(
+/**
+ * Distinct places matching `address` (F1.2), best first, cached per address and
+ * geocoder scope (F1.3). Matches within SAME_PLACE_M of a better one are merged.
+ */
+export async function lookupAddress(
   geocoder: Geocoder,
   cache: Pick<Store, "getGeocode" | "putGeocode">,
   address: string,
   now: Iso,
-): Promise<Location> {
-  const key = normaliseAddress(address);
+): Promise<Location[]> {
+  const key = `${geocoder.scope}|${normaliseAddress(address)}`;
   const cached = await cache.getGeocode(key).catch(() => null);
-  if (cached && isFresh(cached.created_at, GEOCODE_TTL_MS, now)) return cached.location;
-  const location = await geocoder.geocode(address);
-  if (!location) throw new AddressNotFound();
+  if (cached && Array.isArray(cached.results) && isFresh(cached.created_at, GEOCODE_TTL_MS, now)) {
+    return cached.results;
+  }
+  const results = distinctLocations(await geocoder.search(address));
   await cache
-    .putGeocode(key, { location, created_at: now })
+    .putGeocode(key, { results, created_at: now })
     .catch((e) => log.warn("geocode cache write failed", { error: String(e) }));
-  return location;
+  return results;
 }
 
 const CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";

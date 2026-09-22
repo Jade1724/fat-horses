@@ -197,10 +197,16 @@ const scenarios: Record<string, (s: Store) => Promise<void>> = {
   },
 
   async "geocode cache"(s) {
-    const v = { location: { lat: 1, lon: 2, display_name: "x" }, created_at: T0 };
-    assert.equal(await s.getGeocode("1 queen street"), null);
-    await s.putGeocode("1 queen street", v);
-    assert.deepEqual(await s.getGeocode("1 queen street"), v);
+    const v = {
+      results: [
+        { lat: 1, lon: 2, display_name: "x" },
+        { lat: 3, lon: 4, display_name: "y" },
+      ],
+      created_at: T0,
+    };
+    assert.equal(await s.getGeocode("nz|1 queen street"), null);
+    await s.putGeocode("nz|1 queen street", v);
+    assert.deepEqual(await s.getGeocode("nz|1 queen street"), v);
   },
 };
 

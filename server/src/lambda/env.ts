@@ -4,7 +4,7 @@
 import { SFNClient, StartExecutionCommand, StopExecutionCommand } from "@aws-sdk/client-sfn";
 import { GetParameterCommand, SSMClient } from "@aws-sdk/client-ssm";
 import type { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from "aws-lambda";
-import { Nominatim, Overpass } from "../adapters/osm";
+import { nominatimFromEnv, type Nominatim, Overpass } from "../adapters/osm";
 import { identityFromEnv, TabNz } from "../adapters/tabNz";
 import type { ApiRequest, ApiResponse, WorkflowStarter } from "../app/api";
 import { defaultConfig, type Deps } from "../app/workflow";
@@ -77,8 +77,9 @@ export function workflowDeps(): Deps {
   };
 }
 
+/** Countries addresses are searched in (F1.2): GEOCODE_COUNTRIES, default "nz". */
 export function geocoder(): Nominatim {
-  return new Nominatim();
+  return nominatimFromEnv();
 }
 
 /** API Gateway (HTTP API, payload v2) → framework-free request. */

@@ -2,9 +2,16 @@
 
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { Nominatim, Overpass } from "../adapters/osm";
+import { nominatimFromEnv, Overpass } from "../adapters/osm";
 import { identityFromEnv, TabNz } from "../adapters/tabNz";
-import { AddressNotFound, DEFAULT_RADIUS_M, InvalidRequest, newPickId, startPick } from "../app/start";
+import {
+  AddressNotFound,
+  AmbiguousAddress,
+  DEFAULT_RADIUS_M,
+  InvalidRequest,
+  newPickId,
+  startPick,
+} from "../app/start";
 import { defaultConfig, runPick, systemClock } from "../app/workflow";
 import { FakeClassifier } from "../domain/classify";
 import { bundledCountries } from "../domain/countries";
@@ -67,7 +74,7 @@ async function main(argv: string[]): Promise<void> {
       let session;
       try {
         session = await startPick(
-          new Nominatim(),
+          nominatimFromEnv(),
           store,
           {
             address: arg,
@@ -81,6 +88,12 @@ async function main(argv: string[]): Promise<void> {
         );
       } catch (e) {
         if (e instanceof InvalidRequest || e instanceof AddressNotFound) fail(e.message);
+        if (e instanceof AmbiguousAddress) {
+          fail(
+            `"${arg}" matches ${e.matches.length} places; add the suburb or city:\n` +
+              e.matches.map((m) => `  - ${m.display_name}`).join("\n"),
+          );
+        }
         throw e;
       }
       process.stdout.write(`📍 ${session.location.display_name}\n`);

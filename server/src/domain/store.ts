@@ -60,8 +60,9 @@ export interface CachedGuess {
   created_at: Iso;
 }
 
+/** Geocoder matches for one address (F1.3). */
 export interface CachedLocation {
-  location: Location;
+  results: Location[];
   created_at: Iso;
 }
 

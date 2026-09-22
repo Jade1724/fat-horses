@@ -43,6 +43,12 @@ describe("Api", () => {
     expect(JSON.parse(f.mock.calls[0]![1]?.body as string)).toEqual({ restaurant: details });
   });
 
+  it("looks up addresses", async () => {
+    const f = fakeFetch(200, { matches: [] });
+    await new Api("k", () => {}, f).geocode("50 Albert St");
+    expect(f.mock.calls[0]![0]).toBe("/api/geocode?q=50%20Albert%20St");
+  });
+
   it("cancels a pick", async () => {
     const f = fakeFetch(200, { pick_id: "01J", status: "cancelled" });
     const view = await new Api("k", () => {}, f).cancelPick("01J");

@@ -4,6 +4,7 @@ import { z } from "zod";
 import {
   distanceM,
   GeocoderUnavailable,
+  MAX_ADDRESS_MATCHES,
   osmId,
   parseCuisine,
   PlacesUnavailable,
@@ -23,8 +24,8 @@ export const NOMINATIM_INTERVAL_MS = 1000;
 
 const searchResults = z.array(z.object({ lat: z.string(), lon: z.string(), display_name: z.string() }));
 
-/** Parse a `format=jsonv2` search; the first result wins (F1.2). */
-export function parseSearch(body: string): Location | null {
+/** Parse a `format=jsonv2` search: every result, best first (F1.2). */
+export function parseSearch(body: string): Location[] {
   let value: unknown;
   try {
     value = JSON.parse(body);
@@ -33,23 +34,57 @@ export function parseSearch(body: string): Location | null {
   }
   const r = searchResults.safeParse(value);
   if (!r.success) throw new GeocoderUnavailable(`bad Nominatim response: ${r.error.message}`);
-  const first = r.data[0];
-  if (!first) return null;
-  const lat = Number(first.lat);
-  const lon = Number(first.lon);
-  if (!Number.isFinite(lat) || !Number.isFinite(lon)) throw new GeocoderUnavailable("bad coordinates");
-  return { lat, lon, display_name: first.display_name };
+  return r.data.map((x) => {
+    const lat = Number(x.lat);
+    const lon = Number(x.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) throw new GeocoderUnavailable("bad coordinates");
+    return { lat, lon, display_name: x.display_name };
+  });
+}
+
+/** Addresses are searched in New Zealand unless GEOCODE_COUNTRIES says otherwise (F1.2). */
+export const DEFAULT_GEOCODE_COUNTRIES = "nz";
+
+/** ISO 3166-1 alpha-2 codes from a comma list such as GEOCODE_COUNTRIES ("nz,au"); empty = worldwide. */
+export function parseCountries(value: string | undefined): string[] {
+  return (value ?? "")
+    .split(",")
+    .map((c) => c.trim().toLowerCase())
+    .filter((c) => /^[a-z]{2}$/.test(c));
+}
+
+/** A Nominatim geocoder limited to GEOCODE_COUNTRIES (default "nz"; "" for worldwide). */
+export function nominatimFromEnv(env: NodeJS.ProcessEnv = process.env): Nominatim {
+  return new Nominatim({ countries: parseCountries(env.GEOCODE_COUNTRIES ?? DEFAULT_GEOCODE_COUNTRIES) });
+}
+
+export interface NominatimOptions {
+  /** Only match addresses in these countries (F1.2); empty searches worldwide. */
+  countries?: string[];
+  baseUrl?: string;
+  fetchFn?: Fetch;
+  now?: () => number;
+  wait?: (ms: number) => Promise<void>;
 }
 
 export class Nominatim implements Geocoder {
   private last = 0;
+  private readonly countries: string[];
+  private readonly baseUrl: string;
+  private readonly fetchFn: Fetch;
+  private readonly now: () => number;
+  private readonly wait: (ms: number) => Promise<void>;
 
-  constructor(
-    private readonly baseUrl = NOMINATIM_URL,
-    private readonly fetchFn: Fetch = fetch,
-    private readonly now: () => number = Date.now,
-    private readonly wait: (ms: number) => Promise<void> = sleep,
-  ) {}
+  readonly scope: string;
+
+  constructor(opts: NominatimOptions = {}) {
+    this.countries = opts.countries ?? [];
+    this.scope = this.countries.length > 0 ? this.countries.join(",") : "world";
+    this.baseUrl = opts.baseUrl ?? NOMINATIM_URL;
+    this.fetchFn = opts.fetchFn ?? fetch;
+    this.now = opts.now ?? Date.now;
+    this.wait = opts.wait ?? sleep;
+  }
 
   /** Wait until a second has passed since the previous request. */
   async throttle(): Promise<void> {
@@ -58,12 +93,18 @@ export class Nominatim implements Geocoder {
     this.last = this.now();
   }
 
-  async geocode(address: string): Promise<Location | null> {
+  /** The search URL (exported for tests). */
+  searchUrl(address: string): string {
+    const q = new URLSearchParams({ q: address, format: "jsonv2", limit: String(MAX_ADDRESS_MATCHES) });
+    if (this.countries.length > 0) q.set("countrycodes", this.countries.join(","));
+    return `${this.baseUrl}/search?${q}`;
+  }
+
+  async search(address: string): Promise<Location[]> {
     await this.throttle();
-    const q = new URLSearchParams({ q: address, format: "jsonv2", limit: "1" });
     let body: string;
     try {
-      body = await fetchText(`${this.baseUrl}/search?${q}`, { fetchFn: this.fetchFn, timeoutMs: 10_000 });
+      body = await fetchText(this.searchUrl(address), { fetchFn: this.fetchFn, timeoutMs: 10_000 });
     } catch (e) {
       throw new GeocoderUnavailable(String(e));
     }

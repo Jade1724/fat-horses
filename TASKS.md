@@ -82,6 +82,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 - [x] **T4.5 Lambda binaries and local server.** `crates/lambdas`: `api` (`lambda_http` wiring for T4.4, DynamoDB store, Step Functions starter, API key from SSM) and `workflow` (one §6 step per invocation via `app::workflow::run_step`). For UI development, `fat-horses serve --api-key … [--web web/dist]` runs the same API on localhost with picks in-process and the JSON-file store (replaces `cargo lambda watch`, which isn't installed).
   Needs: T4.4.
 - [x] **T4.6 Maximum wait and cancelling (F3.2, F10.5a, F12).** Requested by the owner: races must start within `max_wait_min` (default 10) or the pick fails at once; `POST /picks/{id}/cancel` plus a Cancel button; cancelled is final in every store. Tested in the stores' contract, workflow, API and web tests, and in a browser against live TAB data.
+- [x] **T4.7 Addresses in New Zealand, with a choice (F1.2, F1.3, F10.3).** Requested by the owner after "50 Albert Street" went to London: Nominatim limited to `GEOCODE_COUNTRIES` (default `nz`), up to 5 matches merged within 100 m, `GET /geocode`, 409 `ambiguous_address`, a "Which …?" list in the UI. Tested with recorded Nominatim responses and in a browser against live Nominatim.
 
 ## M5 Web UI (`web/`)
 

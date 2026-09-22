@@ -183,7 +183,10 @@ describe("cancel API (F12)", () => {
       this.cancelled.push(id);
     }
   }
-  const geocoder: Geocoder = { geocode: async () => ({ lat: -36.8, lon: 174.7, display_name: "x" }) };
+  const geocoder: Geocoder = {
+    scope: "nz",
+    search: async () => [{ lat: -36.8, lon: 174.7, display_name: "x" }],
+  };
   const post = (path: string, body: unknown = {}): ApiRequest => ({
     method: "POST",
     path,

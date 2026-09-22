@@ -2,9 +2,18 @@
 
 import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
+import { distinctLocations } from "../domain/places";
 import type { Race } from "../domain/race";
 import { hasEnoughRunners } from "../domain/race";
-import { buildQuery, Nominatim, Overpass, parseOverpass, parseSearch } from "./osm";
+import {
+  buildQuery,
+  Nominatim,
+  nominatimFromEnv,
+  Overpass,
+  parseCountries,
+  parseOverpass,
+  parseSearch,
+} from "./osm";
 import { parseEvent, parseMeetings, raceDays, RaceSourceUnavailable, TabNz } from "./tabNz";
 
 const fixture = (path: string) =>
@@ -106,28 +115,58 @@ describe("TAB NZ", () => {
 });
 
 describe("Nominatim", () => {
-  it("parses the first result or none", () => {
-    const loc = parseSearch(fixture("nominatim/sky_tower.json"))!;
-    expect(loc.lat).toBeCloseTo(-36.8484632, 6);
-    expect(loc.lon).toBeCloseTo(174.762183, 6);
-    expect(loc.display_name.startsWith("Sky Tower")).toBe(true);
-    expect(parseSearch(fixture("nominatim/not_found.json"))).toBeNull();
+  it("parses every result, best first", () => {
+    const [loc] = parseSearch(fixture("nominatim/sky_tower.json"));
+    expect(loc?.lat).toBeCloseTo(-36.8484632, 6);
+    expect(loc?.lon).toBeCloseTo(174.762183, 6);
+    expect(loc?.display_name.startsWith("Sky Tower")).toBe(true);
+    expect(parseSearch(fixture("nominatim/albert_street_nz.json"))).toHaveLength(5);
+    expect(parseSearch(fixture("nominatim/not_found.json"))).toEqual([]);
     expect(() => parseSearch("<html>")).toThrow();
     expect(() => parseSearch('[{"lat":"x","lon":"1","display_name":"a"}]')).toThrow();
+  });
+
+  it("the country filter is what keeps London out (recorded responses)", () => {
+    const world = parseSearch(fixture("nominatim/albert_street_world.json"));
+    const nz = parseSearch(fixture("nominatim/albert_street_nz.json"));
+    expect(world[0]?.display_name).toContain("London");
+    expect(nz.every((l) => l.display_name.endsWith("New Zealand / Aotearoa"))).toBe(true);
+    expect(nz.some((l) => l.display_name.includes("City Centre, Auckland"))).toBe(true);
+  });
+
+  it("merges several OSM objects for one place, keeps different places", () => {
+    expect(distinctLocations(parseSearch(fixture("nominatim/sky_tower_nz.json")))).toHaveLength(1);
+    expect(distinctLocations(parseSearch(fixture("nominatim/albert_street_nz.json")))).toHaveLength(5);
+  });
+
+  it("limits the search to the configured countries", () => {
+    const nz = new URL(new Nominatim({ countries: ["nz"] }).searchUrl("50 Albert Street"));
+    expect(nz.searchParams.get("countrycodes")).toBe("nz");
+    expect(nz.searchParams.get("limit")).toBe("5");
+    expect(nz.searchParams.get("q")).toBe("50 Albert Street");
+    expect(new URL(new Nominatim().searchUrl("x")).searchParams.has("countrycodes")).toBe(false);
+    expect(new Nominatim({ countries: ["nz", "au"] }).scope).toBe("nz,au");
+    expect(new Nominatim().scope).toBe("world");
+  });
+
+  it("reads GEOCODE_COUNTRIES, defaulting to New Zealand", () => {
+    expect(parseCountries(" NZ, au ,x, usa")).toEqual(["nz", "au"]);
+    expect(parseCountries("")).toEqual([]);
+    expect(nominatimFromEnv({}).scope).toBe("nz");
+    expect(nominatimFromEnv({ GEOCODE_COUNTRIES: "" }).scope).toBe("world");
+    expect(nominatimFromEnv({ GEOCODE_COUNTRIES: "au" }).scope).toBe("au");
   });
 
   it("waits a second between requests", async () => {
     let now = 1_000;
     const waits: number[] = [];
-    const n = new Nominatim(
-      "https://n.test",
-      fetch,
-      () => now,
-      async (ms) => {
+    const n = new Nominatim({
+      now: () => now,
+      wait: async (ms) => {
         waits.push(ms);
         now += ms;
       },
-    );
+    });
     await n.throttle();
     now += 300;
     await n.throttle();

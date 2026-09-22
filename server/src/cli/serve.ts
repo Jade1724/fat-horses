@@ -4,7 +4,7 @@
 import { createReadStream, existsSync, statSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { extname, join, normalize } from "node:path";
-import { Nominatim, Overpass } from "../adapters/osm";
+import { nominatimFromEnv, Overpass } from "../adapters/osm";
 import { identityFromEnv, TabNz } from "../adapters/tabNz";
 import { Api, type WorkflowStarter } from "../app/api";
 import { defaultConfig, runPick, systemClock, type Deps } from "../app/workflow";
@@ -75,7 +75,7 @@ export function serve(store: Store, port: number, apiKey: string, webDir?: strin
     config: defaultConfig(),
   };
   const api = new Api({
-    geocoder: new Nominatim(),
+    geocoder: nominatimFromEnv(),
     store,
     starter: new LocalStarter(deps),
     countries: deps.countries,

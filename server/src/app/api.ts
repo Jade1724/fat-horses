@@ -19,7 +19,15 @@ import {
 } from "../domain/store";
 import type { Iso } from "../domain/time";
 import { log } from "../log";
-import { AddressNotFound, InvalidRequest, newPickId, startInput, startPick } from "./start";
+import {
+  AddressNotFound,
+  AmbiguousAddress,
+  InvalidRequest,
+  lookupAddress,
+  newPickId,
+  startInput,
+  startPick,
+} from "./start";
 
 export interface ApiRequest {
   method: string;
@@ -80,6 +88,7 @@ type Route =
   | { kind: "visit"; id: string }
   | { kind: "skip"; id: string }
   | { kind: "countries" }
+  | { kind: "geocode" }
   | { kind: "history" };
 
 function route(method: string, rawPath: string): Route | null {
@@ -92,6 +101,7 @@ function route(method: string, rawPath: string): Route | null {
   if (method === "GET") {
     if (path === "/restaurants/picked") return { kind: "picked" };
     if (path === "/countries") return { kind: "countries" };
+    if (path === "/geocode") return { kind: "geocode" };
     if (path === "/history") return { kind: "history" };
     const m = /^\/picks\/([^/]+)$/.exec(path);
     return m?.[1] ? { kind: "pick", id: m[1] } : null;
@@ -163,6 +173,8 @@ export class Api {
           return ok(await recordSkip(this.deps.store, r.id, now));
         case "countries":
           return await this.countries(req.query.min_population);
+        case "geocode":
+          return await this.geocode(req.query.q, now);
         case "history":
           return ok(await this.deps.store.history(req.query.cursor ?? null, HISTORY_PAGE));
       }
@@ -180,6 +192,12 @@ export class Api {
     } catch (e) {
       if (e instanceof InvalidRequest) return error(422, "invalid_request", e.message);
       if (e instanceof AddressNotFound) return error(422, "address_not_found", e.message);
+      if (e instanceof AmbiguousAddress) {
+        return {
+          status: 409,
+          body: { error: "ambiguous_address", message: e.message, matches: e.matches },
+        };
+      }
       if (e instanceof GeocoderUnavailable) {
         log.error("geocoder unavailable", { error: e.message });
         return error(503, "internal", "geocoder unavailable");
@@ -208,6 +226,22 @@ export class Api {
         .catch((e: unknown) => log.warn("workflow stop failed", { pick_id: id, error: String(e) }));
     }
     return ok(await this.pickView(s));
+  }
+
+  /** F1.2: the distinct places matching an address, so the user can choose one. */
+  private async geocode(q: string | undefined, now: Iso): Promise<ApiResponse> {
+    const address = q?.trim();
+    if (!address) return error(422, "invalid_request", "q is required");
+    if (address.length > 300) return error(422, "invalid_request", "q is too long");
+    try {
+      return ok({ matches: await lookupAddress(this.deps.geocoder, this.deps.store, address, now) });
+    } catch (e) {
+      if (e instanceof GeocoderUnavailable) {
+        log.error("geocoder unavailable", { error: e.message });
+        return error(503, "internal", "geocoder unavailable");
+      }
+      throw e;
+    }
   }
 
   private async getPick(id: string): Promise<ApiResponse> {

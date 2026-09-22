@@ -83,6 +83,13 @@ export function pinKind(status: RestaurantStatus, chosen: boolean): PinKind {
   return "new";
 }
 
+/** A shorter address for choice lists: without the country at the end. */
+export function shortAddress(displayName: string): string {
+  const parts = displayName.split(",").map((p) => p.trim());
+  if (parts.length > 2) parts.pop();
+  return parts.join(", ");
+}
+
 export function distanceText(m: number): string {
   return m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`;
 }

@@ -7,18 +7,35 @@ import { recordPick } from "../domain/store";
 import { contractRestaurant } from "../store/contract";
 import { MemoryStore } from "../store/state";
 import { Api, constantTimeEqual, type ApiRequest, type WorkflowStarter } from "./api";
-import { AddressNotFound, InvalidRequest, newPickId, startPick, type StartInput } from "./start";
+import {
+  AddressNotFound,
+  AmbiguousAddress,
+  InvalidRequest,
+  lookupAddress,
+  newPickId,
+  startPick,
+  type StartInput,
+} from "./start";
 
 const NOW = "2026-09-21T10:00:00.000Z";
 const KEY = "s3cret-key";
 
+const SKY_TOWER: Location = { lat: -36.8485, lon: 174.7622, display_name: "Sky Tower, Auckland" };
+const ALBERT_STREETS: Location[] = [
+  { lat: -36.94037, lon: 174.85203, display_name: "50, Albert Street, Ōtāhuhu, Auckland" },
+  { lat: -36.84642, lon: 174.7646, display_name: "50, Albert Street, City Centre, Auckland" },
+];
+
 class FakeGeocoder implements Geocoder {
+  readonly scope = "nz";
   calls = 0;
-  async geocode(address: string): Promise<Location | null> {
+  async search(address: string): Promise<Location[]> {
     this.calls++;
     if (address === "down") throw new GeocoderUnavailable("503");
-    if (address.includes("nowhere")) return null;
-    return { lat: -36.8485, lon: 174.7622, display_name: "Sky Tower, Auckland" };
+    if (address.includes("nowhere")) return [];
+    if (address.includes("Albert")) return ALBERT_STREETS;
+    // Three OSM objects for one building, as Nominatim returns for "Sky Tower".
+    return [SKY_TOWER, { ...SKY_TOWER, lat: -36.84809 }, { ...SKY_TOWER, lon: 174.76213 }];
   }
 }
 
@@ -85,6 +102,46 @@ describe("startPick (F1)", () => {
     await expect(startPick(new FakeGeocoder(), new MemoryStore(), address("down"), "p", NOW)).rejects.toThrow(
       GeocoderUnavailable,
     );
+  });
+
+  it("one place, even when the geocoder returns it several times", async () => {
+    const s = await startPick(new FakeGeocoder(), new MemoryStore(), address("Sky Tower"), "p", NOW);
+    expect(s.location).toEqual(SKY_TOWER);
+  });
+
+  it("several places: the caller must choose", async () => {
+    const err = await startPick(
+      new FakeGeocoder(),
+      new MemoryStore(),
+      address("50 Albert Street"),
+      "p",
+      NOW,
+    ).catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(AmbiguousAddress);
+    expect((err as AmbiguousAddress).matches).toEqual(ALBERT_STREETS);
+  });
+
+  it("a chosen match starts with its address as the label", async () => {
+    const [chosen] = ALBERT_STREETS;
+    const s = await startPick(
+      new FakeGeocoder(),
+      new MemoryStore(),
+      { lat: chosen!.lat, lon: chosen!.lon, label: chosen!.display_name },
+      "p",
+      NOW,
+    );
+    expect(s.location).toEqual(chosen);
+  });
+
+  it("the cache is per geocoder scope", async () => {
+    const cache = new MemoryStore();
+    const nz = new FakeGeocoder();
+    await lookupAddress(nz, cache, "Sky Tower", NOW);
+    await lookupAddress(nz, cache, "Sky Tower", NOW);
+    expect(nz.calls).toBe(1);
+    const world = Object.assign(new FakeGeocoder(), { scope: "world" });
+    await lookupAddress(world, cache, "Sky Tower", NOW);
+    expect(world.calls).toBe(1);
   });
 
   it("pick ids are time-ordered ULIDs", () => {
@@ -197,6 +254,33 @@ describe("API (§5)", () => {
       "internal",
     ]);
     expect(errorOf(await a.handle(get("/picks/nope"), NOW))).toEqual([404, "not_found"]);
+  });
+
+  it("lists address matches (F1.2)", async () => {
+    const { api: a } = api();
+    const r = await a.handle(get("/geocode", { q: "50 Albert Street" }), NOW);
+    expect(r.status).toBe(200);
+    expect(r.body).toEqual({ matches: ALBERT_STREETS });
+    const one = await a.handle(get("/geocode", { q: "Sky Tower" }), NOW);
+    expect(one.body).toEqual({ matches: [SKY_TOWER] });
+    const none = await a.handle(get("/geocode", { q: "nowhere" }), NOW);
+    expect(none.body).toEqual({ matches: [] });
+    expect(errorOf(await a.handle(get("/geocode"), NOW))).toEqual([422, "invalid_request"]);
+    expect(errorOf(await a.handle(get("/geocode", { q: "down" }), NOW))).toEqual([503, "internal"]);
+  });
+
+  it("an ambiguous address is 409 with the matches", async () => {
+    const { api: a, starter } = api();
+    const r = await a.handle(post("/picks", { address: "50 Albert Street" }), NOW);
+    expect(r.status).toBe(409);
+    expect(r.body).toMatchObject({ error: "ambiguous_address", matches: ALBERT_STREETS });
+    expect(starter.started).toEqual([]);
+    const chosen = ALBERT_STREETS[1]!;
+    const ok = await a.handle(
+      post("/picks", { lat: chosen.lat, lon: chosen.lon, label: chosen.display_name }),
+      NOW,
+    );
+    expect(ok.status).toBe(202);
   });
 
   it("picked, visit and skip", async () => {

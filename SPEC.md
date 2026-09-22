@@ -27,8 +27,8 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 
 ### F1. Starting a pick
 - **F1.1** Input: `address` (free text) **or** `{lat, lon}`; `radius_m` (default **200**, allowed 50–2000); `min_population` (default **10 000 000**); `include_visited` (default **false**); `max_wait_min` (default **10**, allowed 5–180).
-- **F1.2** A free-text address is geocoded synchronously with Nominatim before the pick starts. The first result is used. No result → HTTP 422 `address_not_found`; nothing is stored.
-- **F1.3** Geocode results are cached (key = normalised address, lowercase + collapsed whitespace; 30 days).
+- **F1.2** Addresses are geocoded with Nominatim, **limited to the countries in `GEOCODE_COUNTRIES`** (default `nz`; empty = worldwide), up to 5 matches. Matches within 100 m of a better one are the same place and are merged. The web UI calls `GET /geocode` first: one match starts the pick at its coordinates (with the address as `label`); several are shown for the user to choose; none → "Couldn't find that address". `POST /picks` with a free-text address: no match → HTTP 422 `address_not_found`; several → HTTP 409 `ambiguous_address` with the matches; nothing is stored in either case. The CLI lists the matches and asks for a more specific address.
+- **F1.3** Geocode matches are cached (key = geocoder scope, e.g. `nz`, plus the normalised address, lowercase + collapsed whitespace; 30 days).
 - **F1.4** Starting a pick stores a pick session with status `finding_race` and starts the workflow (§6). Returns `pick_id` immediately.
 
 ### F2. Country pool
@@ -95,7 +95,7 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 ### F10. Web UI
 - **F10.1** One-page app with three views: **Pick** (default), **Passport**, **History**. Must be usable at 360 px width.
 - **F10.2** First visit: ask for the API key and keep it in `localStorage`. A 401 response clears it and asks again.
-- **F10.3** Pick view: address field; advanced options (radius, min population, include visited). A map (MapLibre + OpenFreeMap tiles) centred on the location with the radius circle.
+- **F10.3** Pick view: address field; advanced options (radius, min population, include visited). An ambiguous address shows "Which …?" with the matches, without the country, as buttons (F1.2). A map (MapLibre + OpenFreeMap tiles) centred on the location with the radius circle.
 - **F10.4** While the pick runs: poll `GET /api/picks/{id}` every **5 s**; show the status and the race card (number, horse, flag + country, scratched state) with a countdown to the start, and a **Cancel** button (F12). The countdown stops once the pick has finished or been cancelled.
 - **F10.5** When done: the winner (horse + country, with a note for dead heat, abandoned or timeout); a pin for every match. Pin colours by status: new, `PICKED`, `VISITED`. The pick is highlighted with a card showing name, cuisine, address, match type (`likely` badge + reason for inferred/fallback) and a directions link (`https://www.google.com/maps/dir/?api=1&destination=<lat>,<lon>`).
 - **F10.5a** Options include "Race must start within": 10 minutes (default), 30 minutes, 1 hour, 3 hours (F3.2).
@@ -178,8 +178,9 @@ All paths are under `/api`; JSON in and out; errors are `{"error": "<code>", "me
 
 | Method | Path | Request | Response |
 |---|---|---|---|
-| POST | `/picks` | `{address?, lat?, lon?, radius_m?, min_population?, include_visited?, max_wait_min?}` (exactly one of address or lat+lon) | 202 `{pick_id}`; 422 `address_not_found` / `invalid_request` |
+| POST | `/picks` | `{address?, lat?, lon?, label?, radius_m?, min_population?, include_visited?, max_wait_min?}` (exactly one of address or lat+lon; `label` names the place for lat+lon) | 202 `{pick_id}`; 422 `address_not_found` / `invalid_request`; 409 `ambiguous_address` with `matches` |
 | POST | `/picks/{id}/cancel` | – | 200 pick view (F12); 404 |
+| GET | `/geocode` | `?q=<address>` | 200 `{matches: [{lat, lon, display_name}]}` (0–5, best first); 422 without `q` |
 | GET | `/picks/{id}` | – | 200 pick view (below); 404 |
 | GET | `/restaurants/picked` | – | 200 restaurant or `null` |
 | POST | `/restaurants/{id}/visit` | `{restaurant?: {name, lat, lon, address, cuisine, country_iso}}` (required when the restaurant isn't stored yet) | 200 restaurant; 409 `invalid_transition` |
@@ -215,6 +216,7 @@ Each step's output has `failed` (true for failed or cancelled picks) and `cancel
 
 Infrastructure (Terraform in `infra/`, S3 state backend with native lock file):
 - CloudFront: `/` → private S3 site bucket (OAC); `/api/*` → API Gateway HTTP API → `api` Lambda.
+- `api` Lambda environment includes `GEOCODE_COUNTRIES` (default `nz`, F1.2).
 - Lambdas: TypeScript on the managed **Node.js 22** runtime (`nodejs22.x`), arm64, one esbuild bundle per handler (`make build-lambdas`); the AWS SDK v3 comes from the runtime. Chosen over Rust on the OS-only runtime because a managed runtime is easier to operate.
 - Step Functions state machine, DynamoDB table (§4.2), SSM SecureString `/fat-horses/api-key`.
 - IAM: least privilege per Lambda; `bedrock:InvokeModel` only on the configured model/profile; the `api` Lambda may `states:StartExecution` and `states:StopExecution` on the pick state machine only.
@@ -263,6 +265,7 @@ Betting or TAB login; multiple users; ratings, notes or reviews; ranking by rati
 | Question | Default in this spec |
 |---|---|
 | AWS region | `ap-southeast-2` (§6) |
+| Where addresses are searched | New Zealand (`GEOCODE_COUNTRIES=nz`), with a choice when several places match (F1.2) |
 | How long to wait for a race | 10 minutes by default, up to 3 hours by choice (F3.2) |
 | `fast_food` / `cafe` count as restaurants? | `fast_food` yes, `cafe` no; configurable (F6.1) |
 | Fallback widens the radius? | No (F6.7) |

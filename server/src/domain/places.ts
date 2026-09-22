@@ -34,9 +34,25 @@ export interface Location {
 
 export class GeocoderUnavailable extends Error {}
 
+/** Most matches offered for an address (F1.2). */
+export const MAX_ADDRESS_MATCHES = 5;
+/** Matches closer than this are the same place (one building, several OSM objects). */
+export const SAME_PLACE_M = 100;
+
 export interface Geocoder {
-  /** null means no match (F1.2). */
-  geocode(address: string): Promise<Location | null>;
+  /** Which part of the world it searches (e.g. "nz"); part of the cache key. */
+  readonly scope: string;
+  /** Up to MAX_ADDRESS_MATCHES matches, best first; empty for none (F1.2). */
+  search(address: string): Promise<Location[]>;
+}
+
+/** Drop matches within SAME_PLACE_M of a better one, keeping order. */
+export function distinctLocations(locations: readonly Location[]): Location[] {
+  const out: Location[] = [];
+  for (const l of locations) {
+    if (!out.some((o) => distanceM(o.lat, o.lon, l.lat, l.lon) < SAME_PLACE_M)) out.push(l);
+  }
+  return out;
 }
 
 export function osmId(kind: string, id: number): string {

@@ -8,6 +8,7 @@ import {
   isFinished,
   osmUrl,
   pinKind,
+  shortAddress,
   statusText,
   winReasonText,
 } from "./format";
@@ -96,6 +97,15 @@ describe("circleRing", () => {
     const [lon, lat] = ring[2]!; // 90°: due north
     expect(lon).toBeCloseTo(174.76, 6);
     expect((lat + 36.85) * 111_195).toBeCloseTo(200, 0);
+  });
+});
+
+describe("shortAddress", () => {
+  it("drops the country", () => {
+    expect(shortAddress("50, Albert Street, City Centre, Auckland, 1010, New Zealand / Aotearoa")).toBe(
+      "50, Albert Street, City Centre, Auckland, 1010",
+    );
+    expect(shortAddress("Auckland, New Zealand")).toBe("Auckland, New Zealand");
   });
 });
 

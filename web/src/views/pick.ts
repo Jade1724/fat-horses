@@ -1,7 +1,16 @@
 // The Pick view: form, map, race progress and results (SPEC.md F10.3–F10.8).
 
 import { ApiError } from "../api";
-import type { Api, PickRestaurant, PickView, Race, StartPick, StoredRestaurant, Winner } from "../api";
+import type {
+  AddressMatch,
+  Api,
+  PickRestaurant,
+  PickView,
+  Race,
+  StartPick,
+  StoredRestaurant,
+  Winner,
+} from "../api";
 import { clear, h } from "../dom";
 import {
   countdown,
@@ -10,6 +19,7 @@ import {
   errorText,
   isFinished,
   osmUrl,
+  shortAddress,
   statusText,
   winReasonText,
 } from "../format";
@@ -125,27 +135,65 @@ export class PickPage {
     return form;
   }
 
+  /** Look the address up first (F1.2): start at once for one match, ask for several. */
   private async submit(input: StartPick & { address: string }, button: HTMLButtonElement): Promise<void> {
     if (!input.address) return;
+    this.stop(); // an earlier pick's polling would redraw over the choice list
     button.disabled = true;
+    this.showMessage("Looking up the address…");
+    try {
+      const { matches } = await this.api.geocode(input.address);
+      const [only] = matches;
+      if (!only) {
+        this.showMessage("Couldn't find that address. Try adding the suburb or city.", true);
+      } else if (matches.length === 1) {
+        await this.startAt(input, only);
+      } else {
+        this.showChoices(input, matches);
+      }
+    } catch {
+      this.showMessage("Couldn't look up the address. Try again.", true);
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  /** Several places match: let the user choose one. */
+  private showChoices(input: StartPick & { address: string }, matches: AddressMatch[]): void {
+    clear(this.panel);
+    const list = h("ul", { class: "choices" });
+    for (const m of matches) {
+      const b = h("button", { type: "button", class: "choice" }, shortAddress(m.display_name));
+      b.addEventListener("click", () => {
+        for (const x of list.querySelectorAll("button")) x.disabled = true;
+        void this.startAt(input, m);
+      });
+      list.append(h("li", {}, b));
+    }
+    this.panel.append(h("p", { class: "message" }, `Which "${input.address}"?`), list);
+  }
+
+  private async startAt(input: StartPick & { address: string }, place: AddressMatch): Promise<void> {
     this.showMessage("Starting…");
     try {
-      const { pick_id } = await this.api.startPick(input);
-      storage.setLastAddress(input.address);
+      const { address, ...options } = input;
+      const { pick_id } = await this.api.startPick({
+        ...options,
+        lat: place.lat,
+        lon: place.lon,
+        label: place.display_name,
+      });
+      storage.setLastAddress(address);
       storage.setLastPick(pick_id);
       this.selected = null;
       await this.load(pick_id);
     } catch (e) {
       this.showMessage(
-        e instanceof ApiError && e.code === "address_not_found"
-          ? "Couldn't find that address. Try adding the suburb or city."
-          : e instanceof ApiError && e.code === "invalid_request"
-            ? e.message
-            : "Couldn't start a pick. Try again.",
+        e instanceof ApiError && e.code === "invalid_request"
+          ? e.message
+          : "Couldn't start a pick. Try again.",
         true,
       );
-    } finally {
-      button.disabled = false;
     }
   }
 

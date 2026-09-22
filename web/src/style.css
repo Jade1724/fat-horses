@@ -634,3 +634,17 @@ select {
   justify-content: space-between;
   gap: 0.5rem;
 }
+
+.choices {
+  list-style: none;
+  padding: 0;
+  margin: 0.4rem 0 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.choice {
+  width: 100%;
+  text-align: left;
+  border-radius: 8px;
+}

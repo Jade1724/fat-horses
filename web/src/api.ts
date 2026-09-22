@@ -120,6 +120,14 @@ export interface StartPick {
   min_population?: number;
   include_visited?: boolean;
   max_wait_min?: number;
+  /** With lat+lon: the address to show (a match chosen from `geocode`). */
+  label?: string;
+}
+
+export interface AddressMatch {
+  lat: number;
+  lon: number;
+  display_name: string;
 }
 
 export interface VisitDetails {
@@ -181,6 +189,11 @@ export class Api {
 
   startPick(input: StartPick): Promise<{ pick_id: string }> {
     return this.call("POST", "/picks", input);
+  }
+
+  /** Places matching an address, best first (F1.2). */
+  geocode(q: string): Promise<{ matches: AddressMatch[] }> {
+    return this.call("GET", `/geocode?q=${encodeURIComponent(q)}`);
   }
 
   /** Cancel a pick that is still in progress (F12); returns the updated view. */
