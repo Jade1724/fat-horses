@@ -150,6 +150,15 @@ describe("cancelling (F12)", () => {
     expect(await d.store.currentlyPicked()).toBeNull();
   });
 
+  it("the fail step marks an unfinished pick failed, and leaves finished ones", async () => {
+    const d = deps([race(8)]);
+    await d.store.putPick({ ...session(), status: "running" });
+    expect(await runStep(d, "fail", "p1", T0, seeded(1))).toMatchObject({ status: "failed", failed: true });
+    expect((await d.store.getPick("p1"))?.error).toBe("internal");
+    await d.store.putPick({ ...session(), pick_id: "p2", status: "done" });
+    expect((await runStep(d, "fail", "p2", T0, seeded(1))).status).toBe("done");
+  });
+
   it("runStep leaves a cancelled pick alone", async () => {
     const d = deps([race(8)]);
     await d.store.putPick(session());

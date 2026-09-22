@@ -314,8 +314,12 @@ export async function runPick(
   return s;
 }
 
-/** One Step Functions task (§6): start → prepare_nearby → wait → check_result (loop) → finish. */
-export type Step = "start" | "prepare_nearby" | "check_result" | "finish";
+/**
+ * One Step Functions task (§6): start → prepare_nearby → wait → check_result
+ * (loop) → finish. `fail` is the error handler's: it marks a pick whose step
+ * kept failing as failed, so it doesn't stay mid-way forever.
+ */
+export type Step = "start" | "prepare_nearby" | "check_result" | "finish" | "fail";
 
 export interface StepOutput {
   pick_id: string;
@@ -358,6 +362,8 @@ export async function runStep(
     s = await prepareNearby(deps, s, now);
   } else if (step === "check_result" && !s.winner) {
     s = await checkResult(deps, s, now, rng);
+  } else if (step === "fail") {
+    s = failed(s, "internal");
   } else if (step === "finish") {
     s = await ensurePlaces(deps, s, now);
     if (s.status !== "failed")

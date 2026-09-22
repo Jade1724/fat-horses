@@ -1,10 +1,10 @@
 # `make check` is the single source of truth for "is the code good?".
 # It must pass before any change is considered done.
 
-.PHONY: check server-check web-check fmt build-lambdas web-build it
+.PHONY: check server-check web-check infra-fmt-check fmt build-lambdas web-build it infra-bootstrap infra-init infra-plan deploy
 
 ## Run every gate for both packages: format, types, lint, tests.
-check: server-check web-check
+check: server-check web-check infra-fmt-check
 	@echo "check: OK"
 
 ## Install dependencies when a lock file changes.
@@ -22,10 +22,15 @@ server-check: server/node_modules/.package-lock.json
 web-check: web/node_modules/.package-lock.json
 	cd web && npm run -s fmt-check && npm run -s typecheck && npm run -s lint && npm test -s
 
-## Format both packages in place.
+## Terraform formatting (offline; `make infra-plan` validates with AWS).
+infra-fmt-check:
+	$(TERRAFORM) -chdir=infra fmt -check -recursive
+
+## Format everything in place.
 fmt: server/node_modules/.package-lock.json web/node_modules/.package-lock.json
 	cd server && npm run -s fmt
 	cd web && npm run -s fmt
+	$(TERRAFORM) -chdir=infra fmt -recursive
 
 ## Bundle the Lambda handlers into server/dist/lambda/<name>/index.mjs.
 build-lambdas: server/node_modules/.package-lock.json
@@ -34,6 +39,29 @@ build-lambdas: server/node_modules/.package-lock.json
 ## Production build of the web UI into web/dist.
 web-build: web/node_modules/.package-lock.json
 	cd web && npm run -s build
+
+TERRAFORM ?= terraform
+export AWS_PROFILE ?= fat-horses
+
+## One-off: Terraform state bucket, infra/backend.hcl and infra/terraform.tfvars (BUDGET_EMAIL=...).
+infra-bootstrap:
+	scripts/infra-bootstrap.sh
+
+infra-init:
+	$(TERRAFORM) -chdir=infra init -input=false -backend-config=backend.hcl
+
+## Build and show what `make deploy` would change.
+infra-plan: build-lambdas infra-init
+	$(TERRAFORM) -chdir=infra validate
+	$(TERRAFORM) -chdir=infra plan -input=false
+
+## Build, apply, upload the site, then smoke-test.
+deploy: build-lambdas web-build infra-init
+	$(TERRAFORM) -chdir=infra validate
+	$(TERRAFORM) -chdir=infra apply -input=false
+	aws s3 sync web/dist "s3://$$($(TERRAFORM) -chdir=infra output -raw site_bucket)" --delete
+	aws cloudfront create-invalidation --distribution-id "$$($(TERRAFORM) -chdir=infra output -raw distribution_id)" --paths "/*" >/dev/null
+	scripts/smoke-test.sh "$$($(TERRAFORM) -chdir=infra output -raw url)"
 
 DYNAMODB_LOCAL_IMAGE ?= amazon/dynamodb-local:latest
 

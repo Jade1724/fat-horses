@@ -1,5 +1,5 @@
 // One pick-workflow step per invocation, called by Step Functions (SPEC.md §6).
-// Input: {"step": "start" | "prepare_nearby" | "check_result" | "finish", "pick_id": "…", "user": "…"}.
+// Input: {"step": "start" | "prepare_nearby" | "check_result" | "finish" | "fail", "pick_id": "…", "user": "…"}.
 // Output: StepOutput. Environment: TABLE_NAME.
 
 import { z } from "zod";
@@ -11,7 +11,7 @@ import type { DynamoStores } from "../store/dynamo";
 import { dynamoStores, workflowDeps } from "./env";
 
 export const stepInput = z.object({
-  step: z.enum(["start", "prepare_nearby", "check_result", "finish"]),
+  step: z.enum(["start", "prepare_nearby", "check_result", "finish", "fail"]),
   pick_id: z.string().min(1),
   user: z.string().refine(isValidUser, "bad user").default(DEFAULT_USER),
 });

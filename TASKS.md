@@ -99,16 +99,16 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 
 ## M6 Infrastructure (`infra/`)
 
-- [ ] **T6.1 [human] AWS account setup.** The owner creates or chooses the AWS account and a deploy role/profile, the S3 state bucket, and the budget alert email; writes the names into `infra/README.md`.
-- [ ] **T6.2 Terraform scaffold.** Providers, S3 backend (native lock file), variables, `make check` gains `terraform fmt -check` and `terraform validate` (with `-backend=false`).
+- [ ] **T6.1 [human] AWS account setup.** The owner creates the `fat-horses` AWS CLI profile and runs `BUDGET_EMAIL=… make infra-bootstrap` (state bucket, `backend.hcl`, `terraform.tfvars`). AWS CLI and Terraform are installed in `~/.local/bin`.
+- [x] **T6.2 Terraform scaffold.** Providers, S3 backend (native lock file), variables; `make check` runs `terraform fmt -check` (offline); `make infra-plan`/`deploy` validate.
   Needs: T6.1.
-- [ ] **T6.3 Data resources.** DynamoDB table (§4.2: keys, TTL, PITR, on-demand) and the SSM parameter (value set by hand, not in state).
-- [ ] **T6.4 Lambdas.** `make build-lambdas` (esbuild bundles); Terraform Lambda functions on `nodejs22.x`, arm64, log groups (14-day retention), least-privilege IAM, including Bedrock (§6).
-- [ ] **T6.5 Step Functions state machine (§6).** Definition file with Wait states, the result loop, retries, the 45-min timeout and the failure path (stop when a step returns `failed`, which includes cancelled picks).
-- [ ] **T6.6 API Gateway + CloudFront + S3 site (§6, F11.2).** Throttling, OAC, `/api/*` behaviour, SPA fallback to `index.html`.
-- [ ] **T6.7 Budget alarm (§6).**
-- [ ] **T6.8 `make deploy` + smoke test.** Build, `terraform apply`, upload `web/dist`, then a scripted smoke test: 401 without key, POST pick → reaches `waiting_start`.
-- [ ] **T6.9 [human] First deploy.** The owner runs `make deploy` and one real pick in the browser.
+- [x] **T6.3 Data resources.** DynamoDB table (§4.2: keys, TTL, PITR, on-demand) and the SSM parameter (value set by hand, not in state).
+- [x] **T6.4 Lambdas.** `make build-lambdas` (esbuild bundles); Terraform Lambda functions on `nodejs22.x`, arm64, log groups (14-day retention), least-privilege IAM (§6). Bedrock permissions come with T3.9.
+- [x] **T6.5 Step Functions state machine (§6).** Definition file with Wait states, the result loop, retries, the 45-min timeout and the failure path (stop when a step returns `failed`, which includes cancelled picks).
+- [x] **T6.6 API Gateway + CloudFront + S3 site (§6, F11.2).** Throttling, OAC, `/api/*` behaviour. No SPA fallback: the UI uses hash routes, and a distribution-wide error page would also rewrite API 404s.
+- [x] **T6.7 Budget alarm (§6).**
+- [x] **T6.8 `make deploy` + smoke test.** Build, `terraform apply`, upload `web/dist`, then a scripted smoke test: the site loads and the API answers 401 without a key (503 until keys are set).
+- [ ] **T6.9 [human] First deploy.** The owner runs `make deploy`, `scripts/set-api-keys.sh <users>`, and one real pick in the browser. (T6.2–T6.8 are written and validated offline; they count as done only once this deploy works.)
   Needs: T6.8.
 
 ## M7 LLM fallback
