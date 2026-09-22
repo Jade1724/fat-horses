@@ -4,6 +4,7 @@ import type { PickSession } from "../domain/session";
 import type { LogEntry, Restaurant } from "../domain/status";
 import {
   ConflictError,
+  PickCancelled,
   logKey,
   pickedAfter,
   type CachedGuess,
@@ -103,6 +104,9 @@ export class StateStore implements Store {
   }
 
   async putPick(session: PickSession) {
+    if (this.data.picks[session.pick_id]?.status === "cancelled" && session.status !== "cancelled") {
+      throw new PickCancelled(session.pick_id);
+    }
     await this.write((d) => {
       d.picks[session.pick_id] = clone(session);
     });

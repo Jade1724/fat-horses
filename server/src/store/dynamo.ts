@@ -5,6 +5,7 @@
 import {
   CreateTableCommand,
   DynamoDBClient,
+  ConditionalCheckFailedException,
   TransactionCanceledException,
   type DynamoDBClientConfig,
 } from "@aws-sdk/client-dynamodb";
@@ -25,6 +26,7 @@ import {
   logKey,
   pickedAfter,
   PICK_TTL_MS,
+  PickCancelled,
   StoreUnavailable,
   type CachedGuess,
   type CachedLocation,
@@ -227,8 +229,27 @@ export class DynamoStore implements Store {
     return this.getData<PickSession>(`PICK#${pickId}`, META);
   }
 
-  putPick(s: PickSession) {
-    return this.putData(`PICK#${s.pick_id}`, META, s, ttl(s.created_at, PICK_TTL_MS));
+  /** A cancelled pick carries a top-level `cancelled` flag; other writes must not find it (F12.2). */
+  async putPick(s: PickSession) {
+    const cancelled = s.status === "cancelled";
+    try {
+      await this.doc.send(
+        new PutCommand({
+          TableName: this.table,
+          Item: {
+            pk: `PICK#${s.pick_id}`,
+            sk: META,
+            data: JSON.stringify(s),
+            ttl: ttl(s.created_at, PICK_TTL_MS),
+            cancelled: cancelled ? true : undefined,
+          },
+          ConditionExpression: cancelled ? undefined : "attribute_not_exists(cancelled)",
+        }),
+      );
+    } catch (e) {
+      if (e instanceof ConditionalCheckFailedException) throw new PickCancelled(s.pick_id);
+      throw new StoreUnavailable(String(e));
+    }
   }
 
   getGuess(placeId: string, promptVersion: number) {

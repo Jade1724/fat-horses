@@ -18,7 +18,7 @@ import { serve } from "./serve";
 const USAGE = `Usage: fat-horses [--store PATH] <command>
 
 Commands:
-  pick <address> [--radius M] [--min-population N] [--include-visited] --fake-llm
+  pick <address> [--radius M] [--max-wait MIN] [--min-population N] [--include-visited] --fake-llm
   visit <restaurant-id>
   skip <restaurant-id>
   passport [--min-population N]
@@ -38,6 +38,7 @@ async function main(argv: string[]): Promise<void> {
     options: {
       store: { type: "string" },
       radius: { type: "string" },
+      "max-wait": { type: "string" },
       "min-population": { type: "string" },
       "include-visited": { type: "boolean" },
       "fake-llm": { type: "boolean" },
@@ -73,6 +74,7 @@ async function main(argv: string[]): Promise<void> {
             radius_m: values.radius ? Number(values.radius) : DEFAULT_RADIUS_M,
             min_population: minPopulation,
             include_visited: values["include-visited"] ?? false,
+            max_wait_min: values["max-wait"] ? Number(values["max-wait"]) : undefined,
           },
           newPickId(),
           now(),

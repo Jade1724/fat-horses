@@ -16,14 +16,23 @@ import { log } from "../log";
 
 /** Runs each pick as a background task in this process. */
 export class LocalStarter implements WorkflowStarter {
+  private readonly running = new Map<string, AbortController>();
+
   constructor(private readonly deps: Deps) {}
 
   async start(pickId: string): Promise<void> {
     const session = await this.deps.store.getPick(pickId);
     if (!session) throw new Error("pick not stored");
-    void runPick(this.deps, session, systemClock, systemRng)
+    const abort = new AbortController();
+    this.running.set(pickId, abort);
+    void runPick(this.deps, session, systemClock, systemRng, () => {}, abort.signal)
       .then((s) => log.info("pick finished", { pick_id: pickId, status: s.status }))
-      .catch((e: unknown) => log.error("pick failed", { pick_id: pickId, error: String(e) }));
+      .catch((e: unknown) => log.error("pick failed", { pick_id: pickId, error: String(e) }))
+      .finally(() => this.running.delete(pickId));
+  }
+
+  async cancel(pickId: string): Promise<void> {
+    this.running.get(pickId)?.abort();
   }
 }
 

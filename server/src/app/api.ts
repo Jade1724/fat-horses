@@ -5,10 +5,12 @@ import { z } from "zod";
 import type { Countries, Country } from "../domain/countries";
 import { GeocoderUnavailable, type Geocoder } from "../domain/places";
 import { DEFAULT_MIN_POPULATION } from "../domain/pool";
+import { DEFAULT_MAX_WAIT_MIN } from "../domain/race";
 import type { PickSession } from "../domain/session";
 import { InvalidTransition, type Restaurant } from "../domain/status";
 import {
   ConflictError,
+  cancelPick,
   HISTORY_PAGE,
   NotFoundError,
   recordSkip,
@@ -34,8 +36,11 @@ export interface ApiResponse {
 }
 
 /** Starts the workflow for a stored pick (Step Functions in AWS, a task locally). */
+/** Starts and stops the workflow for a stored pick (Step Functions in AWS, a task locally). */
 export interface WorkflowStarter {
   start(pickId: string): Promise<void>;
+  /** Stop a running pick's workflow; best effort, the stored `cancelled` status is what counts. */
+  cancel(pickId: string): Promise<void>;
 }
 
 export interface ApiDeps {
@@ -70,6 +75,7 @@ function storeError(e: unknown): ApiResponse {
 type Route =
   | { kind: "start" }
   | { kind: "pick"; id: string }
+  | { kind: "cancel"; id: string }
   | { kind: "picked" }
   | { kind: "visit"; id: string }
   | { kind: "skip"; id: string }
@@ -92,6 +98,8 @@ function route(method: string, rawPath: string): Route | null {
   }
   if (method === "POST") {
     if (path === "/picks") return { kind: "start" };
+    const c = /^\/picks\/([^/]+)\/cancel$/.exec(path);
+    if (c?.[1]) return { kind: "cancel", id: c[1] };
     // Restaurant ids contain '/' (osm:node/1), so match from both ends.
     const m = /^\/restaurants\/(.+)\/(visit|skip)$/.exec(path);
     if (m?.[1]) return { kind: m[2] === "visit" ? "visit" : "skip", id: m[1] };
@@ -145,6 +153,8 @@ export class Api {
           return await this.start(req.body, now);
         case "pick":
           return await this.getPick(r.id);
+        case "cancel":
+          return await this.cancel(r.id);
         case "picked":
           return ok(await this.deps.store.currentlyPicked());
         case "visit":
@@ -189,6 +199,17 @@ export class Api {
     return { status: 202, body: { pick_id: session.pick_id } };
   }
 
+  /** F12: mark the pick cancelled, then stop its workflow. Finished picks are left as they are. */
+  private async cancel(id: string): Promise<ApiResponse> {
+    const s = await cancelPick(this.deps.store, id);
+    if (s.status === "cancelled") {
+      await this.deps.starter
+        .cancel(id)
+        .catch((e: unknown) => log.warn("workflow stop failed", { pick_id: id, error: String(e) }));
+    }
+    return ok(await this.pickView(s));
+  }
+
   private async getPick(id: string): Promise<ApiResponse> {
     const s = await this.deps.store.getPick(id);
     return s ? ok(await this.pickView(s)) : error(404, "not_found", "no such pick");
@@ -223,6 +244,7 @@ export class Api {
       error: s.error,
       created_at: s.created_at,
       location: { ...s.location, radius_m: s.request.radius_m },
+      max_wait_min: s.request.max_wait_min ?? DEFAULT_MAX_WAIT_MIN,
       world_complete: s.world_complete,
       race:
         s.race && s.card

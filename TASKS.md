@@ -81,6 +81,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
   Needs: T4.1.
 - [x] **T4.5 Lambda binaries and local server.** `crates/lambdas`: `api` (`lambda_http` wiring for T4.4, DynamoDB store, Step Functions starter, API key from SSM) and `workflow` (one §6 step per invocation via `app::workflow::run_step`). For UI development, `fat-horses serve --api-key … [--web web/dist]` runs the same API on localhost with picks in-process and the JSON-file store (replaces `cargo lambda watch`, which isn't installed).
   Needs: T4.4.
+- [x] **T4.6 Maximum wait and cancelling (F3.2, F10.5a, F12).** Requested by the owner: races must start within `max_wait_min` (default 10) or the pick fails at once; `POST /picks/{id}/cancel` plus a Cancel button; cancelled is final in every store. Tested in the stores' contract, workflow, API and web tests, and in a browser against live TAB data.
 
 ## M5 Web UI (`web/`)
 
@@ -99,7 +100,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
   Needs: T6.1.
 - [ ] **T6.3 Data resources.** DynamoDB table (§4.2: keys, TTL, PITR, on-demand) and the SSM parameter (value set by hand, not in state).
 - [ ] **T6.4 Lambdas.** `make build-lambdas` (esbuild bundles); Terraform Lambda functions on `nodejs22.x`, arm64, log groups (14-day retention), least-privilege IAM, including Bedrock (§6).
-- [ ] **T6.5 Step Functions state machine (§6).** Definition file with Wait states, the result loop, retries, the 45-min timeout and the failure path.
+- [ ] **T6.5 Step Functions state machine (§6).** Definition file with Wait states, the result loop, retries, the 45-min timeout and the failure path (stop when a step returns `failed`, which includes cancelled picks).
 - [ ] **T6.6 API Gateway + CloudFront + S3 site (§6, F11.2).** Throttling, OAC, `/api/*` behaviour, SPA fallback to `index.html`.
 - [ ] **T6.7 Budget alarm (§6).**
 - [ ] **T6.8 `make deploy` + smoke test.** Build, `terraform apply`, upload `web/dist`, then a scripted smoke test: 401 without key, POST pick → reaches `waiting_start`.

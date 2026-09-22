@@ -6,8 +6,10 @@ import type { PickSession } from "../domain/session";
 import { newSession } from "../domain/session";
 import { applyEvent, type Restaurant } from "../domain/status";
 import {
+  cancelPick,
   ConflictError,
   NotFoundError,
+  PickCancelled,
   recordPick,
   recordSkip,
   recordVisit,
@@ -156,6 +158,26 @@ const scenarios: Record<string, (s: Store) => Promise<void>> = {
     const done = { ...session, status: "done" as const, pick: "osm:node/1" };
     await s.putPick(done);
     assert.deepEqual(await s.getPick("p1"), done);
+  },
+
+  async "a cancelled pick stays cancelled"(s) {
+    const session: PickSession = newSession(
+      "p9",
+      T0,
+      { radius_m: 200, min_population: 10_000_000, include_visited: false, max_wait_min: 10 },
+      { lat: -36.85, lon: 174.76, display_name: "Sky Tower" },
+    );
+    await s.putPick({ ...session, status: "waiting_start" });
+    const cancelled = await cancelPick(s, "p9");
+    assert.equal(cancelled.status, "cancelled");
+    assert.equal((await s.getPick("p9"))?.status, "cancelled");
+    await rejects(s.putPick({ ...session, status: "running" }), PickCancelled);
+    assert.equal((await s.getPick("p9"))?.status, "cancelled");
+    // Cancelling again, or a finished pick, changes nothing.
+    assert.equal((await cancelPick(s, "p9")).status, "cancelled");
+    await s.putPick({ ...session, pick_id: "p10", status: "done" });
+    assert.equal((await cancelPick(s, "p10")).status, "done");
+    await rejects(cancelPick(s, "missing"), NotFoundError);
   },
 
   async "guess cache"(s) {

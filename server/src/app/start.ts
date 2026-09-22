@@ -4,6 +4,7 @@ import { randomBytes } from "node:crypto";
 import { z } from "zod";
 import { normaliseAddress, type Geocoder, type Location } from "../domain/places";
 import { DEFAULT_MIN_POPULATION } from "../domain/pool";
+import { DEFAULT_MAX_WAIT_MIN, MAX_WAIT_MIN_RANGE } from "../domain/race";
 import { newSession, type PickSession } from "../domain/session";
 import { GEOCODE_TTL_MS, isFresh, type Store } from "../domain/store";
 import type { Iso } from "../domain/time";
@@ -21,6 +22,7 @@ export const startInput = z.object({
   radius_m: z.number().int().optional(),
   min_population: z.number().int().nonnegative().optional(),
   include_visited: z.boolean().optional(),
+  max_wait_min: z.number().int().optional(),
 });
 export type StartInput = z.infer<typeof startInput>;
 
@@ -42,6 +44,11 @@ export async function startPick(
   const radius = input.radius_m ?? DEFAULT_RADIUS_M;
   if (radius < RADIUS_MIN || radius > RADIUS_MAX) {
     throw new InvalidRequest(`radius_m must be ${RADIUS_MIN}–${RADIUS_MAX}`);
+  }
+  const maxWait = input.max_wait_min ?? DEFAULT_MAX_WAIT_MIN;
+  const [minWait, maxWaitLimit] = MAX_WAIT_MIN_RANGE;
+  if (maxWait < minWait || maxWait > maxWaitLimit) {
+    throw new InvalidRequest(`max_wait_min must be ${minWait}–${maxWaitLimit}`);
   }
   const address = input.address?.trim() || undefined;
   let location: Location;
@@ -65,6 +72,7 @@ export async function startPick(
       radius_m: radius,
       min_population: input.min_population ?? DEFAULT_MIN_POPULATION,
       include_visited: input.include_visited ?? false,
+      max_wait_min: maxWait,
     },
     location,
   );

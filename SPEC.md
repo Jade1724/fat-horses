@@ -26,7 +26,7 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 ## 2. Functional requirements
 
 ### F1. Starting a pick
-- **F1.1** Input: `address` (free text) **or** `{lat, lon}`; `radius_m` (default **200**, allowed 50–2000); `min_population` (default **10 000 000**); `include_visited` (default **false**).
+- **F1.1** Input: `address` (free text) **or** `{lat, lon}`; `radius_m` (default **200**, allowed 50–2000); `min_population` (default **10 000 000**); `include_visited` (default **false**); `max_wait_min` (default **10**, allowed 5–180).
 - **F1.2** A free-text address is geocoded synchronously with Nominatim before the pick starts. The first result is used. No result → HTTP 422 `address_not_found`; nothing is stored.
 - **F1.3** Geocode results are cached (key = normalised address, lowercase + collapsed whitespace; 30 days).
 - **F1.4** Starting a pick stores a pick session with status `finding_race` and starts the workflow (§6). Returns `pick_id` immediately.
@@ -39,7 +39,7 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 
 ### F3. Race selection
 - **F3.1** Only **gallops** (thoroughbred) races. Harness and greyhound races are ignored.
-- **F3.2** Choose the race with the earliest scheduled start in `[now + 2 min, now + 15 min]`. If none, the earliest race starting after `now + 2 min`. If none starts within the next **3 hours**, the pick fails with `no_upcoming_race`.
+- **F3.2** Choose the race with the earliest scheduled start in `[now + 2 min, now + max_wait_min]`. If there is none, the pick fails at once with `no_upcoming_race` and the UI says so ("No gallops race starts in the next 10 minutes"), so nobody waits hours for a late-night race by accident.
 - **F3.3** Only races that are still open (not started, not abandoned) and have at least **2** non-scratched runners are eligible.
 
 ### F4. Assigning countries to horses
@@ -96,8 +96,9 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 - **F10.1** One-page app with three views: **Pick** (default), **Passport**, **History**. Must be usable at 360 px width.
 - **F10.2** First visit: ask for the API key and keep it in `localStorage`. A 401 response clears it and asks again.
 - **F10.3** Pick view: address field; advanced options (radius, min population, include visited). A map (MapLibre + OpenFreeMap tiles) centred on the location with the radius circle.
-- **F10.4** While the pick runs: poll `GET /api/picks/{id}` every **5 s**; show the status and the race card (number, horse, flag + country, scratched state) with a countdown to the start.
+- **F10.4** While the pick runs: poll `GET /api/picks/{id}` every **5 s**; show the status and the race card (number, horse, flag + country, scratched state) with a countdown to the start, and a **Cancel** button (F12). The countdown stops once the pick has finished or been cancelled.
 - **F10.5** When done: the winner (horse + country, with a note for dead heat, abandoned or timeout); a pin for every match. Pin colours by status: new, `PICKED`, `VISITED`. The pick is highlighted with a card showing name, cuisine, address, match type (`likely` badge + reason for inferred/fallback) and a directions link (`https://www.google.com/maps/dir/?api=1&destination=<lat>,<lon>`).
+- **F10.5a** Options include "Race must start within": 10 minutes (default), 30 minutes, 1 hour, 3 hours (F3.2).
 - **F10.6** Buttons: "We went here", "Skip", "Race again". Clicking a non-picked pin offers "We went here" (F8.2 last row).
 - **F10.7** If `llm_unavailable`, show a small notice "Cuisine guessing unavailable, showing tagged places only".
 - **F10.8** The current `PICKED` restaurant (if any) is shown on load, so you can mark it visited later.
@@ -105,6 +106,11 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 ### F11. Access
 - **F11.1** Every `/api/*` request needs header `x-api-key`, compared in constant time with the value in SSM, read once when the Lambda starts (a changed key takes effect as containers recycle, or at once after redeploying). Missing or wrong → 401.
 - **F11.2** API Gateway throttling: 5 requests/s rate, burst 10.
+
+### F12. Cancelling a pick
+- **F12.1** `POST /picks/{id}/cancel` marks a pick that hasn't finished as `cancelled` and stops its workflow (Step Functions `StopExecution` in AWS; the in-process run locally). A pick that is already `done`, `failed` or `cancelled` is left as it is.
+- **F12.2** `cancelled` is final: stores refuse to overwrite a cancelled pick with any other status (DynamoDB: a conditional put on a top-level `cancelled` attribute), so a step that was already running can't undo it.
+- **F12.3** No restaurant becomes `PICKED` by a cancelled pick: the pick is checked again just before recording the chosen restaurant. Cancelling writes nothing to history.
 
 ---
 
@@ -172,7 +178,8 @@ All paths are under `/api`; JSON in and out; errors are `{"error": "<code>", "me
 
 | Method | Path | Request | Response |
 |---|---|---|---|
-| POST | `/picks` | `{address?, lat?, lon?, radius_m?, min_population?, include_visited?}` (exactly one of address or lat+lon) | 202 `{pick_id}`; 422 `address_not_found` / `invalid_request` |
+| POST | `/picks` | `{address?, lat?, lon?, radius_m?, min_population?, include_visited?, max_wait_min?}` (exactly one of address or lat+lon) | 202 `{pick_id}`; 422 `address_not_found` / `invalid_request` |
+| POST | `/picks/{id}/cancel` | – | 200 pick view (F12); 404 |
 | GET | `/picks/{id}` | – | 200 pick view (below); 404 |
 | GET | `/restaurants/picked` | – | 200 restaurant or `null` |
 | POST | `/restaurants/{id}/visit` | `{restaurant?: {name, lat, lon, address, cuisine, country_iso}}` (required when the restaurant isn't stored yet) | 200 restaurant; 409 `invalid_transition` |
@@ -189,7 +196,7 @@ Pick view:
   restaurants: [{id, name, lat, lon, address, cuisine, match, reason?, status, visit_count}],
   pick?: <restaurant id>, dishes?: [...], llm_unavailable }
 ```
-`status` ∈ `finding_race`, `waiting_start`, `running`, `resolving`, `searching`, `done`, `failed`. `error` (when `failed`) ∈ `no_upcoming_race`, `race_source_unavailable`, `places_unavailable`, `internal`.
+`status` ∈ `finding_race`, `waiting_start`, `running`, `resolving`, `searching`, `done`, `failed`, `cancelled`. The view also carries `max_wait_min`. `error` (when `failed`) ∈ `no_upcoming_race`, `race_source_unavailable`, `places_unavailable`, `internal`.
 
 ---
 
@@ -204,13 +211,13 @@ Pick workflow (AWS Step Functions Standard; each task invokes the `workflow` Lam
 5. `Match`: tiers 1–2 (F6.2–F6.4) → if empty, `FallbackMatch` (F6.5) → status `searching`
 6. `PickRestaurant` (F7, F8) → status `done`
 
-Any unhandled step error → status `failed` with the error code. Step retries: 2 with backoff for network errors.
+Each step's output has `failed` (true for failed or cancelled picks) and `cancelled`; the state machine stops when `failed` is true. Any unhandled step error → status `failed` with the error code. Step retries: 2 with backoff for network errors.
 
 Infrastructure (Terraform in `infra/`, S3 state backend with native lock file):
 - CloudFront: `/` → private S3 site bucket (OAC); `/api/*` → API Gateway HTTP API → `api` Lambda.
 - Lambdas: TypeScript on the managed **Node.js 22** runtime (`nodejs22.x`), arm64, one esbuild bundle per handler (`make build-lambdas`); the AWS SDK v3 comes from the runtime. Chosen over Rust on the OS-only runtime because a managed runtime is easier to operate.
 - Step Functions state machine, DynamoDB table (§4.2), SSM SecureString `/fat-horses/api-key`.
-- IAM: least privilege per Lambda; `bedrock:InvokeModel` only on the configured model/profile.
+- IAM: least privilege per Lambda; `bedrock:InvokeModel` only on the configured model/profile; the `api` Lambda may `states:StartExecution` and `states:StopExecution` on the pick state machine only.
 - AWS Budgets alarm (default USD 10/month) emailing the owner.
 - Region: **`ap-southeast-2`** (default; subject to Bedrock model availability, confirmed in T1.3).
 
@@ -256,6 +263,7 @@ Betting or TAB login; multiple users; ratings, notes or reviews; ranking by rati
 | Question | Default in this spec |
 |---|---|
 | AWS region | `ap-southeast-2` (§6) |
+| How long to wait for a race | 10 minutes by default, up to 3 hours by choice (F3.2) |
 | `fast_food` / `cafe` count as restaurants? | `fast_food` yes, `cafe` no; configurable (F6.1) |
 | Fallback widens the radius? | No (F6.7) |
 | Directions link | Google Maps URL, no API key (F10.5) |

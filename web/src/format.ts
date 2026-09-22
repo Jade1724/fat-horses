@@ -35,13 +35,21 @@ export function statusText(status: PickStatus): string {
       return "Done";
     case "failed":
       return "Something went wrong";
+    case "cancelled":
+      return "Cancelled";
   }
 }
 
-export function errorText(error: PickError | null): string {
+/** A duration in minutes as words: 10 → "10 minutes", 180 → "3 hours". */
+export function minutesText(min: number): string {
+  if (min % 60 === 0) return min === 60 ? "hour" : `${min / 60} hours`;
+  return `${min} minutes`;
+}
+
+export function errorText(error: PickError | null, maxWaitMin = 10): string {
   switch (error) {
     case "no_upcoming_race":
-      return "No gallops race in the next 3 hours. Try again later.";
+      return `No gallops race starts in the next ${minutesText(maxWaitMin)}. Try again later, or allow a longer wait in Options.`;
     case "race_source_unavailable":
       return "TAB NZ isn't answering right now. Try again in a few minutes.";
     case "places_unavailable":
@@ -80,7 +88,7 @@ export function distanceText(m: number): string {
 }
 
 export function isFinished(status: PickStatus): boolean {
-  return status === "done" || status === "failed";
+  return status === "done" || status === "failed" || status === "cancelled";
 }
 
 /** A closed ring approximating a circle, for the radius overlay (GeoJSON order: lon, lat). */

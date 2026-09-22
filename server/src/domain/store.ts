@@ -2,7 +2,7 @@
 
 import type { Guess } from "./classify";
 import type { Location } from "./places";
-import type { PickSession } from "./session";
+import { isFinished, type PickSession } from "./session";
 import { applyEvent, type Event, type LogEntry, type Restaurant, type Transition } from "./status";
 import { DAY, ms, type Iso } from "./time";
 
@@ -15,6 +15,13 @@ export const HISTORY_PAGE = 50;
 export class ConflictError extends Error {
   constructor() {
     super("conflict: the data changed since it was read");
+  }
+}
+
+/** The pick was cancelled; its session can't be changed any more (F12). */
+export class PickCancelled extends Error {
+  constructor(pickId: string) {
+    super(`pick ${pickId} was cancelled`);
   }
 }
 
@@ -74,6 +81,7 @@ export interface Store {
   history(cursor: string | null, limit: number): Promise<HistoryPage>;
 
   getPick(pickId: string): Promise<PickSession | null>;
+  /** Throws PickCancelled if the stored pick is cancelled and `session` isn't (F12.2). */
   putPick(session: PickSession): Promise<void>;
 
   getGuess(placeId: string, promptVersion: number): Promise<CachedGuess | null>;
@@ -164,4 +172,17 @@ async function changeOne(store: Store, current: Restaurant, event: Event, now: I
   const t = applyEvent(current, event, now);
   await store.apply({ transitions: [t], expected_picked: expectedPicked });
   return t.restaurant;
+}
+
+/**
+ * Cancel a pick (F12): mark it `cancelled` unless it has already finished.
+ * Returns the stored session afterwards.
+ */
+export async function cancelPick(store: Store, pickId: string): Promise<PickSession> {
+  const s = await store.getPick(pickId);
+  if (!s) throw new NotFoundError(`pick ${pickId} not found`);
+  if (isFinished(s.status)) return s;
+  const cancelled: PickSession = { ...s, status: "cancelled" };
+  await store.putPick(cancelled);
+  return cancelled;
 }

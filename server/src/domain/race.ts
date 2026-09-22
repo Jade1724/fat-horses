@@ -7,6 +7,9 @@ import type { Placing, ResultSnapshot } from "./winner";
 export const MIN_LEAD_MS = 2 * MINUTE;
 /** Races starting later than this after now are not considered (F3.2). */
 export const MAX_LEAD_MS = 3 * HOUR;
+/** Default and allowed maximum wait for a race to start, in minutes (F1.1, F3.2). */
+export const DEFAULT_MAX_WAIT_MIN = 10;
+export const MAX_WAIT_MIN_RANGE = [5, 180] as const;
 /** A race needs at least this many non-scratched runners (F3.3). */
 export const MIN_RUNNERS = 2;
 
@@ -62,21 +65,19 @@ export function hasEnoughRunners(race: Race): boolean {
 }
 
 /**
- * Races that may be chosen, in the order to try them: open gallops races
- * starting in [now + 2 min, now + 3 h], earliest first. The caller fetches
- * runners for each in turn and takes the first with enough runners. Earliest
- * after 2 minutes covers both halves of F3.2: a race within 15 minutes is
- * necessarily the earliest.
+ * Races that may be chosen, in the order to try them (F3.2): open gallops
+ * races starting in [now + 2 min, now + maxLead], earliest first. The caller
+ * fetches runners for each in turn and takes the first with enough runners.
  */
-export function candidates(races: readonly Race[], now: Iso): Race[] {
+export function candidates(races: readonly Race[], now: Iso, maxLeadMs = MAX_LEAD_MS): Race[] {
   const t = ms(now);
   return races
     .filter((r) => r.race_type === "gallops" && r.status === "open")
-    .filter((r) => ms(r.start_time) >= t + MIN_LEAD_MS && ms(r.start_time) <= t + MAX_LEAD_MS)
+    .filter((r) => ms(r.start_time) >= t + MIN_LEAD_MS && ms(r.start_time) <= t + maxLeadMs)
     .sort((a, b) => ms(a.start_time) - ms(b.start_time) || a.id.localeCompare(b.id));
 }
 
 /** The race to use when runners are already known (F3). */
-export function selectRace(races: readonly Race[], now: Iso): Race | undefined {
-  return candidates(races, now).find(hasEnoughRunners);
+export function selectRace(races: readonly Race[], now: Iso, maxLeadMs = MAX_LEAD_MS): Race | undefined {
+  return candidates(races, now, maxLeadMs).find(hasEnoughRunners);
 }

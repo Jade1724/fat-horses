@@ -13,11 +13,17 @@ import {
 } from "../domain/matching";
 import { DEFAULT_AMENITIES, type Place, type Places } from "../domain/places";
 import { pool } from "../domain/pool";
-import { candidates, hasEnoughRunners, snapshot, type RaceProvider } from "../domain/race";
+import {
+  candidates,
+  DEFAULT_MAX_WAIT_MIN,
+  hasEnoughRunners,
+  snapshot,
+  type RaceProvider,
+} from "../domain/race";
 import type { Rng } from "../domain/rng";
-import { failed, type PickSession } from "../domain/session";
+import { failed, isFinished, type PickSession } from "../domain/session";
 import type { Restaurant } from "../domain/status";
-import { NotFoundError, recordPick, type Store } from "../domain/store";
+import { NotFoundError, PickCancelled, recordPick, type Store } from "../domain/store";
 import { addMs, ms, MINUTE, type Iso } from "../domain/time";
 import { resolve, type ResultSnapshot } from "../domain/winner";
 import { log } from "../log";
@@ -55,7 +61,8 @@ export async function findRace(deps: Deps, s: PickSession, now: Iso): Promise<Pi
     log.warn("race schedule unavailable", { pick_id: s.pick_id, error: String(e) });
     return failed(s, "race_source_unavailable");
   }
-  for (const race of candidates(schedule, now)) {
+  const maxLeadMs = (s.request.max_wait_min ?? DEFAULT_MAX_WAIT_MIN) * MINUTE;
+  for (const race of candidates(schedule, now, maxLeadMs)) {
     try {
       const u = await deps.races.update(race);
       if (u.race.status === "open" && hasEnoughRunners(u.race)) return { ...s, race: u.race };
@@ -221,48 +228,80 @@ export async function pickRestaurant(deps: Deps, s: PickSession, now: Iso, rng: 
 /** Time source for `runPick`; tests use one that jumps instead of sleeping. */
 export interface Clock {
   now(): Iso;
-  sleepUntil(t: Iso): Promise<void>;
+  /** Resolves at `t`, or early when `signal` aborts. */
+  sleepUntil(t: Iso, signal?: AbortSignal): Promise<void>;
 }
 
 export const systemClock: Clock = {
   now: () => new Date().toISOString(),
-  sleepUntil: (t) => new Promise((r) => setTimeout(r, Math.max(0, ms(t) - Date.now()))),
+  sleepUntil: (t, signal) =>
+    new Promise((resolve) => {
+      if (signal?.aborted) return resolve();
+      const timer = setTimeout(done, Math.max(0, ms(t) - Date.now()));
+      signal?.addEventListener("abort", done, { once: true });
+      function done() {
+        clearTimeout(timer);
+        signal?.removeEventListener("abort", done);
+        resolve();
+      }
+    }),
 };
 
-/** Run a whole pick in-process (CLI, local server, tests), saving after every step. */
+/**
+ * Run a whole pick in-process (CLI, local server, tests), saving after every
+ * step. Stops early, returning a cancelled session, when `signal` aborts or
+ * the stored pick has been cancelled (F12).
+ */
 export async function runPick(
   deps: Deps,
   session: PickSession,
   clock: Clock,
   rng: Rng,
   onUpdate: (s: PickSession) => void = () => {},
+  signal?: AbortSignal,
 ): Promise<PickSession> {
   let s = session;
-  const save = async () => {
-    await deps.store.putPick(s);
+  const cancelled = (): PickSession => {
+    s = { ...s, status: "cancelled" };
+    onUpdate(s);
+    return s;
+  };
+  /** Save; true means stop (failed or cancelled). */
+  const save = async (): Promise<boolean> => {
+    if (signal?.aborted) return true;
+    try {
+      await deps.store.putPick(s);
+    } catch (e) {
+      if (e instanceof PickCancelled) return true;
+      throw e;
+    }
     onUpdate(s);
     return s.status === "failed";
   };
-  if (await save()) return s;
+  const end = () => (signal?.aborted || s.status !== "failed" ? cancelled() : s);
+  if (await save()) return end();
   s = await findRace(deps, s, clock.now());
-  if (await save()) return s;
+  if (await save()) return end();
   s = await assignCountries(deps, s, rng);
-  if (await save()) return s;
+  if (await save()) return end();
   s = await prepareNearby(deps, s, clock.now());
-  if (await save()) return s;
-  if (s.race) await clock.sleepUntil(s.race.start_time);
+  if (await save()) return end();
+  if (s.race) await clock.sleepUntil(s.race.start_time, signal);
   for (;;) {
+    if (signal?.aborted) return cancelled();
     s = await checkResult(deps, s, clock.now(), rng);
-    if (await save()) return s;
+    if (await save()) return end();
     if (s.winner) break;
-    await clock.sleepUntil(addMs(clock.now(), POLL_INTERVAL_MS));
+    await clock.sleepUntil(addMs(clock.now(), POLL_INTERVAL_MS), signal);
   }
   s = await ensurePlaces(deps, s, clock.now());
-  if (await save()) return s;
+  if (await save()) return end();
   s = await fallbackMatch(deps, matchRestaurants(deps, s));
-  if (await save()) return s;
+  if (await save()) return end();
+  // Last check before marking a restaurant PICKED.
+  if (signal?.aborted || (await deps.store.getPick(s.pick_id))?.status === "cancelled") return cancelled();
   s = await pickRestaurant(deps, s, clock.now(), rng);
-  await save();
+  if (await save()) return end();
   return s;
 }
 
@@ -276,8 +315,9 @@ export interface StepOutput {
   start_time: Iso | null;
   /** A winner is decided; go to `finish`. */
   decided: boolean;
-  /** The pick has failed; stop. */
+  /** The pick has failed or was cancelled; stop. */
   failed: boolean;
+  cancelled: boolean;
 }
 
 function output(s: PickSession): StepOutput {
@@ -286,7 +326,8 @@ function output(s: PickSession): StepOutput {
     status: s.status,
     start_time: s.race?.start_time ?? null,
     decided: s.winner !== null,
-    failed: s.status === "failed",
+    failed: s.status === "failed" || s.status === "cancelled",
+    cancelled: s.status === "cancelled",
   };
 }
 
@@ -300,7 +341,7 @@ export async function runStep(
 ): Promise<StepOutput> {
   let s = await deps.store.getPick(pickId);
   if (!s) throw new NotFoundError(`pick ${pickId} not found`);
-  if (s.status === "failed" || s.status === "done") return output(s);
+  if (isFinished(s.status)) return output(s);
   if (step === "start" && !s.card) {
     s = await findRace(deps, s, now);
     if (s.status !== "failed") s = await assignCountries(deps, s, rng);
@@ -313,6 +354,11 @@ export async function runStep(
     if (s.status !== "failed")
       s = await pickRestaurant(deps, await fallbackMatch(deps, matchRestaurants(deps, s)), now, rng);
   }
-  await deps.store.putPick(s);
+  try {
+    await deps.store.putPick(s);
+  } catch (e) {
+    if (e instanceof PickCancelled) return output({ ...s, status: "cancelled" });
+    throw e;
+  }
   return output(s);
 }

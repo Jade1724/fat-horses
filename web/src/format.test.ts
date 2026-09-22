@@ -45,15 +45,21 @@ describe("status and error text", () => {
       "searching",
       "done",
       "failed",
+      "cancelled",
     ] as const) {
       expect(statusText(s)).not.toBe("");
     }
     expect(isFinished("done")).toBe(true);
     expect(isFinished("failed")).toBe(true);
+    expect(isFinished("cancelled")).toBe(true);
     expect(isFinished("running")).toBe(false);
   });
   it("explains errors", () => {
-    expect(errorText("no_upcoming_race")).toContain("3 hours");
+    expect(errorText("no_upcoming_race")).toBe(
+      "No gallops race starts in the next 10 minutes. Try again later, or allow a longer wait in Options.",
+    );
+    expect(errorText("no_upcoming_race", 180)).toContain("next 3 hours");
+    expect(errorText("no_upcoming_race", 60)).toContain("next hour");
     expect(errorText("places_unavailable")).toContain("OpenStreetMap");
     expect(errorText(null)).not.toBe("");
   });

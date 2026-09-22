@@ -43,6 +43,14 @@ describe("Api", () => {
     expect(JSON.parse(f.mock.calls[0]![1]?.body as string)).toEqual({ restaurant: details });
   });
 
+  it("cancels a pick", async () => {
+    const f = fakeFetch(200, { pick_id: "01J", status: "cancelled" });
+    const view = await new Api("k", () => {}, f).cancelPick("01J");
+    expect(view.status).toBe("cancelled");
+    expect(f.mock.calls[0]![0]).toBe("/api/picks/01J/cancel");
+    expect(f.mock.calls[0]![1]?.method).toBe("POST");
+  });
+
   it("builds query strings", async () => {
     const f = fakeFetch(200, { entries: [], next_cursor: null });
     const api = new Api("k", () => {}, f);

@@ -1,7 +1,7 @@
 // Lambda wiring (SPEC.md §6): configuration from the environment and AWS clients.
 // Logic lives in `app`.
 
-import { SFNClient, StartExecutionCommand } from "@aws-sdk/client-sfn";
+import { SFNClient, StartExecutionCommand, StopExecutionCommand } from "@aws-sdk/client-sfn";
 import { GetParameterCommand, SSMClient } from "@aws-sdk/client-ssm";
 import type { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from "aws-lambda";
 import { Nominatim, Overpass } from "../adapters/osm";
@@ -44,6 +44,20 @@ export class SfnStarter implements WorkflowStarter {
       }),
     );
   }
+
+  async cancel(pickId: string): Promise<void> {
+    await this.client.send(
+      new StopExecutionCommand({
+        executionArn: executionArn(this.stateMachineArn, pickId),
+        cause: "cancelled by the user",
+      }),
+    );
+  }
+}
+
+/** Executions are named after the pick, so their ARN follows from the state machine's. */
+export function executionArn(stateMachineArn: string, pickId: string): string {
+  return `${stateMachineArn.replace(":stateMachine:", ":execution:")}:${pickId}`;
 }
 
 /**

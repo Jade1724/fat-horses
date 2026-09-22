@@ -9,7 +9,12 @@ import type { Iso } from "./time";
 import type { Placing, Winner } from "./winner";
 
 export type PickStatus =
-  "finding_race" | "waiting_start" | "running" | "resolving" | "searching" | "done" | "failed";
+  "finding_race" | "waiting_start" | "running" | "resolving" | "searching" | "done" | "failed" | "cancelled";
+
+/** Nothing more will happen to a pick in one of these statuses. */
+export function isFinished(status: PickStatus): boolean {
+  return status === "done" || status === "failed" || status === "cancelled";
+}
 
 export type PickError = "no_upcoming_race" | "race_source_unavailable" | "places_unavailable" | "internal";
 
@@ -18,6 +23,8 @@ export interface PickRequest {
   radius_m: number;
   min_population: number;
   include_visited: boolean;
+  /** Only races starting within this many minutes (F3.2). Absent in picks saved before it existed. */
+  max_wait_min?: number;
 }
 
 export interface PickSession {

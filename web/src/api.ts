@@ -1,7 +1,7 @@
 // Typed client for the HTTP API (SPEC.md §5).
 
 export type PickStatus =
-  "finding_race" | "waiting_start" | "running" | "resolving" | "searching" | "done" | "failed";
+  "finding_race" | "waiting_start" | "running" | "resolving" | "searching" | "done" | "failed" | "cancelled";
 
 export type PickError = "no_upcoming_race" | "race_source_unavailable" | "places_unavailable" | "internal";
 
@@ -58,6 +58,8 @@ export interface PickView {
   error: PickError | null;
   created_at: string;
   location: { lat: number; lon: number; display_name: string; radius_m: number };
+  /** Races had to start within this many minutes (F3.2). */
+  max_wait_min: number;
   world_complete: boolean;
   race: Race | null;
   winner: Winner | null;
@@ -117,6 +119,7 @@ export interface StartPick {
   radius_m?: number;
   min_population?: number;
   include_visited?: boolean;
+  max_wait_min?: number;
 }
 
 export interface VisitDetails {
@@ -178,6 +181,11 @@ export class Api {
 
   startPick(input: StartPick): Promise<{ pick_id: string }> {
     return this.call("POST", "/picks", input);
+  }
+
+  /** Cancel a pick that is still in progress (F12); returns the updated view. */
+  cancelPick(id: string): Promise<PickView> {
+    return this.call("POST", `/picks/${encodeURIComponent(id)}/cancel`, {});
   }
 
   getPick(id: string): Promise<PickView> {

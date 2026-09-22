@@ -1,7 +1,7 @@
 // The Pick view: form, map, race progress and results (SPEC.md F10.3–F10.8).
 
 import { ApiError } from "../api";
-import type { Api, PickRestaurant, PickView, Race, StoredRestaurant, Winner } from "../api";
+import type { Api, PickRestaurant, PickView, Race, StartPick, StoredRestaurant, Winner } from "../api";
 import { clear, h } from "../dom";
 import {
   countdown,
@@ -83,6 +83,15 @@ export class PickPage {
     ] as const) {
       minPop.append(h("option", { value }, label));
     }
+    const maxWait = h("select", { name: "max_wait_min" });
+    for (const [value, label] of [
+      ["10", "10 minutes"],
+      ["30", "30 minutes"],
+      ["60", "1 hour"],
+      ["180", "3 hours"],
+    ] as const) {
+      maxWait.append(h("option", { value }, label));
+    }
     const includeVisited = h("input", { name: "include_visited", type: "checkbox" });
     const submit = h("button", { type: "submit", class: "primary" }, "Race for a restaurant");
     const form = h(
@@ -94,6 +103,7 @@ export class PickPage {
         {},
         h("summary", {}, "Options"),
         h("label", {}, "Radius (m)", radius),
+        h("label", {}, "Race must start within", maxWait),
         h("label", {}, "Countries with", minPop),
         h("label", { class: "check" }, includeVisited, "Include countries I've visited"),
       ),
@@ -102,34 +112,26 @@ export class PickPage {
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       void this.submit(
-        address.value.trim(),
-        Number(radius.value),
-        Number(minPop.value),
-        includeVisited.checked,
+        {
+          address: address.value.trim(),
+          radius_m: Number(radius.value),
+          min_population: Number(minPop.value),
+          include_visited: includeVisited.checked,
+          max_wait_min: Number(maxWait.value),
+        },
         submit,
       );
     });
     return form;
   }
 
-  private async submit(
-    address: string,
-    radius: number,
-    minPopulation: number,
-    includeVisited: boolean,
-    button: HTMLButtonElement,
-  ): Promise<void> {
-    if (!address) return;
+  private async submit(input: StartPick & { address: string }, button: HTMLButtonElement): Promise<void> {
+    if (!input.address) return;
     button.disabled = true;
     this.showMessage("Starting…");
     try {
-      const { pick_id } = await this.api.startPick({
-        address,
-        radius_m: radius,
-        min_population: minPopulation,
-        include_visited: includeVisited,
-      });
-      storage.setLastAddress(address);
+      const { pick_id } = await this.api.startPick(input);
+      storage.setLastAddress(input.address);
       storage.setLastPick(pick_id);
       this.selected = null;
       await this.load(pick_id);
@@ -171,6 +173,19 @@ export class PickPage {
     }
   }
 
+  /** F12: stop the pick; the page shows it as cancelled and the form is ready again. */
+  private async cancel(pickId: string, button: HTMLButtonElement): Promise<void> {
+    button.disabled = true;
+    window.clearTimeout(this.pollTimer);
+    try {
+      this.pick = await this.api.cancelPick(pickId);
+      this.render();
+    } catch {
+      button.disabled = false;
+      await this.load(pickId);
+    }
+  }
+
   private showMessage(text: string, error = false): void {
     clear(this.panel);
     this.panel.append(h("p", { class: error ? "message error" : "message" }, text));
@@ -189,14 +204,26 @@ export class PickPage {
       );
     }
     if (!isFinished(p.status)) {
-      this.panel.append(h("p", { class: "status" }, h("span", { class: "spinner" }), statusText(p.status)));
+      const cancel = h("button", { type: "button", class: "small" }, "Cancel");
+      cancel.addEventListener("click", () => void this.cancel(p.pick_id, cancel));
+      this.panel.append(
+        h(
+          "div",
+          { class: "status-row" },
+          h("p", { class: "status" }, h("span", { class: "spinner" }), statusText(p.status)),
+          cancel,
+        ),
+      );
     }
     if (p.status === "failed") {
-      this.panel.append(h("p", { class: "message error" }, errorText(p.error)));
+      this.panel.append(h("p", { class: "message error" }, errorText(p.error, p.max_wait_min)));
+    }
+    if (p.status === "cancelled") {
+      this.panel.append(h("p", { class: "message" }, "Pick cancelled. Start a new one whenever you like."));
     }
     if (p.winner) this.panel.append(this.renderWinner(p.winner));
     if (p.status === "done") this.panel.append(this.renderResults(p));
-    if (p.race) this.panel.append(this.renderRace(p.race, p.winner));
+    if (p.race) this.panel.append(this.renderRace(p.race, p.winner, isFinished(p.status)));
 
     this.map.showRestaurants(p.restaurants, p.pick, (r) => {
       this.selected = r.id;
@@ -204,17 +231,18 @@ export class PickPage {
     });
   }
 
-  private renderRace(race: Race, winner: Winner | null): HTMLElement {
+  /** The race card; the countdown only runs while the pick is still waiting on the race. */
+  private renderRace(race: Race, winner: Winner | null, finished: boolean): HTMLElement {
     const start = new Date(race.start_time);
+    const hhmm = start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     const clock = h("span", { class: "countdown" });
+    const live = !winner && !finished;
     const tick = () => {
       const c = countdown(start, new Date());
-      clock.textContent = c
-        ? `starts in ${c}`
-        : `started ${start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+      clock.textContent = !live ? `at ${hhmm}` : c ? `starts in ${c}` : `started ${hhmm}`;
     };
     tick();
-    if (!winner) this.tickTimer = window.setInterval(tick, 1000);
+    if (live) this.tickTimer = window.setInterval(tick, 1000);
     const rows = race.runners.map((r) =>
       h(
         "li",
@@ -228,7 +256,7 @@ export class PickPage {
     );
     return h(
       "details",
-      { class: "race", open: !winner },
+      { class: "race", open: live },
       h("summary", {}, h("strong", {}, `🏇 ${race.venue} R${race.race_number}`), " ", clock),
       h("p", { class: "race-name" }, race.name),
       h("ol", { class: "card" }, ...rows),
