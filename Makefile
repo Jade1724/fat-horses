@@ -41,7 +41,10 @@ web-build: web/node_modules/.package-lock.json
 	cd web && npm run -s build
 
 TERRAFORM ?= terraform
-export AWS_PROFILE ?= fat-horses
+# Hard assignment, not `?=`: a shell that exports AWS_PROFILE for some other
+# account must not silently redirect these targets at it. To use a different
+# profile, say so on the command line: `make AWS_PROFILE=... <target>`.
+export AWS_PROFILE = fat-horses
 
 ## One-off: Terraform state bucket, infra/backend.hcl and infra/terraform.tfvars (BUDGET_EMAIL=...).
 infra-bootstrap:

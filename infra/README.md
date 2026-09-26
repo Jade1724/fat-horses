@@ -4,12 +4,21 @@ Everything runs in one AWS account and region (`ap-southeast-2` by default):
 CloudFront → S3 (site) and API Gateway → `api` Lambda; Step Functions → `workflow`
 Lambda; DynamoDB; SSM (API keys); a monthly budget alarm. See SPEC.md §6.
 
-Tools: AWS CLI v2, Terraform ≥ 1.10, Node 22. Commands use the AWS profile
-`fat-horses` (override with `AWS_PROFILE=...`).
+Tools: AWS CLI v2, Terraform ≥ 1.10, Node 22. The `make` targets pin the AWS
+profile to `fat-horses`, so a shell that exports `AWS_PROFILE` for another
+account can't redirect them; to use a different one, pass it on the command
+line: `make AWS_PROFILE=... deploy`. Scripts run directly (`scripts/*.sh`) fall
+back to the ambient `AWS_PROFILE`, so prefix those with
+`AWS_PROFILE=fat-horses` if your shell points elsewhere.
 
 ## First time
 
-1. Credentials: `aws configure --profile fat-horses` (region `ap-southeast-2`).
+1. Credentials: `aws configure sso --profile fat-horses` — region
+   `ap-southeast-2`, output `json`. Reuse an existing `sso-session` name if you
+   have one; one `aws sso login --sso-session <name>` then covers every account
+   it grants. Check with `aws sts get-caller-identity --profile fat-horses`, and
+   make sure no stale `[fat-horses]` block is left in `~/.aws/credentials` —
+   static keys there win over SSO in `~/.aws/config`.
 2. State bucket and settings (once):
 
    ```
