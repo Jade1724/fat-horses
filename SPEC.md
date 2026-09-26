@@ -33,9 +33,9 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 
 ### F2. Country pool
 - **F2.1** Countries come from `data/countries.json` (schema §4.1).
-- **F2.2** Pool = countries with `population >= min_population`.
+- **F2.2** Pool = countries with `population >= min_population` **and at least one tagged restaurant nearby** (a tier-1 match, F6.2, among the places of F6.1). So whichever horse wins, there is somewhere to eat. Only tags count: a guess (F6.3) is too uncertain to put a country in the race. If no country qualifies, the pick fails at once with `no_matching_places`, before a race is looked for; the UI says "No restaurant within <radius> has a cuisine we can match to a country" and suggests a bigger radius.
 - **F2.3** Unless `include_visited`, countries with `visit_count > 0` are removed from the pool.
-- **F2.4** If F2.3 leaves the pool empty, use the F2.2 pool and set `world_complete = true` on the pick session (the UI shows "World complete!").
+- **F2.4** If F2.3 leaves the pool empty, use the F2.2 pool and set `world_complete = true` on the pick session. Because F2.2 is limited to what's nearby, this means every cuisine *near here* has been visited; the UI says so ("You've eaten every cuisine near here! They're all back in the draw.").
 
 ### F3. Race selection
 - **F3.1** Only **gallops** (thoroughbred) races. Harness and greyhound races are ignored.
@@ -44,7 +44,7 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 
 ### F4. Assigning countries to horses
 - **F4.1** N = number of non-scratched runners at assignment time.
-- **F4.2** Countries are drawn **without replacement**, uniformly at random, from the pool. If the pool has fewer than N countries: use all of them, then top up with distinct countries from the F2.2 pool that aren't already used (visited ones), then, only if still short, repeat countries at random.
+- **F4.2** Countries are drawn **without replacement**, uniformly at random, from the pool. If the pool has fewer than N countries: use all of them, then top up with distinct countries from the F2.2 pool that aren't already used (visited ones), then, only if still short, repeat countries at random. A country with nothing nearby is never used to fill a card: repeats are the price of every horse being one you can eat at.
 - **F4.3** The race card (runner number, horse name, country) is saved on the pick session and never re-drawn.
 - **F4.4** A runner scratched after assignment is shown as scratched; its country can't win.
 
@@ -56,11 +56,11 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 - **F5.5** The winning country is shown whether or not any restaurant matches.
 
 ### F6. Restaurant matching
-- **F6.1 Places:** Overpass query for nodes/ways (ways via `out center`) inside the radius with `amenity` in `{restaurant, fast_food}` (**`cafe` excluded by default**; configurable list). Place ID = `osm:<type>/<id>`, e.g. `osm:node/123`.
+- **F6.1 Places:** Overpass query for nodes/ways (ways via `out center`) inside the radius with `amenity` in `{restaurant, fast_food}` (**`cafe` excluded by default**; configurable list). Place ID = `osm:<type>/<id>`, e.g. `osm:node/123`. Loaded **first, before a race is chosen**, because the places decide which countries may run (F2.2); this also keeps a slow lookup from eating into the time before the start. If the lookup fails (after the adapter's own retries), the pick fails with `places_unavailable`.
 - **F6.2 Tier 1, tagged:** a place matches when any value of its `cuisine` tag (split on `;`, trimmed, lowercased) is in the winning country's `cuisine_tags`.
 - **F6.3 Tier 2, inferred:** for places **without** a `cuisine` tag, use the cached or new Guess (§3). A place matches when a guessed tag with `confidence >= 0.7` is in the country's `cuisine_tags`. Its `reason` is the Guess reason.
-- **F6.4** Tiers 1 and 2 together form the **primary** matches. Guesses are made while waiting for the race (§6), before the winner is known, so the wait is used productively.
-- **F6.5 Tier 3, fallback:** only if there are no primary matches. The LLM receives every place (tagged or not) and the country's `dishes`, and returns places likely to serve them, each with a reason (§3). These are `match = fallback`.
+- **F6.4** Tiers 1 and 2 together form the **primary** matches. Guesses are made while waiting for the race (§6), before the winner is known, so the wait is used productively. They can only add restaurants for a country already on the card.
+- **F6.5 Tier 3, fallback:** only if there are no primary matches. Since F2.2 every drawn country has a tagged match, so this and F6.6 are a safety net for picks drawn before that rule. The LLM receives every place (tagged or not) and the country's `dishes`, and returns places likely to serve them, each with a reason (§3). These are `match = fallback`.
 - **F6.6** If all tiers are empty, the pick ends `done` with no restaurant; the UI shows "No match nearby", the country's dishes and "Race again".
 - **F6.7** The radius is **not** widened automatically in v1.
 - **F6.8** If Bedrock fails (error, throttling, timeout or invalid output after a retry), skip tier 2 and/or 3, set `llm_unavailable = true`, and carry on. A pick never fails because of the LLM.
@@ -209,7 +209,7 @@ Pick view:
   restaurants: [{id, name, lat, lon, address, cuisine, match, reason?, status, visit_count}],
   pick?: <restaurant id>, dishes?: [...], llm_unavailable }
 ```
-`status` ∈ `finding_race`, `waiting_start`, `running`, `resolving`, `searching`, `done`, `failed`, `cancelled`. The view also carries `max_wait_min`. `error` (when `failed`) ∈ `no_upcoming_race`, `race_source_unavailable`, `places_unavailable`, `internal`.
+`status` ∈ `finding_race`, `waiting_start`, `running`, `resolving`, `searching`, `done`, `failed`, `cancelled`. The view also carries `max_wait_min`. `error` (when `failed`) ∈ `no_upcoming_race`, `race_source_unavailable`, `places_unavailable`, `no_matching_places`, `internal`.
 
 ---
 
@@ -217,8 +217,8 @@ Pick view:
 
 Pick workflow (AWS Step Functions Standard; each task invokes the `workflow` Lambda with `{step, pick_id}`; the same steps are plain async functions in `server/src/app/workflow.ts`, which the CLI calls in-process):
 
-1. `FindRace` (F3) → `AssignCountries` (F2, F4) → status `waiting_start`
-2. `PrepareNearby`: Overpass places (F6.1) + guesses for untagged places (F6.3), stored on the session
+1. `Start`: Overpass places (F6.1) and the countries they allow (F2.2) → `FindRace` (F3) → `AssignCountries` (F2, F4) → status `waiting_start`
+2. `PrepareNearby`: guesses for untagged places (F6.3), stored on the session
 3. `Wait` until the scheduled start → status `running`
 4. Loop: `CheckResult` (F5) → `Wait 60 s` until a winner is decided or the 45-min timeout → status `resolving`
 5. `Match`: tiers 1–2 (F6.2–F6.4) → if empty, `FallbackMatch` (F6.5) → status `searching`

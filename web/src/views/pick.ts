@@ -258,7 +258,11 @@ export class PickPage {
     this.panel.append(h("p", { class: "where" }, "📍 ", p.location.display_name));
     if (p.world_complete) {
       this.panel.append(
-        h("p", { class: "note good" }, "🌍 World complete! Every country is back in the draw."),
+        h(
+          "p",
+          { class: "note good" },
+          "🌍 You've eaten every cuisine near here! They're all back in the draw.",
+        ),
       );
     }
     if (!isFinished(p.status)) {
@@ -274,7 +278,9 @@ export class PickPage {
       );
     }
     if (p.status === "failed") {
-      this.panel.append(h("p", { class: "message error" }, errorText(p.error, p.max_wait_min)));
+      this.panel.append(
+        h("p", { class: "message error" }, errorText(p.error, p.max_wait_min, p.location.radius_m)),
+      );
     }
     if (p.status === "cancelled") {
       this.panel.append(h("p", { class: "message" }, "Pick cancelled. Start a new one whenever you like."));

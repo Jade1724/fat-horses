@@ -7,12 +7,13 @@ import type { Countries } from "../domain/countries";
 import { guessUntagged, MAX_PLACES, type GuessConfig } from "../domain/guessing";
 import {
   chooseRestaurant,
+  countriesWithTaggedPlaces,
   DEFAULT_CONFIDENCE_THRESHOLD,
   primaryMatches,
   type Match,
 } from "../domain/matching";
 import { DEFAULT_AMENITIES, type Place, type Places } from "../domain/places";
-import { pool } from "../domain/pool";
+import { pool, type Pool } from "../domain/pool";
 import {
   candidates,
   DEFAULT_MAX_WAIT_MIN,
@@ -52,7 +53,44 @@ export interface Deps {
   config: Config;
 }
 
-/** Step 1: choose the race (F3). */
+/** Nearby places (F6.1), or null if the lookup failed after its own retries. */
+async function fetchPlaces(deps: Deps, s: PickSession): Promise<Place[] | null> {
+  try {
+    return await deps.places.nearby(
+      s.location.lat,
+      s.location.lon,
+      s.request.radius_m,
+      deps.config.amenities,
+    );
+  } catch (e) {
+    log.warn("places unavailable", { pick_id: s.pick_id, error: String(e) });
+    return null;
+  }
+}
+
+/**
+ * Countries that may get a horse (F2): only those with a tagged restaurant
+ * nearby, so whichever wins, there is somewhere to eat.
+ */
+function countryPool(deps: Deps, s: PickSession, visited: ReadonlySet<string>): Pool {
+  const nearby = countriesWithTaggedPlaces(deps.countries.all, s.places);
+  return pool(nearby, s.request.min_population, visited, s.request.include_visited);
+}
+
+/**
+ * Step 1: find the restaurants first (F6.1), because they decide which
+ * countries may run (F2.2). Runs before a race is chosen, so a slow lookup
+ * can't eat into the time before the start, and a pick with nothing to match
+ * fails at once instead of after a race.
+ */
+export async function loadNearby(deps: Deps, s: PickSession): Promise<PickSession> {
+  const places = await fetchPlaces(deps, s);
+  if (!places) return failed(s, "places_unavailable");
+  const next: PickSession = { ...s, places, places_loaded: true };
+  return countryPool(deps, next, new Set()).full.length === 0 ? failed(next, "no_matching_places") : next;
+}
+
+/** Step 2: choose the race (F3). */
 export async function findRace(deps: Deps, s: PickSession, now: Iso): Promise<PickSession> {
   let schedule;
   try {
@@ -73,13 +111,13 @@ export async function findRace(deps: Deps, s: PickSession, now: Iso): Promise<Pi
   return failed(s, "no_upcoming_race");
 }
 
-/** Step 2: build the pool and draw countries (F2, F4). Sets `waiting_start`. */
+/** Step 3: draw countries from the nearby pool (F2, F4). Sets `waiting_start`. */
 export async function assignCountries(deps: Deps, s: PickSession, rng: Rng): Promise<PickSession> {
   if (!s.race) return failed(s, "internal");
   const visited = new Set(
     (await deps.store.countryVisits()).filter((c) => c.visit_count > 0).map((c) => c.iso2),
   );
-  const p = pool(deps.countries.all, s.request.min_population, visited, s.request.include_visited);
+  const p = countryPool(deps, s, visited);
   try {
     return {
       ...s,
@@ -88,47 +126,41 @@ export async function assignCountries(deps: Deps, s: PickSession, rng: Rng): Pro
       status: "waiting_start",
     };
   } catch (e) {
-    if (e instanceof EmptyPoolError) return failed(s, "internal");
+    if (e instanceof EmptyPoolError) return failed(s, "no_matching_places");
     throw e;
   }
 }
 
 /**
- * Step 3: fetch nearby places and guess cuisines for untagged ones (F6.1, F6.3)
- * while the race hasn't started (F6.4). A failed lookup leaves `places_loaded`
- * false; `ensurePlaces` retries it after the race.
+ * Step 4: guess cuisines for untagged places while the race hasn't started
+ * (F6.3, F6.4). They can only add restaurants for a country already running;
+ * a guess never puts a country in the race. A pick saved before places were
+ * loaded first gets them here, and after the race if this lookup fails.
  */
 export async function prepareNearby(deps: Deps, s: PickSession, now: Iso): Promise<PickSession> {
-  let places: Place[];
-  try {
-    places = await deps.places.nearby(
-      s.location.lat,
-      s.location.lon,
-      s.request.radius_m,
-      deps.config.amenities,
-    );
-  } catch (e) {
-    log.warn("places unavailable; will retry after the race", { pick_id: s.pick_id, error: String(e) });
-    return s;
+  let next = s;
+  if (!next.places_loaded) {
+    const places = await fetchPlaces(deps, s);
+    if (!places) return s;
+    next = { ...next, places, places_loaded: true };
   }
-  const out = await guessUntagged(places, deps.classifier, deps.store, deps.config.guess, now);
+  const out = await guessUntagged(next.places, deps.classifier, deps.store, deps.config.guess, now);
   return {
-    ...s,
-    places,
-    places_loaded: true,
+    ...next,
     guesses: out.guesses,
-    llm_unavailable: s.llm_unavailable || out.llm_unavailable,
+    guessed: true,
+    llm_unavailable: next.llm_unavailable || out.llm_unavailable,
   };
 }
 
-/** Before matching: retry the places lookup if needed; fail if it still fails. */
-export async function ensurePlaces(deps: Deps, s: PickSession, now: Iso): Promise<PickSession> {
+/** Before matching: load places if an older pick still lacks them; fail if that fails. */
+export async function ensurePlaces(deps: Deps, s: PickSession): Promise<PickSession> {
   if (s.places_loaded) return s;
-  const next = await prepareNearby(deps, s, now);
-  return next.places_loaded ? next : failed(next, "places_unavailable");
+  const places = await fetchPlaces(deps, s);
+  return places ? { ...s, places, places_loaded: true } : failed(s, "places_unavailable");
 }
 
-/** Step 4: poll the race once (F5). Sets `resolving` when a winner is decided. */
+/** Step 5: poll the race once (F5). Sets `resolving` when a winner is decided. */
 export async function checkResult(deps: Deps, s: PickSession, now: Iso, rng: Rng): Promise<PickSession> {
   if (!s.race || !s.card) return failed(s, "internal");
   let next: PickSession = { ...s };
@@ -156,7 +188,7 @@ export async function checkResult(deps: Deps, s: PickSession, now: Iso, rng: Rng
   return winner ? { ...next, winner, status: "resolving" } : next;
 }
 
-/** Step 5: tiers 1–2 (F6.2–F6.4). Sets `searching`. */
+/** Step 6: tiers 1–2 (F6.2–F6.4). Sets `searching`. */
 export function matchRestaurants(deps: Deps, s: PickSession): PickSession {
   const country = s.winner ? deps.countries.get(s.winner.country_iso) : undefined;
   if (!country) return failed(s, "internal");
@@ -167,7 +199,7 @@ export function matchRestaurants(deps: Deps, s: PickSession): PickSession {
   };
 }
 
-/** Step 6: tier 3, only without primary matches (F6.5, F6.8). */
+/** Step 7: tier 3, only without primary matches (F6.5, F6.8). Every drawn country has a tagged match, so this is a safety net. */
 export async function fallbackMatch(deps: Deps, s: PickSession): Promise<PickSession> {
   if (s.matches.length > 0 || s.places.length === 0) return s;
   const country = s.winner ? deps.countries.get(s.winner.country_iso) : undefined;
@@ -208,7 +240,7 @@ export function restaurantFrom(p: Place, countryIso: string, m: Match): Restaura
   };
 }
 
-/** Step 7: choose the restaurant and mark it PICKED (F7, F8). Sets `done`. */
+/** Step 8: choose the restaurant and mark it PICKED (F7, F8). Sets `done`. */
 export async function pickRestaurant(deps: Deps, s: PickSession, now: Iso, rng: Rng): Promise<PickSession> {
   if (!s.winner) return failed(s, "internal");
   const counts = new Map<string, number>();
@@ -284,12 +316,16 @@ export async function runPick(
   // a server that stopped carries on where it was (F13) instead of starting over.
   if (await save()) return end();
   if (!s.card) {
+    if (!s.places_loaded) {
+      s = await loadNearby(deps, s);
+      if (await save()) return end();
+    }
     s = await findRace(deps, s, clock.now());
     if (await save()) return end();
     s = await assignCountries(deps, s, rng);
     if (await save()) return end();
   }
-  if (!s.places_loaded) {
+  if (!s.guessed) {
     s = await prepareNearby(deps, s, clock.now());
     if (await save()) return end();
   }
@@ -303,7 +339,7 @@ export async function runPick(
       await clock.sleepUntil(addMs(clock.now(), POLL_INTERVAL_MS), signal);
     }
   }
-  s = await ensurePlaces(deps, s, clock.now());
+  s = await ensurePlaces(deps, s);
   if (await save()) return end();
   s = await fallbackMatch(deps, matchRestaurants(deps, s));
   if (await save()) return end();
@@ -356,16 +392,17 @@ export async function runStep(
   if (!s) throw new NotFoundError(`pick ${pickId} not found`);
   if (isFinished(s.status)) return output(s);
   if (step === "start" && !s.card) {
-    s = await findRace(deps, s, now);
+    if (!s.places_loaded) s = await loadNearby(deps, s);
+    if (s.status !== "failed") s = await findRace(deps, s, now);
     if (s.status !== "failed") s = await assignCountries(deps, s, rng);
-  } else if (step === "prepare_nearby" && !s.places_loaded) {
+  } else if (step === "prepare_nearby" && !s.guessed) {
     s = await prepareNearby(deps, s, now);
   } else if (step === "check_result" && !s.winner) {
     s = await checkResult(deps, s, now, rng);
   } else if (step === "fail") {
     s = failed(s, "internal");
   } else if (step === "finish") {
-    s = await ensurePlaces(deps, s, now);
+    s = await ensurePlaces(deps, s);
     if (s.status !== "failed")
       s = await pickRestaurant(deps, await fallbackMatch(deps, matchRestaurants(deps, s)), now, rng);
   }

@@ -25,6 +25,18 @@ export function taggedMatches(places: readonly Place[], country: Country): Match
     .map((p) => ({ place_id: p.id, match: "tagged", reason: null }));
 }
 
+/**
+ * The countries allowed into the race (F2.2): those with at least one tagged
+ * restaurant nearby, so whichever horse wins, there is somewhere to eat. Only
+ * tags count; a guess is too uncertain to put a country in the draw.
+ */
+export function countriesWithTaggedPlaces(
+  countries: readonly Country[],
+  places: readonly Place[],
+): Country[] {
+  return countries.filter((c) => taggedMatches(places, c).length > 0);
+}
+
 /** Tier 2 (F6.3): untagged places whose guess matches with enough confidence. */
 export function inferredMatches(
   places: readonly Place[],

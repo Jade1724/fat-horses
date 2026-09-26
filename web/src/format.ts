@@ -22,7 +22,7 @@ export function countdown(start: Date, now: Date): string | null {
 export function statusText(status: PickStatus): string {
   switch (status) {
     case "finding_race":
-      return "Finding the next race…";
+      return "Finding restaurants and the next race…";
     case "waiting_start":
       return "Waiting for the start";
     case "running":
@@ -46,7 +46,7 @@ export function minutesText(min: number): string {
   return `${min} minutes`;
 }
 
-export function errorText(error: PickError | null, maxWaitMin = 10): string {
+export function errorText(error: PickError | null, maxWaitMin = 10, radiusM = 500): string {
   switch (error) {
     case "no_upcoming_race":
       return `No gallops race starts in the next ${minutesText(maxWaitMin)}. Try again later, or allow a longer wait in Options.`;
@@ -54,6 +54,8 @@ export function errorText(error: PickError | null, maxWaitMin = 10): string {
       return "TAB NZ isn't answering right now. Try again in a few minutes.";
     case "places_unavailable":
       return "The restaurant search (OpenStreetMap) is down. Try again in a few minutes.";
+    case "no_matching_places":
+      return `No restaurant within ${distanceText(radiusM)} has a cuisine we can match to a country, so there's nobody to race. Try a bigger radius in Options.`;
     case "internal":
     case null:
       return "Something went wrong on our side. Try again.";

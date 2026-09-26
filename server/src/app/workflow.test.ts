@@ -11,7 +11,16 @@ import { recordVisit } from "../domain/store";
 import { addMs, ms, MINUTE, type Iso } from "../domain/time";
 import { contractRestaurant } from "../store/contract";
 import { MemoryStore } from "../store/state";
-import { defaultConfig, runPick, runStep, type Clock, type Deps } from "./workflow";
+import {
+  defaultConfig,
+  ensurePlaces,
+  fallbackMatch,
+  matchRestaurants,
+  runPick,
+  runStep,
+  type Clock,
+  type Deps,
+} from "./workflow";
 
 const T0 = "2026-09-21T10:00:00.000Z";
 const at = (m: number) => addMs(T0, m * MINUTE);
@@ -28,11 +37,13 @@ class FakeClock implements Clock {
 
 /** A fixed schedule, then the given updates in order (the last repeats). */
 class FakeRaces implements RaceProvider {
+  scheduleCalls = 0;
   constructor(
     private readonly races: Race[],
     private readonly updates: RaceUpdate[],
   ) {}
   async schedule() {
+    this.scheduleCalls++;
     return this.races;
   }
   async update() {
@@ -203,85 +214,71 @@ describe("runPick", () => {
     expect(s.winner?.reason).toBe("timeout");
   });
 
-  it("no match is done without a pick", async () => {
+  it("only countries with a restaurant nearby get a horse (F2.2)", async () => {
+    const { s } = await run(
+      deps({
+        updates: openThen(update("final", [[1, 1]])),
+        places: new FakePlaces([
+          place("osm:node/1", "Sakura", "sushi"),
+          place("osm:node/2", "Roma", "pizza"),
+        ]),
+      }),
+    );
+    const drawn = new Set(s.card?.entries.map((e) => e.country_iso));
+    // Three horses, two eligible countries: both run, one twice; Mexico never.
+    expect(drawn).toEqual(new Set(["JP", "IT"]));
+    expect(s.status).toBe("done");
+    expect(s.pick).not.toBeNull();
+  });
+
+  it("fails before looking for a race when nothing nearby matches any country", async () => {
     const d = deps({
       updates: openThen(update("final", [[1, 1]])),
       places: new FakePlaces([place("osm:node/9", "Burger Barn", "burger")]),
     });
     const { s } = await run(d);
-    expect(s.status).toBe("done");
-    expect(s.matches).toEqual([]);
-    expect(s.pick).toBeNull();
+    expect(s).toMatchObject({ status: "failed", error: "no_matching_places", race: null, card: null });
+    expect((d.races as FakeRaces).scheduleCalls).toBe(0);
     expect(await d.store.currentlyPicked()).toBeNull();
-    expect(s.llm_unavailable).toBe(false);
+  });
+
+  it("a places outage fails the pick before a race is chosen", async () => {
+    const d = deps({
+      updates: openThen(update("final", [[1, 1]])),
+      places: new FakePlaces(onePerCountry(), 1),
+    });
+    const { s } = await run(d);
+    expect(s).toMatchObject({ status: "failed", error: "places_unavailable", race: null });
+    expect((d.races as FakeRaces).scheduleCalls).toBe(0);
   });
 
   it("LLM failure still finishes", async () => {
     const { s } = await run(
       deps({
         updates: openThen(update("final", [[1, 1]])),
-        places: new FakePlaces([place("osm:node/9", "Mystery Kitchen", "")]),
+        places: new FakePlaces([
+          place("osm:node/1", "Sakura", "sushi"),
+          place("osm:node/9", "Mystery Kitchen", ""),
+        ]),
         classifier: FakeClassifier.failing(),
       }),
     );
     expect(s.status).toBe("done");
     expect(s.llm_unavailable).toBe(true);
-    expect(s.pick).toBeNull();
+    expect(s.pick).toBe("osm:node/1");
   });
 
-  it("inferred matches count as primary", async () => {
-    const fake = new FakeClassifier()
-      .withGuess(guess("osm:node/1", "japanese"))
-      .withGuess(guess("osm:node/2", "italian"))
-      .withGuess(guess("osm:node/3", "mexican"));
+  it("an inferred match joins the winner's tagged ones", async () => {
     const { s } = await run(
       deps({
         updates: openThen(update("final", [[1, 1]])),
-        places: new FakePlaces([
-          place("osm:node/1", "Sakura", ""),
-          place("osm:node/2", "Roma", ""),
-          place("osm:node/3", "Taq", ""),
-        ]),
-        classifier: fake,
+        places: new FakePlaces([place("osm:node/1", "Sakura", "sushi"), place("osm:node/2", "Kaiten", "")]),
+        classifier: new FakeClassifier().withGuess(guess("osm:node/2", "japanese")),
       }),
     );
-    expect(s.guesses).toHaveLength(3);
-    expect(s.matches).toHaveLength(1);
-    expect(s.matches[0]?.match).toBe("inferred");
+    expect(s.guesses).toHaveLength(1);
+    expect(s.matches.map((m) => m.match).sort()).toEqual(["inferred", "tagged"]);
     expect(s.pick).not.toBeNull();
-  });
-
-  it("fallback when there is no primary match", async () => {
-    let fake = new FakeClassifier();
-    for (const n of ["Japan", "Italy", "Mexico"])
-      fake = fake.withDishMatch(n, "osm:node/9", "has the dishes");
-    const { s } = await run(
-      deps({
-        updates: openThen(update("final", [[1, 1]])),
-        places: new FakePlaces([place("osm:node/9", "Corner Bistro", "")]),
-        classifier: fake,
-      }),
-    );
-    expect(s.matches).toEqual([{ place_id: "osm:node/9", match: "fallback", reason: "has the dishes" }]);
-    expect(s.pick).toBe("osm:node/9");
-  });
-
-  it("a places outage before the race is retried", async () => {
-    const { s } = await run(
-      deps({ updates: openThen(update("final", [[1, 1]])), places: new FakePlaces(onePerCountry(), 1) }),
-    );
-    expect(s.status).toBe("done");
-    expect(s.places_loaded).toBe(true);
-    expect(s.pick).not.toBeNull();
-  });
-
-  it("a places outage after the race fails, with the winner shown", async () => {
-    const { s } = await run(
-      deps({ updates: openThen(update("final", [[1, 1]])), places: new FakePlaces(onePerCountry(), 2) }),
-    );
-    expect(s.status).toBe("failed");
-    expect(s.error).toBe("places_unavailable");
-    expect(s.winner).not.toBeNull();
   });
 
   it("no race fails", async () => {
@@ -291,7 +288,7 @@ describe("runPick", () => {
     expect((await d.store.getPick("p1"))?.status).toBe("failed");
   });
 
-  it("world complete when every country is visited", async () => {
+  it("every cuisine nearby visited: they all come back into the draw (F2.4)", async () => {
     const store = new MemoryStore();
     for (const [id, iso] of [
       ["osm:node/1", "JP"],
@@ -316,6 +313,37 @@ describe("runPick", () => {
     const { s } = await run(deps({ store, updates: openThen(update("final", [[1, 1]])) }));
     expect(s.world_complete).toBe(false);
     expect(s.card?.entries.some((e) => e.country_iso === "MX")).toBe(true);
+  });
+});
+
+describe("picks drawn before countries were limited to nearby ones", () => {
+  // Such a pick can have a winner with nothing tagged nearby, and may not have
+  // its places yet; the finish step still copes.
+  const legacy = (places: Place[], loaded: boolean): PickSession => ({
+    ...session(),
+    status: "resolving",
+    winner: { number: 1, country_iso: "JP", reason: "result", tied: [] },
+    places,
+    places_loaded: loaded,
+  });
+
+  it("falls back to dishes when there is no primary match", async () => {
+    let fake = new FakeClassifier();
+    for (const n of ["Japan", "Italy", "Mexico"])
+      fake = fake.withDishMatch(n, "osm:node/9", "has the dishes");
+    const d = deps({ classifier: fake });
+    const s = await fallbackMatch(
+      d,
+      matchRestaurants(d, legacy([place("osm:node/9", "Corner Bistro", "")], true)),
+    );
+    expect(s.matches).toEqual([{ place_id: "osm:node/9", match: "fallback", reason: "has the dishes" }]);
+  });
+
+  it("loads missing places after the race, and fails if it can't", async () => {
+    const ok = await ensurePlaces(deps({ places: new FakePlaces(onePerCountry()) }), legacy([], false));
+    expect(ok.places_loaded).toBe(true);
+    const down = await ensurePlaces(deps({ places: new FakePlaces(onePerCountry(), 1) }), legacy([], false));
+    expect(down).toMatchObject({ status: "failed", error: "places_unavailable" });
   });
 });
 

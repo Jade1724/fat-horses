@@ -16,7 +16,13 @@ export function isFinished(status: PickStatus): boolean {
   return status === "done" || status === "failed" || status === "cancelled";
 }
 
-export type PickError = "no_upcoming_race" | "race_source_unavailable" | "places_unavailable" | "internal";
+export type PickError =
+  | "no_upcoming_race"
+  | "race_source_unavailable"
+  | "places_unavailable"
+  /** Nothing nearby is tagged with a cuisine any country claims, so no country can enter the race (F2.2). */
+  | "no_matching_places"
+  | "internal";
 
 /** The validated request that started a pick (F1.1). */
 export interface PickRequest {
@@ -42,10 +48,15 @@ export interface PickSession {
   interim_placings: Placing[];
   interim_since: Iso | null;
   winner: Winner | null;
-  /** false until the places lookup has succeeded (it is retried after the race). */
+  /**
+   * false until the places lookup has succeeded. A pick loads places first, to
+   * know which countries may run (F2.2); picks saved before that retry after the race.
+   */
   places_loaded: boolean;
   places: Place[];
   guesses: Guess[];
+  /** Cuisine guessing for untagged places is done (F6.3). Absent in picks saved before it existed. */
+  guessed?: boolean;
   matches: Match[];
   /** Place id of the chosen restaurant. */
   pick: string | null;

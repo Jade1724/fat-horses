@@ -318,7 +318,7 @@
     <h2 id="pick">A pick, start to finish</h2>
     <figure>
       <div class="canvas">
-        <svg class="dg" viewBox="0 0 1080 300" role="img" aria-label="The pick state machine: Start finds a race and draws countries, PrepareNearby loads nearby places, WaitForStart waits until post time, CheckResult polls for the result every 60 seconds until a winner is decided, then Finish matches restaurants and marks one PICKED. A step that keeps failing goes to Fail, which marks the pick failed.">
+        <svg class="dg" viewBox="0 0 1080 300" role="img" aria-label="The pick state machine: Start loads nearby restaurants, finds a race and draws countries only from cuisines found nearby, PrepareNearby guesses cuisines for untagged places, WaitForStart waits until post time, CheckResult polls for the result every 60 seconds until a winner is decided, then Finish matches restaurants and marks one PICKED. A step that keeps failing goes to Fail, which marks the pick failed.">
           <defs>
             <marker id="p-wf" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto"><path class="ah wf" d="M0,0 L10,5 L0,10 z"/></marker>
             <marker id="p-quiet" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" orient="auto"><path class="ah quiet" d="M0,0 L10,5 L0,10 z"/></marker>
@@ -345,11 +345,11 @@
           <!-- states -->
           <rect class="box" x="20" y="110" width="150" height="56" rx="6"/>
           <text class="t" x="95" y="134" text-anchor="middle">Start</text>
-          <text class="s" x="95" y="153" text-anchor="middle">race + countries</text>
+          <text class="s" x="95" y="153" text-anchor="middle">places · race · draw</text>
 
           <rect class="box" x="210" y="110" width="150" height="56" rx="6"/>
           <text class="t" x="285" y="134" text-anchor="middle">PrepareNearby</text>
-          <text class="s" x="285" y="153" text-anchor="middle">places + cuisines</text>
+          <text class="s" x="285" y="153" text-anchor="middle">guess cuisines</text>
 
           <rect class="box wait" x="400" y="110" width="150" height="56" rx="6"/>
           <text class="t" x="475" y="134" text-anchor="middle">WaitForStart</text>
@@ -375,7 +375,7 @@
           <text class="s" x="475" y="263" text-anchor="middle">mark pick failed</text>
         </svg>
       </div>
-      <figcaption>White boxes each invoke the workflow Lambda once. Tinted ones run nothing: WaitForStart and Poll are Step Functions waits, so a pick can sit up to three hours before post time at no compute cost. After any step, a pick that has failed or been cancelled skips straight to Done.</figcaption>
+      <figcaption>Start looks up the restaurants <em>before</em> the race, and only countries with a tagged restaurant nearby get a horse, so whichever wins, there is somewhere to eat. White boxes each invoke the workflow Lambda once. Tinted ones run nothing: WaitForStart and Poll are Step Functions waits, so a pick can sit up to three hours before post time at no compute cost. After any step, a pick that has failed or been cancelled skips straight to Done.</figcaption>
     </figure>
   </section>
 

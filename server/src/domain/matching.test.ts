@@ -13,7 +13,14 @@ import {
 } from "./classify";
 import type { Country } from "./countries";
 import { guessUntagged, inputHash, type GuessConfig } from "./guessing";
-import { chooseRestaurant, inferredMatches, primaryMatches, taggedMatches, type Match } from "./matching";
+import {
+  chooseRestaurant,
+  countriesWithTaggedPlaces,
+  inferredMatches,
+  primaryMatches,
+  taggedMatches,
+  type Match,
+} from "./matching";
 import { distanceM, normaliseAddress, osmId, parseCuisine, type Place } from "./places";
 import { seeded } from "./rng";
 import { applyEvent, InvalidTransition, type Restaurant, type Status } from "./status";
@@ -207,6 +214,27 @@ describe("matching (F6.2–F6.4)", () => {
       ["osm:node/2", "tagged"],
       ["osm:node/1", "inferred"],
     ]);
+  });
+});
+
+describe("countries that can enter the race (F2.2)", () => {
+  const italy: Country = { ...japan, iso2: "IT", name: "Italy", cuisine_tags: ["italian", "pizza"] };
+  const algeria: Country = { ...japan, iso2: "DZ", name: "Algeria", cuisine_tags: ["algerian", "maghreb"] };
+
+  it("keeps only countries with a tagged restaurant nearby", () => {
+    const nearby = [place("osm:node/1", "ramen"), place("osm:node/2", "pizza;burger")];
+    expect(countriesWithTaggedPlaces([japan, italy, algeria], nearby).map((c) => c.iso2)).toEqual([
+      "JP",
+      "IT",
+    ]);
+  });
+
+  it("ignores untagged places: a guess can't put a country in the race", () => {
+    expect(countriesWithTaggedPlaces([japan, italy], [place("osm:node/1", "")])).toEqual([]);
+  });
+
+  it("is empty when nothing nearby has a cuisine any country claims", () => {
+    expect(countriesWithTaggedPlaces([japan, italy, algeria], [place("osm:node/1", "burger")])).toEqual([]);
   });
 });
 

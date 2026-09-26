@@ -62,6 +62,10 @@ describe("status and error text", () => {
     expect(errorText("no_upcoming_race", 180)).toContain("next 3 hours");
     expect(errorText("no_upcoming_race", 60)).toContain("next hour");
     expect(errorText("places_unavailable")).toContain("OpenStreetMap");
+    expect(errorText("no_matching_places", 10, 500)).toBe(
+      "No restaurant within 500 m has a cuisine we can match to a country, so there's nobody to race. Try a bigger radius in Options.",
+    );
+    expect(errorText("no_matching_places", 10, 2000)).toContain("within 2.0 km");
     expect(errorText(null)).not.toBe("");
   });
   it("explains unusual wins", () => {

@@ -3,7 +3,8 @@
 export type PickStatus =
   "finding_race" | "waiting_start" | "running" | "resolving" | "searching" | "done" | "failed" | "cancelled";
 
-export type PickError = "no_upcoming_race" | "race_source_unavailable" | "places_unavailable" | "internal";
+export type PickError =
+  "no_upcoming_race" | "race_source_unavailable" | "places_unavailable" | "no_matching_places" | "internal";
 
 export type RestaurantStatus = "PICKED" | "VISITED" | null;
 export type MatchKind = "tagged" | "inferred" | "fallback";
