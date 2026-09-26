@@ -5,8 +5,8 @@ import { bundledCountries } from "../domain/countries";
 import { GeocoderUnavailable, type Geocoder, type Location } from "../domain/places";
 import { recordPick } from "../domain/store";
 import { contractRestaurant } from "../store/contract";
-import { MemoryStore, MemoryStores } from "../store/state";
-import { Api, constantTimeEqual, type ApiRequest, type WorkflowStarter } from "./api";
+import { MemoryStore } from "../store/state";
+import { Api, type ApiRequest, type WorkflowStarter } from "./api";
 import {
   AddressNotFound,
   AmbiguousAddress,
@@ -16,9 +16,9 @@ import {
   startPick,
   type StartInput,
 } from "./start";
+import { sessionCookie, TEST_PASSWORD, testAuth } from "../../test/auth";
 
 const NOW = "2026-09-21T10:00:00.000Z";
-const KEY = "s3cret-key";
 
 const SKY_TOWER: Location = { lat: -36.8485, lon: 174.7622, display_name: "Sky Tower, Auckland" };
 const ALBERT_STREETS: Location[] = [
@@ -154,17 +154,16 @@ describe("startPick (F1)", () => {
 });
 
 function api(starter = new FakeStarter()) {
-  const stores = new MemoryStores();
+  const store = new MemoryStore();
   return {
     api: new Api({
       geocoder: new FakeGeocoder(),
-      stores,
+      store,
       starter,
       countries: bundledCountries(),
-      apiKeys: { me: KEY },
+      auth: testAuth(),
     }),
-    store: stores.forUser("me"),
-    stores,
+    store,
     starter,
   };
 }
@@ -178,7 +177,7 @@ const req = (
   method,
   path,
   query,
-  apiKey: KEY,
+  cookies: sessionCookie(NOW),
   body: body === undefined ? undefined : JSON.stringify(body),
 });
 const get = (path: string, query: Record<string, string> = {}) => req("GET", path, undefined, query);
@@ -189,19 +188,69 @@ function errorOf(r: { status: number; body: unknown }) {
 }
 
 describe("API (§5)", () => {
-  it("requires the key", async () => {
+  it("requires a session", async () => {
     const { api: a } = api();
-    expect(errorOf(await a.handle({ ...get("/history"), apiKey: undefined }, NOW))).toEqual([
-      401,
-      "unauthorized",
-    ]);
-    expect(errorOf(await a.handle({ ...get("/history"), apiKey: "wrong" }, NOW))).toEqual([
-      401,
-      "unauthorized",
-    ]);
+    for (const cookies of [undefined, "", "fh_session=nonsense", sessionCookie(NOW, "another secret")]) {
+      expect(errorOf(await a.handle({ ...get("/history"), cookies }, NOW))).toEqual([401, "unauthorized"]);
+    }
     expect((await a.handle(get("/history"), NOW)).status).toBe(200);
-    expect(constantTimeEqual("abc", "abc")).toBe(true);
-    expect(constantTimeEqual("abc", "abcd")).toBe(false);
+  });
+
+  it("stops accepting a session once it expires", async () => {
+    const { api: a } = api();
+    const later = new Date(Date.parse(NOW) + 13 * 60 * 60 * 1000).toISOString();
+    const r = await a.handle(get("/history"), later);
+    expect(errorOf(r)).toEqual([401, "unauthorized"]);
+    expect((r.body as { message: string }).message).toBe("session expired");
+  });
+
+  describe("POST /login", () => {
+    it("trades the password for an HttpOnly session cookie", async () => {
+      const { api: a } = api();
+      const r = await a.handle({ ...post("/login", { password: TEST_PASSWORD }), cookies: undefined }, NOW);
+      expect(r.status).toBe(200);
+      expect(r.setCookie).toContain("HttpOnly");
+      expect(r.setCookie).toContain("SameSite=Strict");
+      // The reply itself carries no token, so no script can read one.
+      expect(JSON.stringify(r.body)).not.toContain(".");
+
+      const token = (r.setCookie ?? "").split(";")[0];
+      expect((await a.handle({ ...get("/history"), cookies: token }, NOW)).status).toBe(200);
+    });
+
+    it("refuses a wrong password and sets no cookie", async () => {
+      const { api: a } = api();
+      const r = await a.handle({ ...post("/login", { password: "guess" }), cookies: undefined }, NOW);
+      expect(errorOf(r)).toEqual([401, "unauthorized"]);
+      expect(r.setCookie).toBeUndefined();
+    });
+
+    it("needs a password in the body", async () => {
+      const { api: a } = api();
+      expect(errorOf(await a.handle(post("/login", {}), NOW))).toEqual([422, "invalid_request"]);
+      expect(errorOf(await a.handle(post("/login", { password: "" }), NOW))).toEqual([
+        422,
+        "invalid_request",
+      ]);
+    });
+
+    it("is 503 until a password has been set", async () => {
+      const a = new Api({
+        geocoder: new FakeGeocoder(),
+        store: new MemoryStore(),
+        starter: new FakeStarter(),
+        countries: bundledCountries(),
+        auth: { passwordHash: "unset", sessionSecret: "s", secureCookie: true },
+      });
+      expect(errorOf(await a.handle(post("/login", { password: "x" }), NOW))).toEqual([503, "internal"]);
+    });
+  });
+
+  it("logging out expires the cookie", async () => {
+    const { api: a } = api();
+    const r = await a.handle(post("/logout"), NOW);
+    expect(r.status).toBe(200);
+    expect(r.setCookie).toContain("Max-Age=0");
   });
 
   it("unknown routes are 404", async () => {

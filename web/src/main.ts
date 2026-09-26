@@ -1,11 +1,10 @@
-// App shell: API key gate, navigation between Pick, Passport and History (F10.1, F10.2).
+// App shell: the login gate, navigation between Pick, Passport and History (F10.1, F10.2).
 
 import "./style.css";
-import { Api } from "./api";
+import { Api, ApiError } from "./api";
 import { clear, h } from "./dom";
 import { PickMap } from "./map";
 import { createMap } from "./mapView";
-import { storage } from "./storage";
 import { historyPage } from "./views/history";
 import { passportPage } from "./views/passport";
 import { PickPage } from "./views/pick";
@@ -21,16 +20,17 @@ function currentRoute(): Route {
   return r === "passport" || r === "history" ? r : "pick";
 }
 
-function keyScreen(message?: string): void {
+function loginScreen(message?: string): void {
   clear(app);
   const input = h("input", {
     type: "password",
-    name: "key",
+    name: "password",
     autocomplete: "current-password",
-    placeholder: "API key",
+    placeholder: "Password",
     required: true,
-    "aria-label": "API key",
+    "aria-label": "Password",
   });
+  const button = h("button", { type: "submit", class: "primary" }, "Log in");
   const form = h(
     "form",
     { class: "key-form" },
@@ -38,29 +38,29 @@ function keyScreen(message?: string): void {
     h("p", {}, "A horse race picks the country. We find the restaurant."),
     message ? h("p", { class: "message error" }, message) : null,
     input,
-    h("button", { type: "submit", class: "primary" }, "Continue"),
+    button,
   );
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const key = input.value.trim();
-    if (!key) return;
-    storage.setApiKey(key);
-    boot();
+    const password = input.value;
+    if (!password) return;
+    button.disabled = true;
+    // The cookie the server sets is HttpOnly, so nothing is kept here.
+    void new Api(() => {})
+      .login(password)
+      .then(() => boot())
+      .catch(() => {
+        button.disabled = false;
+        input.value = "";
+        loginScreen("That password didn't work. Try again.");
+      });
   });
   app.append(h("main", { class: "key-page" }, form));
   input.focus();
 }
 
 function boot(): void {
-  const key = storage.apiKey();
-  if (!key) {
-    keyScreen();
-    return;
-  }
-  const api = new Api(key, () => {
-    storage.setApiKey(null);
-    keyScreen("That key didn't work. Enter it again.");
-  });
+  const api = new Api(() => loginScreen("Your session expired. Log in again."));
 
   clear(app);
   const nav = h("nav", { class: "tabs" });
@@ -99,4 +99,15 @@ function boot(): void {
   show();
 }
 
-boot();
+/**
+ * The session lives in a cookie we can't read, so ask the API instead: one cheap
+ * call says whether we're logged in. Anything other than a 401 is the app's own
+ * problem to show, not a reason to ask for the password again.
+ */
+void new Api(() => {})
+  .picked()
+  .then(() => boot())
+  .catch((e: unknown) => {
+    if (e instanceof ApiError && e.status === 401) loginScreen();
+    else boot();
+  });

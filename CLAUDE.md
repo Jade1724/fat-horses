@@ -17,7 +17,7 @@ same change).
 - `make build-lambdas` — bundle the Lambda handlers (esbuild) into `server/dist/lambda/`.
 - `make web-build` — build the UI into `web/dist/`.
 - `make it` — store contract against DynamoDB Local (needs Docker). Not part of `check`.
-- `cd server && npm run cli -- <command>` — the `fat-horses` CLI (pick, visit, skip, passport, history, serve).
+- `cd server && npm run cli -- <command>` — the `fat-horses` CLI (pick, visit, skip, passport, history, serve, hash-password).
 
 ## Definition of done
 

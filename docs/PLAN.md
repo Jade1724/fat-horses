@@ -46,7 +46,7 @@ Help the user explore the world's cuisines. Enter an address; a real upcoming ho
 
 ```
 Browser (MapLibre GL JS SPA)
-   │  HTTPS, x-api-key header
+   │  HTTPS, fh_session cookie
 CloudFront ── /        → S3 (static site, private, OAC)
            └─ /api/*   → API Gateway HTTP API → Lambda `api` (Rust)
                                                   │ start execution / read state
@@ -143,7 +143,7 @@ At most one restaurant is `PICKED` at a time. Every transition writes a log entr
 
 Statuses: `finding_race`, `waiting_start`, `running`, `resolving`, `searching`, `done`, `failed`.
 
-Every request needs the `x-api-key` header, compared against SSM in constant time. API Gateway throttling is set low (e.g. 5 requests/s).
+One shared password, checked against an scrypt hash in SSM, is traded at `POST /login` for a 12-hour `HttpOnly` session cookie; every other request needs that cookie (F11). API Gateway throttling is set low (e.g. 5 requests/s).
 
 6.11 **LLM usage rules (Bedrock)**
 - **Interface:** a `Classifier` trait in `crates/domain` with two operations: `guess_cuisines(places) → [{place_id, cuisines[{tag, confidence}], reason}]` and `match_dishes(places, country_dishes) → [{place_id, reason}]`. Implementations: `BedrockClassifier` (real) and `FakeClassifier` (deterministic, for tests and offline CLI runs). `make check` never calls Bedrock.

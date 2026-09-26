@@ -7,10 +7,11 @@ locals {
       timeout     = 15
       memory      = 512
       environment = {
-        TABLE_NAME        = aws_dynamodb_table.main.name
-        API_KEYS_PARAM    = aws_ssm_parameter.api_keys.name
-        STATE_MACHINE_ARN = local.state_machine_arn
-        GEOCODE_COUNTRIES = var.geocode_countries
+        TABLE_NAME           = aws_dynamodb_table.main.name
+        PASSWORD_HASH_PARAM  = aws_ssm_parameter.password_hash.name
+        SESSION_SECRET_PARAM = aws_ssm_parameter.session_secret.name
+        STATE_MACHINE_ARN    = local.state_machine_arn
+        GEOCODE_COUNTRIES    = var.geocode_countries
       }
     }
     workflow = {
@@ -107,16 +108,16 @@ data "aws_iam_policy_document" "lambda" {
   dynamic "statement" {
     for_each = each.key == "api" ? [1] : []
     content {
-      sid       = "ApiKeys"
+      sid       = "AuthSecrets"
       actions   = ["ssm:GetParameter"]
-      resources = [aws_ssm_parameter.api_keys.arn]
+      resources = [aws_ssm_parameter.password_hash.arn, aws_ssm_parameter.session_secret.arn]
     }
   }
 
   dynamic "statement" {
     for_each = each.key == "api" ? [1] : []
     content {
-      sid       = "DecryptApiKeys"
+      sid       = "DecryptAuthSecrets"
       actions   = ["kms:Decrypt"]
       resources = [data.aws_kms_alias.ssm.target_key_arn]
     }

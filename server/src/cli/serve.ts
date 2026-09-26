@@ -6,29 +6,28 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { extname, join, normalize } from "node:path";
 import { nominatimFromEnv, Overpass } from "../adapters/osm";
 import { identityFromEnv, TabNz } from "../adapters/tabNz";
-import { Api, type WorkflowStarter } from "../app/api";
+import { Api, type AuthConfig, type WorkflowStarter } from "../app/api";
 import { defaultConfig, runPick, systemClock, type Deps } from "../app/workflow";
 import { FakeClassifier } from "../domain/classify";
 import { bundledCountries } from "../domain/countries";
 import { systemRng } from "../domain/rng";
 import type { PickSession } from "../domain/session";
-import type { ApiKeys } from "../domain/users";
-import type { StateStores } from "../store/state";
+import type { StateStore } from "../store/state";
 import { log } from "../log";
 
-/** Runs each pick as a background task in this process, against its user's store. */
+/** Runs each pick as a background task in this process. */
 export class LocalStarter implements WorkflowStarter {
   private readonly running = new Map<string, AbortController>();
 
   constructor(
     private readonly deps: Omit<Deps, "store">,
-    private readonly stores: StateStores,
+    private readonly store: StateStore,
   ) {}
 
-  async start(pickId: string, user: string): Promise<void> {
-    const session = await this.stores.forUser(user).getPick(pickId);
+  async start(pickId: string): Promise<void> {
+    const session = await this.store.getPick(pickId);
     if (!session) throw new Error("pick not stored");
-    this.run(session, user);
+    this.run(session);
   }
 
   /**
@@ -36,23 +35,23 @@ export class LocalStarter implements WorkflowStarter {
    * inside the server, so stopping the server stops it mid-way.
    */
   async resume(): Promise<number> {
-    const picks = await this.stores.unfinishedPicks();
-    for (const { user, session } of picks) {
-      log.info("resuming pick", { pick_id: session.pick_id, user, status: session.status });
-      this.run(session, user);
+    const picks = await this.store.unfinishedPicks();
+    for (const session of picks) {
+      log.info("resuming pick", { pick_id: session.pick_id, status: session.status });
+      this.run(session);
     }
     return picks.length;
   }
 
-  private run(session: PickSession, user: string): void {
+  private run(session: PickSession): void {
     const pickId = session.pick_id;
     if (this.running.has(pickId)) return;
     const abort = new AbortController();
     this.running.set(pickId, abort);
-    const deps: Deps = { ...this.deps, store: this.stores.forUser(user) };
+    const deps: Deps = { ...this.deps, store: this.store };
     void runPick(deps, session, systemClock, systemRng, () => {}, abort.signal)
-      .then((s) => log.info("pick finished", { pick_id: pickId, user, status: s.status }))
-      .catch((e: unknown) => log.error("pick failed", { pick_id: pickId, user, error: String(e) }))
+      .then((s) => log.info("pick finished", { pick_id: pickId, status: s.status }))
+      .catch((e: unknown) => log.error("pick failed", { pick_id: pickId, error: String(e) }))
       .finally(() => this.running.delete(pickId));
   }
 
@@ -90,7 +89,7 @@ function serveStatic(webDir: string, path: string, res: ServerResponse): void {
   createReadStream(file).pipe(res);
 }
 
-export function serve(stores: StateStores, port: number, apiKeys: ApiKeys, webDir?: string): void {
+export function serve(store: StateStore, port: number, auth: AuthConfig, webDir?: string): void {
   const deps: Omit<Deps, "store"> = {
     races: new TabNz(identityFromEnv()),
     places: new Overpass(),
@@ -98,36 +97,38 @@ export function serve(stores: StateStores, port: number, apiKeys: ApiKeys, webDi
     countries: bundledCountries(),
     config: defaultConfig(),
   };
-  const starter = new LocalStarter(deps, stores);
+  const starter = new LocalStarter(deps, store);
   void starter.resume().then((n) => {
     if (n > 0) console.log(`Resumed ${n} unfinished pick${n === 1 ? "" : "s"}`);
   });
   const api = new Api({
     geocoder: nominatimFromEnv(),
-    stores,
+    store,
     starter,
     countries: deps.countries,
-    apiKeys,
+    auth,
   });
-  console.log(`Users: ${Object.keys(apiKeys).join(", ")}`);
+  console.log("Log in with the shared password (POST /api/login).");
   const server = createServer((req, res) => {
     const url = new URL(req.url ?? "/", "http://localhost");
     if (url.pathname.startsWith("/api/")) {
       void (async () => {
         try {
-          const header = req.headers["x-api-key"];
           const r = await api.handle(
             {
               method: req.method ?? "GET",
               // Keep percent-encoding: take the raw path from req.url, not url.pathname.
               path: ((req.url ?? "").split("?")[0] ?? "").slice(4),
               query: Object.fromEntries(url.searchParams),
-              apiKey: Array.isArray(header) ? header[0] : header,
+              cookies: req.headers.cookie,
               body: (await readBody(req)) || undefined,
             },
             new Date().toISOString(),
           );
-          res.writeHead(r.status, { "content-type": "application/json" });
+          res.writeHead(r.status, {
+            "content-type": "application/json",
+            ...(r.setCookie ? { "set-cookie": r.setCookie } : {}),
+          });
           res.end(JSON.stringify(r.body));
         } catch (e) {
           log.error("request failed", { error: String(e) });

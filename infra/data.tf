@@ -27,16 +27,29 @@ resource "aws_dynamodb_table" "main" {
   deletion_protection_enabled = true
 }
 
-# API keys, one per user (F14.2): {"<user>": "<key>", …}. Terraform creates the
-# parameter with a placeholder and never reads or overwrites the real value,
-# which is set by hand (see infra/README.md), so keys never enter the state.
-resource "aws_ssm_parameter" "api_keys" {
-  name        = "/${var.name}/api-keys"
-  description = "fat-horses API keys: JSON object of user to key"
+# The shared password, as a scrypt hash (F11.1). Terraform creates the parameter
+# with a placeholder and never reads or overwrites the real value, which
+# scripts/set-password.sh sets, so no secret enters the state file.
+resource "aws_ssm_parameter" "password_hash" {
+  name        = "/${var.name}/password-hash"
+  description = "fat-horses shared password, as scrypt$N$r$p$salt$hash"
   type        = "SecureString"
-  # Not valid key JSON on purpose: until the real keys are set, the API refuses
-  # every request instead of accepting a key that is written in this repo.
+  # Not a valid hash on purpose: until a password is set, the API refuses every
+  # login rather than accepting one written in this repo.
   value = "unset"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+# The HMAC key that signs session cookies. Rotating it ends every live session;
+# scripts/set-password.sh --revoke-sessions does that.
+resource "aws_ssm_parameter" "session_secret" {
+  name        = "/${var.name}/session-secret"
+  description = "fat-horses session signing secret"
+  type        = "SecureString"
+  value       = "unset"
 
   lifecycle {
     ignore_changes = [value]

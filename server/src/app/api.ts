@@ -1,7 +1,13 @@
 // HTTP API handlers (SPEC.md §5, F11.1), independent of any HTTP framework.
 
-import { timingSafeEqual } from "node:crypto";
 import { z } from "zod";
+import {
+  SESSION_TTL_SECONDS,
+  signSession,
+  verifyPassword,
+  verifySession,
+  type SessionProblem,
+} from "../domain/auth";
 import type { Countries, Country } from "../domain/countries";
 import { GeocoderUnavailable, type Geocoder } from "../domain/places";
 import { DEFAULT_MIN_POPULATION } from "../domain/pool";
@@ -16,10 +22,8 @@ import {
   recordSkip,
   recordVisit,
   type Store,
-  type Stores,
 } from "../domain/store";
 import type { Iso } from "../domain/time";
-import type { ApiKeys } from "../domain/users";
 import { log } from "../log";
 import {
   AddressNotFound,
@@ -30,51 +34,51 @@ import {
   startInput,
   startPick,
 } from "./start";
+import { clearedSessionCookie, cookieValue, SESSION_COOKIE, sessionCookie } from "./cookies";
 
 export interface ApiRequest {
   method: string;
   /** Path after `/api`, e.g. `/picks/01J…`; may be percent-encoded. */
   path: string;
   query: Record<string, string | undefined>;
-  apiKey: string | undefined;
+  /** A `Cookie:` header, or API Gateway's list of `name=value` strings. */
+  cookies: string | readonly string[] | undefined;
   body: string | undefined;
 }
 
 export interface ApiResponse {
   status: number;
   body: unknown;
+  /** A `Set-Cookie` value, set when logging in or out. */
+  setCookie?: string;
 }
 
-/** Starts the workflow for a stored pick (Step Functions in AWS, a task locally). */
-/** Starts and stops the workflow for a user's stored pick (Step Functions in AWS, a task locally). */
+/** Starts and stops the workflow for a stored pick (Step Functions in AWS, a task locally). */
 export interface WorkflowStarter {
-  start(pickId: string, user: string): Promise<void>;
+  start(pickId: string): Promise<void>;
   /** Stop a running pick's workflow; best effort, the stored `cancelled` status is what counts. */
-  cancel(pickId: string, user: string): Promise<void>;
+  cancel(pickId: string): Promise<void>;
 }
 
 export interface ApiDeps {
   geocoder: Geocoder;
-  stores: Stores;
+  store: Store;
   starter: WorkflowStarter;
   countries: Countries;
-  /** user → key (F14). */
-  apiKeys: ApiKeys;
+  auth: AuthConfig;
 }
 
-/** The user a request is for, and their store. */
-interface Ctx {
-  user: string;
-  store: Store;
-}
-
-/** The user whose key this is. Compares against every key in constant time (F11.1). */
-export function userForKey(keys: ApiKeys, key: string | undefined): string | null {
-  let found: string | null = null;
-  for (const [user, k] of Object.entries(keys)) {
-    if (key !== undefined && constantTimeEqual(key, k) && found === null) found = user;
-  }
-  return found;
+/**
+ * What logins are checked against (F11.1). The Lambda re-reads these from SSM
+ * every few minutes, so rotating either one applies without a redeploy.
+ */
+export interface AuthConfig {
+  /** scrypt hash of the shared password, as `scrypt$…`. */
+  passwordHash: string;
+  /** HMAC key for session tokens. A new one ends every session. */
+  sessionSecret: string;
+  /** Whether the cookie gets `Secure`; false for the local http server. */
+  secureCookie: boolean;
 }
 
 const ok = (body: unknown): ApiResponse => ({ status: 200, body });
@@ -83,12 +87,14 @@ const error = (status: number, code: string, message: string): ApiResponse => ({
   body: { error: code, message },
 });
 
-/** Compare secrets in constant time (F11.1). */
-export function constantTimeEqual(a: string, b: string): boolean {
-  const x = Buffer.from(a);
-  const y = Buffer.from(b);
-  return x.length === y.length && timingSafeEqual(x, y);
+/** Every unusable session gets the same 401; the reason is only for the log. */
+function unauthorized(reason: SessionProblem): ApiResponse {
+  log.debug("no session", { reason });
+  return error(401, "unauthorized", reason === "expired" ? "session expired" : "log in first");
 }
+
+/** Token lifetimes are in whole seconds; the rest of the API works in ISO time. */
+const seconds = (now: Iso): number => Math.floor(Date.parse(now) / 1000);
 
 function storeError(e: unknown): ApiResponse {
   if (e instanceof ConflictError) return error(409, "conflict", e.message);
@@ -99,6 +105,8 @@ function storeError(e: unknown): ApiResponse {
 }
 
 type Route =
+  | { kind: "login" }
+  | { kind: "logout" }
   | { kind: "start" }
   | { kind: "pick"; id: string }
   | { kind: "cancel"; id: string }
@@ -125,6 +133,8 @@ function route(method: string, rawPath: string): Route | null {
     return m?.[1] ? { kind: "pick", id: m[1] } : null;
   }
   if (method === "POST") {
+    if (path === "/login") return { kind: "login" };
+    if (path === "/logout") return { kind: "logout" };
     if (path === "/picks") return { kind: "start" };
     const c = /^\/picks\/([^/]+)\/cancel$/.exec(path);
     if (c?.[1]) return { kind: "cancel", id: c[1] };
@@ -134,6 +144,8 @@ function route(method: string, rawPath: string): Route | null {
   }
   return null;
 }
+
+const loginBody = z.object({ password: z.string().min(1) });
 
 const visitBody = z.object({
   restaurant: z
@@ -170,43 +182,52 @@ export class Api {
   constructor(private readonly deps: ApiDeps) {}
 
   async handle(req: ApiRequest, now: Iso): Promise<ApiResponse> {
-    const user = userForKey(this.deps.apiKeys, req.apiKey);
-    if (!user) return error(401, "unauthorized", "missing or wrong x-api-key");
-    const ctx: Ctx = { user, store: this.deps.stores.forUser(user) };
     const r = route(req.method.toUpperCase(), req.path);
     if (!r) return error(404, "not_found", "no such endpoint");
+
+    // Logging in is the one thing a request without a session may do.
+    if (r.kind === "login") return await this.login(req.body, now);
+    if (r.kind === "logout") return this.logout();
+
+    const check = verifySession(
+      this.deps.auth.sessionSecret,
+      cookieValue(SESSION_COOKIE, req.cookies),
+      seconds(now),
+    );
+    if (!check.valid) return unauthorized(check.reason);
+
     try {
       switch (r.kind) {
         case "start":
-          return await this.start(ctx, req.body, now);
+          return await this.start(req.body, now);
         case "pick":
-          return await this.getPick(ctx, r.id);
+          return await this.getPick(r.id);
         case "cancel":
-          return await this.cancel(ctx, r.id);
+          return await this.cancel(r.id);
         case "picked":
-          return ok(await ctx.store.currentlyPicked());
+          return ok(await this.deps.store.currentlyPicked());
         case "visit":
-          return await this.visit(ctx, r.id, req.body, now);
+          return await this.visit(r.id, req.body, now);
         case "skip":
-          return ok(await recordSkip(ctx.store, r.id, now));
+          return ok(await recordSkip(this.deps.store, r.id, now));
         case "countries":
-          return await this.countries(ctx, req.query.min_population);
+          return await this.countries(req.query.min_population);
         case "geocode":
-          return await this.geocode(ctx, req.query.q, now);
+          return await this.geocode(req.query.q, now);
         case "history":
-          return ok(await ctx.store.history(req.query.cursor ?? null, HISTORY_PAGE));
+          return ok(await this.deps.store.history(req.query.cursor ?? null, HISTORY_PAGE));
       }
     } catch (e) {
       return storeError(e);
     }
   }
 
-  private async start(ctx: Ctx, body: string | undefined, now: Iso): Promise<ApiResponse> {
+  private async start(body: string | undefined, now: Iso): Promise<ApiResponse> {
     const input = parseBody(startInput, body);
     if (isResponse(input)) return input;
     let session: PickSession;
     try {
-      session = await startPick(this.deps.geocoder, ctx.store, input, newPickId(), now);
+      session = await startPick(this.deps.geocoder, this.deps.store, input, newPickId(), now);
     } catch (e) {
       if (e instanceof InvalidRequest) return error(422, "invalid_request", e.message);
       if (e instanceof AddressNotFound) return error(422, "address_not_found", e.message);
@@ -222,35 +243,66 @@ export class Api {
       }
       throw e;
     }
-    await ctx.store.putPick(session);
+    await this.deps.store.putPick(session);
     try {
-      await this.deps.starter.start(session.pick_id, ctx.user);
+      await this.deps.starter.start(session.pick_id);
     } catch (e) {
       log.error("workflow start failed", { pick_id: session.pick_id, error: String(e) });
-      await ctx.store.putPick({ ...session, status: "failed", error: "internal" }).catch(() => undefined);
+      await this.deps.store
+        .putPick({ ...session, status: "failed", error: "internal" })
+        .catch(() => undefined);
       return error(503, "internal", "could not start the pick");
     }
     return { status: 202, body: { pick_id: session.pick_id } };
   }
 
   /** F12: mark the pick cancelled, then stop its workflow. Finished picks are left as they are. */
-  private async cancel(ctx: Ctx, id: string): Promise<ApiResponse> {
-    const s = await cancelPick(ctx.store, id);
+  private async cancel(id: string): Promise<ApiResponse> {
+    const s = await cancelPick(this.deps.store, id);
     if (s.status === "cancelled") {
       await this.deps.starter
-        .cancel(id, ctx.user)
+        .cancel(id)
         .catch((e: unknown) => log.warn("workflow stop failed", { pick_id: id, error: String(e) }));
     }
-    return ok(await this.pickView(s, ctx.store));
+    return ok(await this.pickView(s, this.deps.store));
+  }
+
+  /**
+   * F11.1: exchange the shared password for a session cookie. The reply carries
+   * no token of its own, so nothing on the page can read or store one.
+   */
+  private async login(body: string | undefined, now: Iso): Promise<ApiResponse> {
+    const { passwordHash, sessionSecret, secureCookie } = this.deps.auth;
+    if (!passwordHash.startsWith("scrypt$")) {
+      log.error("no password set", {});
+      return error(503, "internal", "no password set (scripts/set-password.sh)");
+    }
+    const parsed = parseBody(loginBody, body);
+    if (isResponse(parsed)) return parsed;
+    if (!(await verifyPassword(parsed.password, passwordHash))) {
+      log.warn("login refused", {});
+      return error(401, "unauthorized", "wrong password");
+    }
+    log.info("login", {});
+    return {
+      status: 200,
+      body: { expires_in: SESSION_TTL_SECONDS },
+      setCookie: sessionCookie(signSession(sessionSecret, seconds(now)), SESSION_TTL_SECONDS, secureCookie),
+    };
+  }
+
+  /** Ends this browser's session. Other sessions are unaffected. */
+  private logout(): ApiResponse {
+    return { status: 200, body: { ok: true }, setCookie: clearedSessionCookie(this.deps.auth.secureCookie) };
   }
 
   /** F1.2: the distinct places matching an address, so the user can choose one. */
-  private async geocode(ctx: Ctx, q: string | undefined, now: Iso): Promise<ApiResponse> {
+  private async geocode(q: string | undefined, now: Iso): Promise<ApiResponse> {
     const address = q?.trim();
     if (!address) return error(422, "invalid_request", "q is required");
     if (address.length > 300) return error(422, "invalid_request", "q is too long");
     try {
-      return ok({ matches: await lookupAddress(this.deps.geocoder, ctx.store, address, now) });
+      return ok({ matches: await lookupAddress(this.deps.geocoder, this.deps.store, address, now) });
     } catch (e) {
       if (e instanceof GeocoderUnavailable) {
         log.error("geocoder unavailable", { error: e.message });
@@ -260,9 +312,9 @@ export class Api {
     }
   }
 
-  private async getPick(ctx: Ctx, id: string): Promise<ApiResponse> {
-    const s = await ctx.store.getPick(id);
-    return s ? ok(await this.pickView(s, ctx.store)) : error(404, "not_found", "no such pick");
+  private async getPick(id: string): Promise<ApiResponse> {
+    const s = await this.deps.store.getPick(id);
+    return s ? ok(await this.pickView(s, this.deps.store)) : error(404, "not_found", "no such pick");
   }
 
   /** The §5 pick view, with each restaurant's current stored status. */
@@ -331,7 +383,7 @@ export class Api {
     };
   }
 
-  private async visit(ctx: Ctx, id: string, body: string | undefined, now: Iso): Promise<ApiResponse> {
+  private async visit(id: string, body: string | undefined, now: Iso): Promise<ApiResponse> {
     const parsed = parseBody(visitBody, body);
     if (isResponse(parsed)) return parsed;
     let details: Restaurant | null = null;
@@ -358,7 +410,7 @@ export class Api {
       };
     }
     try {
-      return ok(await recordVisit(ctx.store, id, details, now));
+      return ok(await recordVisit(this.deps.store, id, details, now));
     } catch (e) {
       if (e instanceof NotFoundError) {
         return error(
@@ -371,10 +423,10 @@ export class Api {
     }
   }
 
-  private async countries(ctx: Ctx, minPopulation: string | undefined): Promise<ApiResponse> {
+  private async countries(minPopulation: string | undefined): Promise<ApiResponse> {
     const min = minPopulation === undefined ? DEFAULT_MIN_POPULATION : Number(minPopulation);
     if (!Number.isFinite(min) || min < 0) return error(422, "invalid_request", "bad min_population");
-    const visits = new Map((await ctx.store.countryVisits()).map((v) => [v.iso2, v]));
+    const visits = new Map((await this.deps.store.countryVisits()).map((v) => [v.iso2, v]));
     const rows = this.deps.countries.all
       .filter((c) => c.population >= min)
       .map((c) => {

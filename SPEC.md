@@ -94,7 +94,7 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 
 ### F10. Web UI
 - **F10.1** One-page app with three views: **Pick** (default), **Passport**, **History**. Must be usable at 360 px width.
-- **F10.2** First visit: ask for the API key and keep it in `localStorage`. A 401 response clears it and asks again.
+- **F10.2** First visit: ask for the shared password (F11.1) and post it to `/api/login`. Nothing is kept in the page: the session is an `HttpOnly` cookie the browser holds, so no script can read it. A 401 shows the password form again.
 - **F10.3** Pick view: address field; advanced options (radius, min population, include visited). An ambiguous address shows "Which …?" with the matches, without the country, as buttons (F1.2). A map (MapLibre + OpenFreeMap tiles) centred on the location with the radius circle.
 - **F10.4** While the pick runs: poll `GET /api/picks/{id}` every **5 s**; show the status and the race card (number, horse, flag + country, scratched state) with a countdown to the start, and a **Cancel** button (F12). Above the card, "📺 Watch <venue> R<n> on TAB" opens the race's page on tab.co.nz (`https://www.tab.co.nz/racing/race/<race id>`, with TAB's Trackside stream) in a new tab; shown whenever the race is known. The countdown stops once the pick has finished or been cancelled.
 - **F10.5** When done: the winner (horse + country, with a note for dead heat, abandoned or timeout); a pin for every match. Pin colours by status: new, `PICKED`, `VISITED`. The pick is highlighted with a card showing name, cuisine, address, match type (`likely` badge + reason for inferred/fallback) and a directions link (`https://www.google.com/maps/dir/?api=1&destination=<lat>,<lon>`).
@@ -104,8 +104,9 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 - **F10.8** The current `PICKED` restaurant (if any) is shown on load, so you can mark it visited later.
 
 ### F11. Access
-- **F11.1** Every `/api/*` request needs header `x-api-key`, compared in constant time with every user's key (F14) from SSM, re-read at most every 5 minutes (new or changed keys apply within 5 minutes, no redeploy). Missing or wrong → 401. If the keys can't be read (not set yet), every request gets 503.
-- **F11.2** API Gateway throttling: 5 requests/s rate, burst 10.
+- **F11.1** One shared password for everyone who uses the app. `POST /api/login` checks it against an **scrypt hash** in SSM (`/fat-horses/password-hash`), re-read at most every 5 minutes, so rotating it applies without a redeploy. Wrong → 401; no password set (or SSM unreadable) → 503. Only the hash is stored: it cannot be reversed or replayed, and nothing is kept on any developer's machine. Locally the password comes from `--password` or `FAT_HORSES_PASSWORD`.
+- **F11.2** A successful login sets a session cookie `fh_session`: a JWT (HS256) carrying only `iat` and `exp`, valid **12 hours**, signed with a secret in SSM (`/fat-horses/session-secret`). Cookie attributes `HttpOnly`, `SameSite=Strict`, `Path=/`, and `Secure` when served over https (dropped for the local http server). Every other `/api/*` request needs it: the signature is checked in constant time, then the expiry. Missing, forged or expired → 401. `POST /api/logout` expires the cookie. Rotating the session secret invalidates every live session at once.
+- **F11.3** API Gateway throttling: 5 requests/s rate, burst 10.
 
 ### F12. Cancelling a pick
 - **F12.1** `POST /picks/{id}/cancel` marks a pick that hasn't finished as `cancelled` and stops its workflow (Step Functions `StopExecution` in AWS; the in-process run locally). A pick that is already `done`, `failed` or `cancelled` is left as it is.
@@ -116,10 +117,10 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 - **F13.1** With `fat-horses serve`, a pick runs inside the server process. When the server starts, it resumes every unfinished pick (not `done`, `failed` or `cancelled`) from its stored state: steps already done (race and countries, places) are kept, not re-drawn, and a race that finished meanwhile is resolved from its result.
 - **F13.2** The in-memory and JSON-file stores apply writes one at a time, with their conditions checked inside the write, so concurrent writes (two picks, a pick and a visit) never lose an update. (On AWS, Step Functions keeps picks running and DynamoDB's conditional writes cover F13.2.)
 
-### F14. Users
-- **F14.1** Each API key belongs to one user (name: `[a-z0-9_-]{1,32}`). A user's picks, restaurant statuses, passport and history are theirs alone: another user's pick is 404 to them, and one user's pick never replaces another's `PICKED` restaurant. The geocode and cuisine-guess caches hold only public map data and are shared.
-- **F14.2** Keys on AWS: SSM SecureString `/fat-horses/api-keys` holding `{"<user>": "<key>", …}`. Locally: `FAT_HORSES_API_KEYS="haruka:key1,friend:key2"`, or the single `FAT_HORSES_API_KEY` for the user `me`. Adding a user = adding a key.
-- **F14.3** Local data saved before users existed belongs to `me`. The CLI's `--user` (default `me`) chooses whose data `pick`, `visit`, `skip`, `passport` and `history` use.
+### F14. One shared view
+- **F14.1** Everyone who logs in sees the same data: one set of picks, restaurant statuses, passport and history, not a copy each. This is deliberate — the app is for a couple of people deciding where to eat together, and a shared passport is the point.
+- **F14.2** The consequence: there is no per-user isolation to rely on. Two people picking at the same moment race for the one `PICKED` restaurant, and the later write wins (the store's conditional writes keep it consistent, F13.2, but they don't keep it private).
+- **F14.3** Stores saved under the earlier per-user layout load as the data that was kept for `me`.
 
 ---
 
@@ -163,15 +164,15 @@ Validation (a unit test): `iso2` unique and 2 uppercase letters; `population > 0
 ### 4.2 DynamoDB single table `fat-horses`
 Keys `pk` (S), `sk` (S); attribute `ttl` (N, epoch seconds) for TTL. On-demand billing, point-in-time recovery on.
 
-User-owned items are prefixed `U#<user>#` (F14); the Guess and Geocode cache items are shared.
+All items are shared: everyone who logs in sees the same data (F14.1).
 
 | Item | pk | sk | Attributes |
 |---|---|---|---|
-| Restaurant | `U#<user>#RESTAURANT#<place_id>` | `META` | name, lat, lon, address, cuisine (list), country_iso, status (`PICKED`/`VISITED`; absent = `null`), status_before_pick, picked_at, visited_at, visit_count, match, reason |
-| Currently picked | `U#<user>#STATE` | `PICKED` | restaurant_id. Written in the same transaction as every change to or from `PICKED` (enforces F8.3) |
-| Country | `U#<user>#COUNTRY` | `<iso2>` | visit_count, first_visited_at, last_visited_at (one partition, so the Passport is a single Query) |
-| Log entry | `U#<user>#LOG` | `<RFC3339 µs timestamp>#<restaurant_id>#<reason>` (JS has millisecond precision; the microseconds are zero-padded) | the fields of F8.6 |
-| Pick session | `U#<user>#PICK#<pick_id>` | `META` | request, location, status, pool size, world_complete, race card, winner, places, matches, pick, llm_unavailable, error; `ttl` = +30 days |
+| Restaurant | `RESTAURANT#<place_id>` | `META` | name, lat, lon, address, cuisine (list), country_iso, status (`PICKED`/`VISITED`; absent = `null`), status_before_pick, picked_at, visited_at, visit_count, match, reason |
+| Currently picked | `STATE` | `PICKED` | restaurant_id. Written in the same transaction as every change to or from `PICKED` (enforces F8.3) |
+| Country | `COUNTRY` | `<iso2>` | visit_count, first_visited_at, last_visited_at (one partition, so the Passport is a single Query) |
+| Log entry | `LOG` | `<RFC3339 µs timestamp>#<restaurant_id>#<reason>` (JS has millisecond precision; the microseconds are zero-padded) | the fields of F8.6 |
+| Pick session | `PICK#<pick_id>` | `META` | request, location, status, pool size, world_complete, race card, winner, places, matches, pick, llm_unavailable, error; `ttl` = +30 days |
 | Guess | `PLACE#<place_id>` | `GUESS#v<prompt_version>` | cuisines, reason, model_id, input_hash, created_at; `ttl` = +180 days |
 | Geocode cache | `GEOCODE#<normalised address>` | `META` | lat, lon, display_name; `ttl` = +30 days |
 
@@ -229,7 +230,7 @@ Infrastructure (Terraform in `infra/`, S3 state backend with native lock file):
 - CloudFront: `/` → private S3 site bucket (OAC); `/api/*` → API Gateway HTTP API → `api` Lambda.
 - `api` Lambda environment includes `GEOCODE_COUNTRIES` (default `nz`, F1.2).
 - Lambdas: TypeScript on the managed **Node.js 22** runtime (`nodejs22.x`), arm64, one esbuild bundle per handler (`make build-lambdas`); the AWS SDK v3 comes from the runtime. Chosen over Rust on the OS-only runtime because a managed runtime is easier to operate.
-- Step Functions state machine, DynamoDB table (§4.2), SSM SecureString `/fat-horses/api-keys` (F14.2). The Step Functions input is `{pick_id, user}`, passed to each `workflow` step.
+- Step Functions state machine, DynamoDB table (§4.2), and the two SSM SecureStrings `/fat-horses/password-hash` and `/fat-horses/session-secret` (F11). The Step Functions input is `{pick_id}`, passed to each `workflow` step.
 - IAM: least privilege per Lambda; `bedrock:InvokeModel` only on the configured model/profile; the `api` Lambda may `states:StartExecution` and `states:StopExecution` on the pick state machine only.
 - AWS Budgets alarm (default USD 10/month) emailing the owner.
 - Region: **`ap-southeast-2`** (default; subject to Bedrock model availability, confirmed in T1.3).
@@ -263,13 +264,13 @@ infra/                  Terraform
 - **N4 Etiquette:** Nominatim and Overpass calls send `User-Agent: fat-horses/<version> (<contact>)`. At most 1 Nominatim request per second.
 - **N5 Cost:** expected < USD 5/month at personal use; nothing billed while idle except storage.
 - **N6 Latency:** `POST /picks` < 3 s; `GET /picks/{id}` < 500 ms warm.
-- **N7 Logs:** structured JSON logs (`server/src/log.ts`) with `pick_id` where there is one; no API key or address in logs above debug level.
+- **N7 Logs:** structured JSON logs (`server/src/log.ts`) with `pick_id` where there is one; no password, session token or address in logs above debug level. A refused login is logged without the attempted password.
 
 ---
 
 ## 9. Out of scope (v1)
 
-Betting or TAB login; user accounts beyond API keys (sign-up, passwords); sharing data between users; ratings, notes or reviews; ranking by rating, price or opening hours; web search; automatic radius widening; native apps; an LLM "what to order" line.
+Betting or TAB login; user accounts (sign-up, per-person logins, roles); per-person data — everyone who logs in shares one view (F14); ratings, notes or reviews; ranking by rating, price or opening hours; web search; automatic radius widening; native apps; an LLM "what to order" line.
 
 ## 10. Defaults chosen for PLAN's open questions (confirm or change)
 

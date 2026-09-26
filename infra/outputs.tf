@@ -11,9 +11,14 @@ output "distribution_id" {
   value = aws_cloudfront_distribution.site.id
 }
 
-output "api_keys_parameter" {
-  description = "Set the users' keys here (infra/README.md)."
-  value       = aws_ssm_parameter.api_keys.name
+output "password_hash_parameter" {
+  description = "The shared password's hash; set it with scripts/set-password.sh."
+  value       = aws_ssm_parameter.password_hash.name
+}
+
+output "session_secret_parameter" {
+  description = "Signs session cookies; rotating it ends every session."
+  value       = aws_ssm_parameter.session_secret.name
 }
 
 output "state_machine_arn" {

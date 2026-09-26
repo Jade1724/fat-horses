@@ -77,7 +77,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
   Needs: T3.1, T3.2, T3.3, T3.5, T4.1. Done when: a real pick runs end to end (owner runs it once and confirms in `docs/spikes/cli-e2e.md`).
 - [x] **T4.3 CLI `visit`, `skip`, `passport`, `history`.** Tests for output formatting against the in-memory store.
   Needs: T3.5.
-- [x] **T4.4 HTTP API handlers (§5, F11.1) in `crates/app`.** Request validation, error codes, API-key check (constant time). Tested with in-memory stores and fake request objects.
+- [x] **T4.4 HTTP API handlers (§5, F11.1) in `crates/app`.** Request validation, error codes, session-cookie check (constant time). Tested with in-memory stores and fake request objects.
   Needs: T4.1.
 - [x] **T4.5 Lambda binaries and local server.** `crates/lambdas`: `api` (`lambda_http` wiring for T4.4, DynamoDB store, Step Functions starter, API key from SSM) and `workflow` (one §6 step per invocation via `app::workflow::run_step`). For UI development, `fat-horses serve --api-key … [--web web/dist]` runs the same API on localhost with picks in-process and the JSON-file store (replaces `cargo lambda watch`, which isn't installed).
   Needs: T4.4.
@@ -85,12 +85,13 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 - [x] **T4.7 Addresses in New Zealand, with a choice (F1.2, F1.3, F10.3).** Requested by the owner after "50 Albert Street" went to London: Nominatim limited to `GEOCODE_COUNTRIES` (default `nz`), up to 5 matches merged within 100 m, `GET /geocode`, 409 `ambiguous_address`, a "Which …?" list in the UI. Tested with recorded Nominatim responses and in a browser against live Nominatim.
 - [x] **T4.8 "Watch on TAB" link (F10.4).** Requested by the owner: each race carries its tab.co.nz page (`/racing/race/<race id>`, found by trying URLs in a browser); the pick view returns it as `race.url` and the page links to it. Tested with fixtures and in a browser against a live race.
 - [x] **T4.9 Resume picks after a local server restart (F13).** Found by the owner: picks stayed at "Waiting for the start" after the race. Cause: a pick runs inside `serve`, and restarting the server (to pick up rebuilt code) killed it; nothing resumed it. Now `runPick` skips steps already done and `serve` resumes unfinished picks on start. Also fixed lost updates when two writes to the local stores overlapped.
-- [x] **T4.10 Users (F14).** Requested by the owner, to share the app with a friend: each API key is a user with separate picks, passport and history (`U#<user>#` keys in DynamoDB, a section per user in the JSON file, existing local data → `me`); caches shared; keys from SSM JSON on AWS or `FAT_HORSES_API_KEYS` locally.
+- [x] **T4.10 Users (F14).** Requested by the owner, to share the app with a friend: each API key is a user with separate picks, passport and history (`U#<user>#` keys in DynamoDB, a section per user in the JSON file, existing local data → `me`); caches shared; keys from SSM JSON on AWS or `FAT_HORSES_API_KEYS` locally. **Superseded by T4.11.**
+- [x] **T4.11 One shared password and session cookies (F11, F14).** Requested by the owner, who did not want an API key stored in a file on any machine: per-user API keys are replaced by one shared password, kept in SSM only as an scrypt hash and traded at `POST /api/login` for a 12-hour `HttpOnly` `SameSite=Strict` JWT cookie signed with a second SSM secret; `POST /api/logout` ends a session and rotating the signing secret ends all of them (`scripts/set-password.sh --revoke-sessions`). Per-user data is gone with it: one shared view of picks, passport and history (no `U#` prefixes, a flat JSON store that still loads older per-user files). Nothing is written to `~/.config` any more.
 
 ## M5 Web UI (`web/`)
 
 - [x] **T5.1 Scaffold.** Vite + TypeScript + ESLint + Vitest. Extend `make check` with `web` typecheck, lint and test. `make check` runs `npm ci` first rather than skipping the web checks when `web/node_modules` is missing.
-- [x] **T5.2 API client and key screen (F10.2).** Typed client for §5; 401 clears the key. Unit tests with mocked fetch.
+- [x] **T5.2 API client and login screen (F10.2).** Typed client for §5; the session is a cookie the page cannot read, so a cheap call on load decides between the app and the password form, and a 401 returns to it. Unit tests with mocked fetch.
 - [x] **T5.3 Pick form + map (F10.3).** MapLibre with OpenFreeMap tiles, radius circle, advanced options.
 - [x] **T5.4 Race progress (F10.4).** Polling, status text, race card with countdown. Unit tests for the countdown/status mapping.
 - [x] **T5.5 Results (F10.5–F10.8).** Pins coloured by status, the pick card, "likely" badges, buttons wired to the API, current `PICKED` shown on load.
@@ -102,13 +103,13 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 - [ ] **T6.1 [human] AWS account setup.** The owner creates the `fat-horses` AWS CLI profile and runs `BUDGET_EMAIL=… make infra-bootstrap` (state bucket, `backend.hcl`, `terraform.tfvars`). AWS CLI and Terraform are installed in `~/.local/bin`.
 - [x] **T6.2 Terraform scaffold.** Providers, S3 backend (native lock file), variables; `make check` runs `terraform fmt -check` (offline); `make infra-plan`/`deploy` validate.
   Needs: T6.1.
-- [x] **T6.3 Data resources.** DynamoDB table (§4.2: keys, TTL, PITR, on-demand) and the SSM parameter (value set by hand, not in state).
+- [x] **T6.3 Data resources.** DynamoDB table (§4.2: keys, TTL, PITR, on-demand) and the two SSM SecureStrings for the password hash and the session secret (values set by `scripts/set-password.sh`, never in state).
 - [x] **T6.4 Lambdas.** `make build-lambdas` (esbuild bundles); Terraform Lambda functions on `nodejs22.x`, arm64, log groups (14-day retention), least-privilege IAM (§6). Bedrock permissions come with T3.9.
 - [x] **T6.5 Step Functions state machine (§6).** Definition file with Wait states, the result loop, retries, the 45-min timeout and the failure path (stop when a step returns `failed`, which includes cancelled picks).
-- [x] **T6.6 API Gateway + CloudFront + S3 site (§6, F11.2).** Throttling, OAC, `/api/*` behaviour. No SPA fallback: the UI uses hash routes, and a distribution-wide error page would also rewrite API 404s.
+- [x] **T6.6 API Gateway + CloudFront + S3 site (§6, F11.3).** Throttling, OAC, `/api/*` behaviour. No SPA fallback: the UI uses hash routes, and a distribution-wide error page would also rewrite API 404s.
 - [x] **T6.7 Budget alarm (§6).**
-- [x] **T6.8 `make deploy` + smoke test.** Build, `terraform apply`, upload `web/dist`, then a scripted smoke test: the site loads and the API answers 401 without a key (503 until keys are set).
-- [ ] **T6.9 [human] First deploy.** The owner runs `make deploy`, `scripts/set-api-keys.sh <users>`, and one real pick in the browser. (T6.2–T6.8 are written and validated offline; they count as done only once this deploy works.)
+- [x] **T6.8 `make deploy` + smoke test.** Build, `terraform apply`, upload `web/dist`, then a scripted smoke test: the site loads, the API answers 401 without a session, and a deliberately wrong password gets 401 (503 until a password is set).
+- [ ] **T6.9 [human] First deploy.** The owner runs `make deploy`, `scripts/set-password.sh`, and one real pick in the browser. (T6.2–T6.8 are written and validated offline; they count as done only once this deploy works.)
   Needs: T6.8.
 
 ## M7 LLM fallback

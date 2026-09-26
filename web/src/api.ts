@@ -155,29 +155,27 @@ export class ApiError extends Error {
 type Fetch = typeof fetch;
 
 export class Api {
-  private readonly key: string;
   private readonly onUnauthorized: () => void;
   private readonly fetchFn: Fetch;
   private readonly base: string;
 
-  constructor(
-    key: string,
-    onUnauthorized: () => void,
-    fetchFn: Fetch = (...args) => fetch(...args),
-    base = "/api",
-  ) {
-    this.key = key;
+  constructor(onUnauthorized: () => void, fetchFn: Fetch = (...args) => fetch(...args), base = "/api") {
     this.onUnauthorized = onUnauthorized;
     this.fetchFn = fetchFn;
     this.base = base;
   }
 
+  /**
+   * The session is an HttpOnly cookie (F11.2), so there is no token here to
+   * send, store or leak: the browser attaches it to every same-origin call.
+   */
   private async call<T>(method: "GET" | "POST", path: string, body?: unknown): Promise<T> {
-    const headers: Record<string, string> = { "x-api-key": this.key };
+    const headers: Record<string, string> = {};
     if (body !== undefined) headers["content-type"] = "application/json";
     const resp = await this.fetchFn(this.base + path, {
       method,
       headers,
+      credentials: "same-origin",
       body: body === undefined ? undefined : JSON.stringify(body),
     });
     const data: unknown = await resp.json().catch(() => null);
@@ -187,6 +185,16 @@ export class Api {
       throw new ApiError(resp.status, err.error ?? "http_error", err.message ?? resp.statusText);
     }
     return data as T;
+  }
+
+  /** Trade the shared password for a session cookie (F11.1). */
+  login(password: string): Promise<{ expires_in: number }> {
+    return this.call("POST", "/login", { password });
+  }
+
+  /** End this browser's session. */
+  logout(): Promise<{ ok: boolean }> {
+    return this.call("POST", "/logout", {});
   }
 
   startPick(input: StartPick): Promise<{ pick_id: string }> {

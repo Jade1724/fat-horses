@@ -95,11 +95,6 @@ export interface Store {
 
 export class StoreUnavailable extends Error {}
 
-/** Hands out each user's store (F14). Caches inside are shared between users. */
-export interface Stores {
-  forUser(user: string): Store;
-}
-
 export function isFresh(createdAt: Iso, ttlMs: number, now: Iso): boolean {
   return ms(now) - ms(createdAt) < ttlMs;
 }

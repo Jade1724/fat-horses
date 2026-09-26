@@ -1,39 +1,43 @@
 // The HTTP API behind API Gateway (SPEC.md §5).
-// Environment: TABLE_NAME, STATE_MACHINE_ARN, API_KEYS_PARAM (SSM SecureString
-// holding {"<user>": "<key>", …}, F11.1 and F14), GEOCODE_COUNTRIES.
+// Environment: TABLE_NAME, STATE_MACHINE_ARN, GEOCODE_COUNTRIES, and the two
+// SSM SecureStrings PASSWORD_HASH_PARAM and SESSION_SECRET_PARAM (F11.1).
 
 import type { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from "aws-lambda";
-import { Api } from "../app/api";
+import { Api, type AuthConfig } from "../app/api";
 import { bundledCountries } from "../domain/countries";
 import { MINUTE } from "../domain/time";
-import { parseApiKeysJson, type ApiKeys } from "../domain/users";
 import { log } from "../log";
-import { dynamoStores, env, geocoder, secureParameter, SfnStarter, toApiRequest, toResult } from "./env";
-import { KeyCache } from "./keys";
+import { dynamoStore, env, geocoder, secureParameter, SfnStarter, toApiRequest, toResult } from "./env";
+import { Cached } from "./secrets";
 
-const keys = new KeyCache(
-  async () => parseApiKeysJson(await secureParameter(env("API_KEYS_PARAM"))),
-  5 * MINUTE,
-);
-let parts: Omit<ConstructorParameters<typeof Api>[0], "apiKeys"> | undefined;
+/** Behind CloudFront the site is always https, so the cookie is always Secure. */
+const auth = new Cached<AuthConfig>(async () => {
+  const [passwordHash, sessionSecret] = await Promise.all([
+    secureParameter(env("PASSWORD_HASH_PARAM")),
+    secureParameter(env("SESSION_SECRET_PARAM")),
+  ]);
+  return { passwordHash, sessionSecret, secureCookie: true };
+}, 5 * MINUTE);
+
+let parts: Omit<ConstructorParameters<typeof Api>[0], "auth"> | undefined;
 
 export async function handler(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyStructuredResultV2> {
-  let apiKeys: ApiKeys;
+  let config: AuthConfig;
   try {
-    apiKeys = await keys.get(Date.now());
+    config = await auth.get(Date.now());
   } catch (e) {
-    log.error("API keys unavailable", { error: String(e) });
+    log.error("auth secrets unavailable", { error: String(e) });
     return toResult({
       status: 503,
-      body: { error: "internal", message: "API keys not configured (scripts/set-api-keys.sh)" },
+      body: { error: "internal", message: "no password set (scripts/set-password.sh)" },
     });
   }
   parts ??= {
     geocoder: geocoder(),
-    stores: dynamoStores(),
+    store: dynamoStore(),
     starter: new SfnStarter(env("STATE_MACHINE_ARN")),
     countries: bundledCountries(),
   };
-  const r = await new Api({ ...parts, apiKeys }).handle(toApiRequest(event), new Date().toISOString());
+  const r = await new Api({ ...parts, auth: config }).handle(toApiRequest(event), new Date().toISOString());
   return toResult(r);
 }

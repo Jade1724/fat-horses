@@ -17,13 +17,13 @@ import { FakeClassifier } from "../domain/classify";
 import { bundledCountries } from "../domain/countries";
 import { DEFAULT_MIN_POPULATION } from "../domain/pool";
 import { systemRng } from "../domain/rng";
+import { hashPassword, newSessionSecret } from "../domain/auth";
 import { HISTORY_PAGE, NotFoundError, recordSkip, recordVisit } from "../domain/store";
-import { apiKeysFromEnv, DEFAULT_USER, isValidUser, type ApiKeys } from "../domain/users";
-import { defaultStorePath, FileStores } from "../store/file";
+import { defaultStorePath, FileStore } from "../store/file";
 import * as render from "./render";
 import { serve } from "./serve";
 
-const USAGE = `Usage: fat-horses [--store PATH] [--user NAME] <command>
+const USAGE = `Usage: fat-horses [--store PATH] <command>
 
 Commands:
   pick <address> [--radius M] [--max-wait MIN] [--min-population N] [--include-visited] --fake-llm
@@ -31,12 +31,23 @@ Commands:
   skip <restaurant-id>
   passport [--min-population N]
   history [--cursor C]
-  serve [--api-key KEY] [--port 8080] [--web DIR]
+  serve [--password WORD] [--port 8080] [--web DIR]
+  hash-password
 
---user picks whose data pick/visit/skip/passport/history use (default "me").
-serve takes users' keys from FAT_HORSES_API_KEYS="haruka:key1,friend:key2",
-or one key for "me" from --api-key / FAT_HORSES_API_KEY.
+serve takes the shared password from --password or FAT_HORSES_PASSWORD, and
+signs sessions with a secret made at startup, so restarting it logs you out.
+hash-password reads a password on stdin and prints the hash to store in SSM.
 `;
+
+/** Reads a whole stdin, so a password never has to appear in the command line. */
+function readStdin(): Promise<string> {
+  return new Promise((resolve_, reject) => {
+    const chunks: Buffer[] = [];
+    process.stdin.on("data", (c: Buffer) => chunks.push(c));
+    process.stdin.on("end", () => resolve_(Buffer.concat(chunks).toString("utf8")));
+    process.stdin.on("error", reject);
+  });
+}
 
 function fail(message: string): never {
   process.stderr.write(`Error: ${message}\n`);
@@ -49,7 +60,6 @@ async function main(argv: string[]): Promise<void> {
     allowPositionals: true,
     options: {
       store: { type: "string" },
-      user: { type: "string" },
       radius: { type: "string" },
       "max-wait": { type: "string" },
       "min-population": { type: "string" },
@@ -57,7 +67,7 @@ async function main(argv: string[]): Promise<void> {
       "fake-llm": { type: "boolean" },
       cursor: { type: "string" },
       port: { type: "string" },
-      "api-key": { type: "string" },
+      password: { type: "string" },
       web: { type: "string" },
       help: { type: "boolean", short: "h" },
     },
@@ -67,10 +77,7 @@ async function main(argv: string[]): Promise<void> {
     process.stdout.write(USAGE);
     return;
   }
-  const stores = new FileStores(values.store ?? defaultStorePath());
-  const user = values.user ?? DEFAULT_USER;
-  if (!isValidUser(user)) fail(`bad --user "${user}": use a-z, 0-9, _ or -`);
-  const store = stores.forUser(user);
+  const store = new FileStore(values.store ?? defaultStorePath());
   const countries = bundledCountries();
   const now = () => new Date().toISOString();
   const minPopulation = values["min-population"] ? Number(values["min-population"]) : DEFAULT_MIN_POPULATION;
@@ -143,19 +150,26 @@ async function main(argv: string[]): Promise<void> {
         render.history(await store.history(values.cursor ?? null, HISTORY_PAGE), countries),
       );
       return;
+    case "hash-password": {
+      const password = (await readStdin()).trim();
+      if (!password) fail("hash-password reads the password on stdin");
+      process.stdout.write(`${await hashPassword(password)}\n`);
+      return;
+    }
     case "serve": {
-      let keys: ApiKeys;
-      try {
-        keys = values["api-key"] ? { [DEFAULT_USER]: values["api-key"] } : apiKeysFromEnv();
-      } catch (e) {
-        fail(e instanceof Error ? e.message : String(e));
-      }
-      if (Object.keys(keys).length === 0)
-        fail("serve needs FAT_HORSES_API_KEYS, FAT_HORSES_API_KEY or --api-key");
+      const password = values.password ?? process.env.FAT_HORSES_PASSWORD;
+      if (!password) fail("serve needs --password or FAT_HORSES_PASSWORD");
       serve(
-        stores,
+        store,
         values.port ? Number(values.port) : 8080,
-        keys,
+        // Plain http locally, so the cookie can't ask to be Secure. A fresh
+        // secret each start means a restart ends the session, which is fine
+        // for development and keeps no secret on disk.
+        {
+          passwordHash: await hashPassword(password),
+          sessionSecret: newSessionSecret(),
+          secureCookie: false,
+        },
         values.web ? resolve(values.web) : undefined,
       );
       return;

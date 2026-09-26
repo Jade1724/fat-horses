@@ -32,16 +32,35 @@ back to the ambient `AWS_PROFILE`, so prefix those with
    uploads the site and runs a smoke test. It prints the app's URL.
 5. Confirm the email AWS sends to the budget address (SNS subscription), so
    alarms reach you.
-6. API keys, one per user (F14):
+6. The shared password (F11):
 
    ```
-   scripts/set-api-keys.sh haruka friend
+   scripts/set-password.sh
    ```
 
-   Keys go to SSM and to `~/.config/fat-horses/api-keys.json` (only you can
-   read it); they are never printed. Give each person their own key. They
-   apply within 5 minutes. Running it again replaces **all** keys, so list
-   every user each time.
+   It prompts for the password twice, stores only its scrypt hash in SSM, and
+   writes nothing to your machine. Share the password with whoever should get
+   in, by a private channel — never in this repo. It applies within 5 minutes.
+
+   Everyone who logs in shares one view of picks, passport and history (F14):
+   that is the point, not an oversight.
+
+## Rotating the password
+
+```
+scripts/set-password.sh                     # change the password
+scripts/set-password.sh --revoke-sessions   # …and log everyone out now
+```
+
+Changing the password alone leaves current sessions alive, because a session
+cookie is signed with a separate secret — usually what you want. Add
+`--revoke-sessions` when a session itself might be in the wrong hands (a lost
+laptop, a browser left open): it also replaces the signing secret, so every live
+cookie stops verifying.
+
+Either way the `api` Lambda picks the change up within 5 minutes; `make deploy`
+applies it at once. A forgotten password cannot be recovered, only replaced —
+SSM holds a hash, not the password.
 
 ## Later
 

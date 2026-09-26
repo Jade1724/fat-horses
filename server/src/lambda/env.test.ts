@@ -20,7 +20,7 @@ describe("API Gateway mapping", () => {
     const r = toApiRequest(
       event({
         rawPath: "/api/restaurants/osm%3Anode%2F1/visit",
-        headers: { "x-api-key": "k" },
+        cookies: ["fh_session=t"],
         queryStringParameters: { cursor: "c" },
         requestContext: { http: { method: "POST" } } as APIGatewayProxyEventV2["requestContext"],
         body: "{}",
@@ -30,7 +30,7 @@ describe("API Gateway mapping", () => {
       method: "POST",
       path: "/restaurants/osm%3Anode%2F1/visit",
       query: { cursor: "c" },
-      apiKey: "k",
+      cookies: ["fh_session=t"],
       body: "{}",
     });
   });

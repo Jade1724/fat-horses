@@ -1,7 +1,7 @@
 # The pick workflow (SPEC.md §6): start → prepare_nearby → wait for the start →
 # check_result every 60 s until decided → finish. A task that keeps failing
 # goes to `fail`, which marks the pick failed. Cancelling a pick stops the
-# execution (F12). Every task keeps the input {pick_id, user} and puts the
+# execution (F12). Every task keeps the input {pick_id} and puts the
 # step's output under $.out.
 
 locals {
@@ -26,7 +26,6 @@ locals {
       Payload = {
         step        = step
         "pick_id.$" = "$.pick_id"
-        "user.$"    = "$.user"
       }
     }
     ResultSelector = { "result.$" = "$.Payload" }
