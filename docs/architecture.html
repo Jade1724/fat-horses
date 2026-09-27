@@ -181,7 +181,7 @@
     <h2 id="sys">The system</h2>
     <figure>
       <div class="canvas">
-        <svg class="dg" viewBox="0 0 1290 580" role="img" aria-label="The browser reaches everything through one CloudFront address: static files come from S3, and /api/* goes through API Gateway to the api Lambda, which reads DynamoDB and SSM, geocodes with Nominatim, has Claude Haiku 4.5 on Bedrock read menu photos, and starts the Step Functions pick workflow. The workflow invokes the workflow Lambda once per step, which calls the TAB NZ API and Overpass and saves the pick to DynamoDB. Failed executions raise a CloudWatch alarm that emails through SNS.">
+        <svg class="dg" viewBox="0 0 1290 580" role="img" aria-label="The browser reaches everything through one CloudFront address: static files come from S3, and /api/* goes through API Gateway to the api Lambda, which reads DynamoDB and SSM, geocodes with Nominatim, has Claude Haiku 4.5 on Bedrock read menu photos (through the Australia-only inference profile, so photos are processed in Sydney or Melbourne), and starts the Step Functions pick workflow. The workflow invokes the workflow Lambda once per step, which calls the TAB NZ API and Overpass and saves the pick to DynamoDB. Failed executions raise a CloudWatch alarm that emails through SNS.">
           <defs>
             <marker id="s-ink" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" orient="auto"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
             <marker id="s-req" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto"><path class="ah req" d="M0,0 L10,5 L0,10 z"/></marker>
@@ -210,8 +210,8 @@
           <path class="edge" d="M780,250 V200 H1114" marker-end="url(#s-ink)"/>
           <text class="lbl" x="975" y="191" text-anchor="middle">geocode address</text>
 
-          <path class="edge" d="M690,250 V196 H596" marker-end="url(#s-ink)"/>
-          <text class="lbl" x="643" y="188" text-anchor="middle">menu photo</text>
+          <path class="edge" d="M690,250 V196 H601" marker-end="url(#s-ink)"/>
+          <text class="lbl" x="645" y="188" text-anchor="middle">menu photo</text>
 
           <!-- pick workflow -->
           <path class="edge wf" d="M745,314 V414" marker-end="url(#s-wf)"/>
@@ -266,9 +266,9 @@
           <text class="t" x="975" y="277" text-anchor="middle">DynamoDB</text>
           <text class="s" x="975" y="296" text-anchor="middle">one table · shared view</text>
 
-          <rect class="box" x="460" y="168" width="130" height="56" rx="6"/>
-          <text class="t" x="525" y="192" text-anchor="middle">Bedrock</text>
-          <text class="s" x="525" y="210" text-anchor="middle">Claude Haiku 4.5</text>
+          <rect class="box" x="455" y="168" width="140" height="56" rx="6"/>
+          <text class="t" x="525" y="192" text-anchor="middle">Bedrock · Haiku 4.5</text>
+          <text class="s" x="525" y="210" text-anchor="middle">Sydney or Melbourne</text>
 
           <rect class="box" x="670" y="420" width="150" height="64" rx="6"/>
           <text class="t" x="745" y="447" text-anchor="middle">Step Functions</text>
@@ -432,9 +432,10 @@
     <h2 id="dishes">Dish picks</h2>
     <figure>
       <div class="canvas">
-        <svg class="dg" viewBox="0 0 1050 190" role="img" aria-label="A dish pick: the menu photo is shrunk in the browser and sent to the api Lambda, which has Claude Haiku 4.5 on Bedrock read the dishes; you review the list; a race gives each horse a dish; the first three distinct dishes past the post are the podium.">
+        <svg class="dg" viewBox="0 0 1050 262" role="img" aria-label="A dish pick: the menu photo is shrunk in the browser and sent to the api Lambda, which checks it and has Claude Haiku 4.5 on Bedrock read the dishes; you review the list; a race gives each horse a dish; the first three distinct dishes past the post are the podium. A photo of the wrong type or size, menu reading not set up, a failed reading or fewer than three dishes all return you to the photo step with the reason.">
           <defs>
             <marker id="d-wf" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto"><path class="ah wf" d="M0,0 L10,5 L0,10 z"/></marker>
+            <marker id="d-quiet" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" orient="auto"><path class="ah quiet" d="M0,0 L10,5 L0,10 z"/></marker>
           </defs>
 
           <path class="edge wf" d="M160,72 H224" marker-end="url(#d-wf)"/>
@@ -446,9 +447,18 @@
           <path class="edge wf" d="M820,72 H884" marker-end="url(#d-wf)"/>
           <text class="lbl on-surface wf" x="855" y="62" text-anchor="middle">places</text>
 
+          <!-- ways a menu read fails: all back to the photo, with the reason -->
+          <path class="edge quiet" d="M85,104 V196" marker-end="url(#d-quiet)"/>
+          <text class="lbl on-surface" x="93" y="136">invalid_request</text>
+          <text class="lbl on-surface" x="93" y="152">type · size · bytes</text>
+          <path class="edge quiet" d="M305,104 V196" marker-end="url(#d-quiet)"/>
+          <text class="lbl on-surface" x="313" y="136">menu_reading_not_set_up</text>
+          <text class="lbl on-surface" x="313" y="152">menu_unreadable</text>
+          <text class="lbl on-surface" x="313" y="168">too_few_dishes</text>
+
           <rect class="box" x="10" y="40" width="150" height="64" rx="6"/>
           <text class="t" x="85" y="67" text-anchor="middle">Menu photo</text>
-          <text class="s" x="85" y="86" text-anchor="middle">shrunk in the browser</text>
+          <text class="s" x="85" y="86" text-anchor="middle">shrunk · never stored</text>
 
           <rect class="box" x="230" y="40" width="150" height="64" rx="6"/>
           <text class="t" x="305" y="67" text-anchor="middle">Claude Haiku 4.5</text>
@@ -466,12 +476,15 @@
           <text class="t" x="965" y="67" text-anchor="middle">Podium 🥇🥈🥉</text>
           <text class="s" x="965" y="86" text-anchor="middle">top 3 distinct dishes</text>
 
-          <text class="note" x="85" y="130" text-anchor="middle">never stored</text>
           <text class="note" x="745" y="130" text-anchor="middle">≥ 3 runners · repeats if short</text>
           <text class="note" x="965" y="130" text-anchor="middle">repeats passed over</text>
+
+          <rect class="box wait" x="10" y="202" width="370" height="50" rx="6"/>
+          <text class="t" x="195" y="224" text-anchor="middle">Back to the photo step</text>
+          <text class="s" x="195" y="241" text-anchor="middle">showing the reason, e.g. "Reading menus isn't set up yet."</text>
         </svg>
       </div>
-      <figcaption>The one AI call in the app reads the menu, and only that: Claude lists the dishes and the restaurant's name, you decide what's in, and a real race does the choosing. The workflow is the same state machine as a restaurant pick — the start deals out dishes instead of countries, and the result check settles three places instead of one.</figcaption>
+      <figcaption>The one AI call in the app reads the menu, and only that: Claude lists the dishes and the restaurant's name, you decide what's in, and a real race does the choosing. The workflow is the same state machine as a restaurant pick — the start deals out dishes instead of countries, and the result check settles three places instead of one. Every way a read can fail sends you back to the photo with the actual reason: the photo is checked (type, 4 MB limit, and that its bytes match its type) before the model is called, and "not set up" is told apart from "couldn't read it".</figcaption>
     </figure>
   </section>
 
@@ -537,7 +550,7 @@
           <tr><th scope="row">Password</th><td>scrypt hash in SSM</td><td><code>FAT_HORSES_PASSWORD</code></td></tr>
           <tr><th scope="row">Session key</th><td>SSM, rotated on demand</td><td>new at every start</td></tr>
           <tr><th scope="row">Cookie</th><td>Secure (https only)</td><td>not Secure (plain http)</td></tr>
-          <tr><th scope="row">Menu photos</th><td>Bedrock, <code>MENU_MODEL_ID</code></td><td><code>MENU_READER=fake</code>, or Bedrock via your AWS profile</td></tr>
+          <tr><th scope="row">Menu photos</th><td>Bedrock, <code>MENU_MODEL_ID</code> = the <code>au.</code> Haiku 4.5 profile (Sydney or Melbourne)</td><td><code>MENU_READER=fake</code>, or Bedrock via your AWS profile</td></tr>
         </tbody>
       </table>
     </div>
