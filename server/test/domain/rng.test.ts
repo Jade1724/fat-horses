@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { choose, randomIndex, seeded, shuffle, systemRng } from "./rng";
+import { choose, randomIndex, seeded, shuffle, systemRng } from "../../src/domain/rng";
 
 describe("rng", () => {
   it("systemRng stays in [0, 1)", () => {

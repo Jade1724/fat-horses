@@ -1,13 +1,20 @@
 // Pool (F2), race selection (F3), assignment (F4) and winner (F5).
 
 import { describe, expect, it } from "vitest";
-import { applyScratchings, assign, cardEntry, EmptyPoolError, type RaceCard } from "./assign";
-import type { Country } from "./countries";
-import { DEFAULT_MIN_POPULATION, pool } from "./pool";
-import { candidates, hasEnoughRunners, selectRace, type Race, type RaceStatus, type Runner } from "./race";
-import { seeded, shuffle } from "./rng";
-import { addMs, MINUTE } from "./time";
-import { resolve, type ResultSnapshot, type Winner } from "./winner";
+import { applyScratchings, assign, cardEntry, EmptyPoolError, type RaceCard } from "../../src/domain/assign";
+import type { Country } from "../../src/domain/countries";
+import { DEFAULT_MIN_POPULATION, pool } from "../../src/domain/pool";
+import {
+  candidates,
+  hasEnoughRunners,
+  selectRace,
+  type Race,
+  type RaceStatus,
+  type Runner,
+} from "../../src/domain/race";
+import { seeded, shuffle } from "../../src/domain/rng";
+import { addMs, MINUTE } from "../../src/domain/time";
+import { resolve, type ResultSnapshot, type Winner } from "../../src/domain/winner";
 
 const NOW = "2026-09-21T10:00:00.000Z";
 const at = (minutes: number) => addMs(NOW, minutes * MINUTE);

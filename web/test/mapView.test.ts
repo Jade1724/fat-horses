@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createMap, NoMap, type MapView } from "./mapView";
+import { createMap, NoMap, type MapView } from "../src/mapView";
 
 describe("createMap", () => {
   it("returns the real map when it starts", () => {

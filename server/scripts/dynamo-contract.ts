@@ -2,7 +2,7 @@
 // FAT_HORSES_DYNAMODB_ENDPOINT defaults to http://localhost:8000.
 
 import { DeleteTableCommand, DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { runContract, CONTRACT_SCENARIOS } from "../src/store/contract";
+import { runContract, CONTRACT_SCENARIOS } from "../test/store/contract";
 import { createTable, DynamoStore } from "../src/store/dynamo";
 
 const config = {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Cached } from "./secrets";
+import { Cached } from "../../src/lambda/secrets";
 
 describe("Cached (F11.1)", () => {
   it("re-reads after the TTL and doesn't cache failures", async () => {

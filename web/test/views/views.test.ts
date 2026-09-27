@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { historyRow } from "./history";
-import { renderPassport } from "./passport";
-import { watchLink } from "./pick";
+import { historyRow } from "../../src/views/history";
+import { renderPassport } from "../../src/views/passport";
+import { watchLink } from "../../src/views/pick";
 
 describe("renderPassport", () => {
   it("shows progress and puts visited countries first", () => {

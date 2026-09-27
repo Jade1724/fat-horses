@@ -1,5 +1,6 @@
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-  test: { include: ["src/**/*.test.ts", "test/**/*.test.ts"] },
+  // Tests live in test/, mirroring src/; runtime code in src/ has none.
+  test: { include: ["test/**/*.test.ts"] },
 });

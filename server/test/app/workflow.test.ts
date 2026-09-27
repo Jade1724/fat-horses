@@ -1,15 +1,15 @@
 // Whole-pick scenarios with fakes, one step at a time too (SPEC.md §6).
 
 import { describe, expect, it } from "vitest";
-import { Countries, type Country } from "../domain/countries";
-import { parseCuisine, PlacesUnavailable, type Place, type Places } from "../domain/places";
-import type { Race, RaceProvider, RaceStatus, RaceUpdate } from "../domain/race";
-import { seeded } from "../domain/rng";
-import { newSession, type PickSession, type PickStatus } from "../domain/session";
-import { recordVisit } from "../domain/store";
-import { addMs, ms, MINUTE, type Iso } from "../domain/time";
+import { Countries, type Country } from "../../src/domain/countries";
+import { parseCuisine, PlacesUnavailable, type Place, type Places } from "../../src/domain/places";
+import type { Race, RaceProvider, RaceStatus, RaceUpdate } from "../../src/domain/race";
+import { seeded } from "../../src/domain/rng";
+import { newSession, type PickSession, type PickStatus } from "../../src/domain/session";
+import { recordVisit } from "../../src/domain/store";
+import { addMs, ms, MINUTE, type Iso } from "../../src/domain/time";
 import { contractRestaurant } from "../store/contract";
-import { MemoryStore } from "../store/state";
+import { MemoryStore } from "../../src/store/state";
 import {
   defaultConfig,
   ensurePlaces,
@@ -19,7 +19,7 @@ import {
   runStep,
   type Clock,
   type Deps,
-} from "./workflow";
+} from "../../src/app/workflow";
 
 const T0 = "2026-09-21T10:00:00.000Z";
 const at = (m: number) => addMs(T0, m * MINUTE);

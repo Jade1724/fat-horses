@@ -2,13 +2,18 @@
 // status (F8).
 
 import { describe, expect, it } from "vitest";
-import type { Country } from "./countries";
-import { chooseRestaurant, countriesWithTaggedPlaces, taggedMatches, type Match } from "./matching";
-import { distanceM, normaliseAddress, osmId, parseCuisine, type Place } from "./places";
-import { seeded } from "./rng";
-import { applyEvent, InvalidTransition, type Restaurant, type Status } from "./status";
-import { isFresh, logKey, pickedAfter, GEOCODE_TTL_MS } from "./store";
-import { addMs, DAY } from "./time";
+import type { Country } from "../../src/domain/countries";
+import {
+  chooseRestaurant,
+  countriesWithTaggedPlaces,
+  taggedMatches,
+  type Match,
+} from "../../src/domain/matching";
+import { distanceM, normaliseAddress, osmId, parseCuisine, type Place } from "../../src/domain/places";
+import { seeded } from "../../src/domain/rng";
+import { applyEvent, InvalidTransition, type Restaurant, type Status } from "../../src/domain/status";
+import { isFresh, logKey, pickedAfter, GEOCODE_TTL_MS } from "../../src/domain/store";
+import { addMs, DAY } from "../../src/domain/time";
 
 const NOW = "2026-09-21T10:00:00.000Z";
 

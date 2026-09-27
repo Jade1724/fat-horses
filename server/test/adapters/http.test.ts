@@ -1,6 +1,6 @@
 import { getDefaultAutoSelectFamilyAttemptTimeout } from "node:net";
 import { describe, expect, it, vi } from "vitest";
-import { CONNECT_ATTEMPT_TIMEOUT_MS, fetchText, HttpError, USER_AGENT } from "./http";
+import { CONNECT_ATTEMPT_TIMEOUT_MS, fetchText, HttpError, USER_AGENT } from "../../src/adapters/http";
 
 describe("http", () => {
   it("gives slow IPv4 connects time before giving up on an address", () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clearedSessionCookie, cookieValue, SESSION_COOKIE, sessionCookie } from "./cookies";
+import { clearedSessionCookie, cookieValue, SESSION_COOKIE, sessionCookie } from "../../src/app/cookies";
 
 describe("cookieValue", () => {
   it("reads a Cookie header", () => {

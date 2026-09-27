@@ -2,9 +2,9 @@
 
 import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
-import { distinctLocations } from "../domain/places";
-import type { Race } from "../domain/race";
-import { hasEnoughRunners } from "../domain/race";
+import { distinctLocations } from "../../src/domain/places";
+import type { Race } from "../../src/domain/race";
+import { hasEnoughRunners } from "../../src/domain/race";
 import {
   buildQuery,
   Nominatim,
@@ -13,11 +13,10 @@ import {
   parseCountries,
   parseOverpass,
   parseSearch,
-} from "./osm";
-import { parseEvent, parseMeetings, raceDays, RaceSourceUnavailable, TabNz } from "./tabNz";
+} from "../../src/adapters/osm";
+import { parseEvent, parseMeetings, raceDays, RaceSourceUnavailable, TabNz } from "../../src/adapters/tabNz";
 
-const fixture = (path: string) =>
-  readFileSync(new URL(`../../test/fixtures/${path}`, import.meta.url), "utf8");
+const fixture = (path: string) => readFileSync(new URL(`../fixtures/${path}`, import.meta.url), "utf8");
 const tab = (name: string) => fixture(`tab_nz/${name}`);
 
 function scottsville(): Race {

@@ -5,7 +5,7 @@ import {
   validateCountries,
   type Country,
   type CountriesFile,
-} from "./countries";
+} from "../../src/domain/countries";
 
 function country(over: Partial<Country> = {}): Country {
   return {

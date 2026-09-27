@@ -1,19 +1,19 @@
 // Maximum wait for a race (F3.2) and cancelling a pick (F12).
 
 import { describe, expect, it } from "vitest";
-import { bundledCountries } from "../domain/countries";
-import type { Geocoder } from "../domain/places";
-import { parseCuisine, type Place, type Places } from "../domain/places";
-import { candidates, type Race, type RaceProvider, type RaceUpdate } from "../domain/race";
-import { seeded } from "../domain/rng";
-import { newSession, type PickSession } from "../domain/session";
-import { cancelPick } from "../domain/store";
-import { addMs, ms, MINUTE, type Iso } from "../domain/time";
-import { executionArn } from "../lambda/env";
-import { MemoryStore } from "../store/state";
-import { Api, type ApiRequest, type WorkflowStarter } from "./api";
-import { defaultConfig, runPick, runStep, systemClock, type Clock, type Deps } from "./workflow";
-import { sessionCookie, testAuth } from "../../test/auth";
+import { bundledCountries } from "../../src/domain/countries";
+import type { Geocoder } from "../../src/domain/places";
+import { parseCuisine, type Place, type Places } from "../../src/domain/places";
+import { candidates, type Race, type RaceProvider, type RaceUpdate } from "../../src/domain/race";
+import { seeded } from "../../src/domain/rng";
+import { newSession, type PickSession } from "../../src/domain/session";
+import { cancelPick } from "../../src/domain/store";
+import { addMs, ms, MINUTE, type Iso } from "../../src/domain/time";
+import { executionArn } from "../../src/lambda/env";
+import { MemoryStore } from "../../src/store/state";
+import { Api, type ApiRequest, type WorkflowStarter } from "../../src/app/api";
+import { defaultConfig, runPick, runStep, systemClock, type Clock, type Deps } from "../../src/app/workflow";
+import { sessionCookie, testAuth } from "../auth";
 
 const T0 = "2026-09-21T10:00:00.000Z";
 const at = (m: number) => addMs(T0, m * MINUTE);

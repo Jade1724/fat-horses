@@ -6,7 +6,7 @@ import {
   signSession,
   verifyPassword,
   verifySession,
-} from "./auth";
+} from "../../src/domain/auth";
 
 const NOW = 1_700_000_000;
 

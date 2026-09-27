@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { Api, ApiError } from "./api";
+import { Api, ApiError } from "../src/api";
 
 function fakeFetch(status: number, body: unknown) {
   return vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {

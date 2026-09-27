@@ -1,12 +1,12 @@
 // Starting picks (F1) and the HTTP API (§5).
 
 import { describe, expect, it } from "vitest";
-import { bundledCountries } from "../domain/countries";
-import { GeocoderUnavailable, type Geocoder, type Location } from "../domain/places";
-import { recordPick } from "../domain/store";
+import { bundledCountries } from "../../src/domain/countries";
+import { GeocoderUnavailable, type Geocoder, type Location } from "../../src/domain/places";
+import { recordPick } from "../../src/domain/store";
 import { contractRestaurant } from "../store/contract";
-import { MemoryStore } from "../store/state";
-import { Api, type ApiRequest, type WorkflowStarter } from "./api";
+import { MemoryStore } from "../../src/store/state";
+import { Api, type ApiRequest, type WorkflowStarter } from "../../src/app/api";
 import {
   AddressNotFound,
   AmbiguousAddress,
@@ -15,8 +15,8 @@ import {
   newPickId,
   startPick,
   type StartInput,
-} from "./start";
-import { sessionCookie, TEST_PASSWORD, testAuth } from "../../test/auth";
+} from "../../src/app/start";
+import { sessionCookie, TEST_PASSWORD, testAuth } from "../auth";
 
 const NOW = "2026-09-21T10:00:00.000Z";
 

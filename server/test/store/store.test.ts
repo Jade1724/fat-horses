@@ -2,12 +2,12 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { applyEvent } from "../domain/status";
-import { recordPick, recordVisit } from "../domain/store";
+import { applyEvent } from "../../src/domain/status";
+import { recordPick, recordVisit } from "../../src/domain/store";
 import { contractRestaurant, runContract } from "./contract";
-import { DynamoStore, pointerOp } from "./dynamo";
-import { defaultStorePath, FileStore } from "./file";
-import { MemoryStore } from "./state";
+import { DynamoStore, pointerOp } from "../../src/store/dynamo";
+import { defaultStorePath, FileStore } from "../../src/store/file";
+import { MemoryStore } from "../../src/store/state";
 
 const NOW = "2026-09-21T10:00:00.000Z";
 

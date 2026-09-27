@@ -2,9 +2,9 @@
 // factory for fresh, empty stores; failures throw with the scenario name.
 
 import assert from "node:assert/strict";
-import type { PickSession } from "../domain/session";
-import { newSession } from "../domain/session";
-import { applyEvent, type Restaurant } from "../domain/status";
+import type { PickSession } from "../../src/domain/session";
+import { newSession } from "../../src/domain/session";
+import { applyEvent, type Restaurant } from "../../src/domain/status";
 import {
   cancelPick,
   ConflictError,
@@ -15,9 +15,9 @@ import {
   recordVisit,
   type HistoryPage,
   type Store,
-} from "../domain/store";
-import { InvalidTransition } from "../domain/status";
-import { addMs, MINUTE } from "../domain/time";
+} from "../../src/domain/store";
+import { InvalidTransition } from "../../src/domain/status";
+import { addMs, MINUTE } from "../../src/domain/time";
 
 const T0 = "2026-09-21T10:00:00.000Z";
 const at = (m: number) => addMs(T0, m * MINUTE);

@@ -227,14 +227,15 @@ Infrastructure (Terraform in `infra/`, S3 state backend with native lock file):
 server/                 TypeScript, Node.js 22
   src/domain/           types, rules F2–F8, interfaces (RaceProvider, Geocoder, Places, Store, Clock). No I/O
   src/adapters/         TAB NZ, Nominatim, Overpass
-  src/store/            memory, JSON-file and DynamoDB stores + shared contract suite
+  src/store/            memory, JSON-file and DynamoDB stores
   src/app/              workflow steps, start, API handlers
   src/lambda/           `api` and `workflow` handlers; wiring only
-  src/cli/              `fat-horses`: pick, visit, skip, passport, history, serve (eval later)
+  src/cli/              `fat-horses`: pick, visit, skip, passport, history, serve, hash-password
+  test/                 all tests, mirroring src/ (test/domain/…); the store contract suite; helpers
   test/fixtures/        recorded TAB NZ, Nominatim and Overpass responses
   scripts/              Lambda bundling, DynamoDB Local contract run
 data/countries.json     bundled into the server
-web/                    Vite + TypeScript + MapLibre GL JS
+web/                    Vite + TypeScript + MapLibre GL JS; src/ and test/ as in server/
 infra/                  Terraform
 ```
 

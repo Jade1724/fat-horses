@@ -8,6 +8,9 @@ same change).
   `src/adapters` (TAB NZ, Nominatim, Overpass), `src/store`, `src/app`
   (workflow steps, API handlers), `src/lambda` (handlers), `src/cli`.
 - `web/` — the web UI (Vite, MapLibre).
+- Tests live in `server/test/` and `web/test/`, mirroring `src/` (`src/domain/auth.ts`
+  → `test/domain/auth.test.ts`). Nothing under `src/` is test code; Vitest only
+  looks in `test/`.
 - `data/countries.json` — bundled into the server.
 
 ## Commands

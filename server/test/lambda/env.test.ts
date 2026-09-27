@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEventV2 } from "aws-lambda";
 import { describe, expect, it } from "vitest";
-import { toApiRequest, toResult } from "./env";
+import { toApiRequest, toResult } from "../../src/lambda/env";
 
 function event(over: Partial<APIGatewayProxyEventV2>): APIGatewayProxyEventV2 {
   return {

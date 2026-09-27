@@ -11,7 +11,7 @@ import {
   shortAddress,
   statusText,
   winReasonText,
-} from "./format";
+} from "../src/format";
 
 describe("directionsUrl", () => {
   it("points Google Maps at the coordinates", () => {

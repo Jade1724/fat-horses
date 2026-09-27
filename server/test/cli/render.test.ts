@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { bundledCountries } from "../domain/countries";
-import { newSession, type PickSession } from "../domain/session";
-import { recordPick, recordVisit } from "../domain/store";
+import { bundledCountries } from "../../src/domain/countries";
+import { newSession, type PickSession } from "../../src/domain/session";
+import { recordPick, recordVisit } from "../../src/domain/store";
 import { contractRestaurant } from "../store/contract";
-import { MemoryStore } from "../store/state";
-import * as render from "./render";
+import { MemoryStore } from "../../src/store/state";
+import * as render from "../../src/cli/render";
 
 const countries = bundledCountries();
 

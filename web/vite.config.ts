@@ -11,7 +11,9 @@ export default defineConfig({
     // MapLibre alone is ~800 kB; one bundle is fine for a single-user app.
     chunkSizeWarningLimit: 1200,
   },
+  // Tests live in test/, mirroring src/; runtime code in src/ has none.
   test: {
     environment: "jsdom",
+    include: ["test/**/*.test.ts"],
   },
 });
