@@ -1,6 +1,6 @@
 // Pure display helpers (unit-tested).
 
-import type { PickError, PickStatus, RestaurantStatus, WinReason } from "./api";
+import type { PickError, PickStatus, PodiumReason, RestaurantStatus, WinReason } from "./api";
 
 /** Directions to a point (SPEC.md F10.5). */
 export function directionsUrl(lat: number, lon: number): string {
@@ -59,6 +59,28 @@ export function errorText(error: PickError | null, maxWaitMin = 10, radiusM = 50
     case "internal":
     case null:
       return "Something went wrong on our side. Try again.";
+  }
+}
+
+/** The size a photo is shrunk to: its long edge at most `max`, shape kept (F15). */
+export function fitWithin(width: number, height: number, max: number): { width: number; height: number } {
+  const scale = Math.min(1, max / Math.max(width, height));
+  return { width: Math.round(width * scale), height: Math.round(height * scale) };
+}
+
+/** Why a podium place wasn't simply where the horse finished (F15); null when it was. */
+export function podiumNote(reason: PodiumReason): string | null {
+  switch (reason) {
+    case "result":
+      return null;
+    case "dead_heat":
+      return "dead heat, order drawn";
+    case "drawn":
+      return "not placed: drawn at random";
+    case "abandoned":
+      return "race abandoned: drawn at random";
+    case "timeout":
+      return "no result in time: drawn at random";
   }
 }
 

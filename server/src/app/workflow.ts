@@ -3,6 +3,7 @@
 
 import { applyScratchings, assign, EmptyPoolError } from "../domain/assign";
 import type { Countries } from "../domain/countries";
+import { assignDishes, PODIUM_SIZE } from "../domain/dishes";
 import { chooseRestaurant, countriesWithTaggedPlaces, taggedMatches, type Match } from "../domain/matching";
 import { DEFAULT_AMENITIES, type Place, type Places } from "../domain/places";
 import { pool, type Pool } from "../domain/pool";
@@ -14,11 +15,18 @@ import {
   type RaceProvider,
 } from "../domain/race";
 import type { Rng } from "../domain/rng";
-import { failed, isFinished, type PickSession } from "../domain/session";
+import {
+  failed,
+  isDecided,
+  isDishPick,
+  isFinished,
+  type PickRequest,
+  type PickSession,
+} from "../domain/session";
 import type { Restaurant } from "../domain/status";
 import { NotFoundError, PickCancelled, recordPick, type Store } from "../domain/store";
 import { addMs, ms, MINUTE, SECOND, type Iso } from "../domain/time";
-import { resolve, type ResultSnapshot } from "../domain/winner";
+import { resolve, resolvePodium, type ResultSnapshot } from "../domain/winner";
 import { log } from "../log";
 
 /** Poll interval for results (F5.1). */
@@ -39,15 +47,17 @@ export interface Deps {
   config: Config;
 }
 
-/** Nearby places (F6.1), or null if the lookup failed after its own retries. */
+/** A restaurant pick's request; dish picks (F15) have none. */
+function restaurantRequest(s: PickSession): PickRequest | null {
+  return s.request.mode === "dish" ? null : s.request;
+}
+
+/** Nearby places (F6.1), or null if the lookup failed after its own retries (or there's nowhere to look). */
 async function fetchPlaces(deps: Deps, s: PickSession): Promise<Place[] | null> {
+  const req = restaurantRequest(s);
+  if (!req || !s.location) return null;
   try {
-    return await deps.places.nearby(
-      s.location.lat,
-      s.location.lon,
-      s.request.radius_m,
-      deps.config.amenities,
-    );
+    return await deps.places.nearby(s.location.lat, s.location.lon, req.radius_m, deps.config.amenities);
   } catch (e) {
     log.warn("places unavailable", { pick_id: s.pick_id, error: String(e) });
     return null;
@@ -59,8 +69,9 @@ async function fetchPlaces(deps: Deps, s: PickSession): Promise<Place[] | null> 
  * nearby, so whichever wins, there is somewhere to eat.
  */
 function countryPool(deps: Deps, s: PickSession, visited: ReadonlySet<string>): Pool {
-  const nearby = countriesWithTaggedPlaces(deps.countries.all, s.places);
-  return pool(nearby, s.request.min_population, visited, s.request.include_visited);
+  const req = restaurantRequest(s);
+  const nearby = req ? countriesWithTaggedPlaces(deps.countries.all, s.places) : [];
+  return pool(nearby, req?.min_population ?? 0, visited, req?.include_visited ?? false);
 }
 
 /**
@@ -89,7 +100,9 @@ export async function findRace(deps: Deps, s: PickSession, now: Iso): Promise<Pi
   for (const race of candidates(schedule, now, maxLeadMs)) {
     try {
       const u = await deps.races.update(race);
-      if (u.race.status === "open" && hasEnoughRunners(u.race)) return { ...s, race: u.race };
+      // A dish pick needs three runners for its podium (F15).
+      const min = isDishPick(s) ? PODIUM_SIZE : undefined;
+      if (u.race.status === "open" && hasEnoughRunners(u.race, min)) return { ...s, race: u.race };
     } catch (e) {
       log.warn("race card unavailable", { pick_id: s.pick_id, race: race.id, error: String(e) });
     }
@@ -124,7 +137,13 @@ export async function ensurePlaces(deps: Deps, s: PickSession): Promise<PickSess
   return places ? { ...s, places, places_loaded: true } : failed(s, "places_unavailable");
 }
 
-/** Step 4: poll the race once (F5). Sets `resolving` when a winner is decided. */
+/** Step 3 of a dish pick: give every horse a dish (F15). Sets `waiting_start`. */
+export function assignDishCard(s: PickSession, rng: Rng): PickSession {
+  if (!s.race || !isDishPick(s)) return failed(s, "internal");
+  return { ...s, card: assignDishes(s.race.runners, s.request.dishes, rng), status: "waiting_start" };
+}
+
+/** Step 4: poll the race once (F5). Sets `resolving` when a winner (or dish podium, F15) is decided. */
 export async function checkResult(deps: Deps, s: PickSession, now: Iso, rng: Rng): Promise<PickSession> {
   if (!s.race || !s.card) return failed(s, "internal");
   let next: PickSession = { ...s };
@@ -148,7 +167,12 @@ export async function checkResult(deps: Deps, s: PickSession, now: Iso, rng: Rng
   }
   const start = s.race.start_time;
   if (ms(now) >= ms(start) && next.status === "waiting_start") next.status = "running";
-  const winner = resolve(next.card ?? s.card, snap, start, now, next.interim_since, rng);
+  const card = next.card ?? s.card;
+  if (isDishPick(s)) {
+    const podium = resolvePodium(card, snap, start, now, next.interim_since, rng);
+    return podium ? { ...next, podium, status: "resolving" } : next;
+  }
+  const winner = resolve(card, snap, start, now, next.interim_since, rng);
   return winner ? { ...next, winner, status: "resolving" } : next;
 }
 
@@ -254,24 +278,30 @@ export async function runPick(
   // a server that stopped carries on where it was (F13) instead of starting over.
   if (await save()) return end();
   if (!s.card) {
-    if (!s.places_loaded) {
+    if (!s.places_loaded && !isDishPick(s)) {
       s = await loadNearby(deps, s);
       if (await save()) return end();
     }
     s = await findRace(deps, s, clock.now());
     if (await save()) return end();
-    s = await assignCountries(deps, s, rng);
+    s = isDishPick(s) ? assignDishCard(s, rng) : await assignCountries(deps, s, rng);
     if (await save()) return end();
   }
-  if (!s.winner) {
+  if (!isDecided(s)) {
     if (s.race) await clock.sleepUntil(s.race.start_time, signal);
     for (;;) {
       if (signal?.aborted) return cancelled();
       s = await checkResult(deps, s, clock.now(), rng);
       if (await save()) return end();
-      if (s.winner) break;
+      if (isDecided(s)) break;
       await clock.sleepUntil(addMs(clock.now(), POLL_INTERVAL_MS), signal);
     }
+  }
+  if (isDishPick(s)) {
+    // Nothing to match: the podium is the answer, and no restaurant becomes PICKED.
+    s = { ...s, status: "done" };
+    await save();
+    return s;
   }
   s = await ensurePlaces(deps, s);
   if (await save()) return end();
@@ -298,7 +328,7 @@ export interface StepOutput {
   status: PickSession["status"];
   /** The scheduled start, for the Wait state. */
   start_time: Iso | null;
-  /** A winner is decided; go to `finish`. */
+  /** A winner (or dish podium) is decided; go to `finish`. */
   decided: boolean;
   /** The pick has failed or was cancelled; stop. */
   failed: boolean;
@@ -310,7 +340,7 @@ function output(s: PickSession): StepOutput {
     pick_id: s.pick_id,
     status: s.status,
     start_time: s.race?.start_time ?? null,
-    decided: s.winner !== null,
+    decided: isDecided(s),
     failed: s.status === "failed" || s.status === "cancelled",
     cancelled: s.status === "cancelled",
   };
@@ -328,13 +358,16 @@ export async function runStep(
   if (!s) throw new NotFoundError(`pick ${pickId} not found`);
   if (isFinished(s.status)) return output(s);
   if (step === "start" && !s.card) {
-    if (!s.places_loaded) s = await loadNearby(deps, s);
+    if (!s.places_loaded && !isDishPick(s)) s = await loadNearby(deps, s);
     if (s.status !== "failed") s = await findRace(deps, s, now);
-    if (s.status !== "failed") s = await assignCountries(deps, s, rng);
-  } else if (step === "check_result" && !s.winner) {
+    if (s.status !== "failed")
+      s = isDishPick(s) ? assignDishCard(s, rng) : await assignCountries(deps, s, rng);
+  } else if (step === "check_result" && !isDecided(s)) {
     s = await checkResult(deps, s, now, rng);
   } else if (step === "fail") {
     s = failed(s, "internal");
+  } else if (step === "finish" && isDishPick(s)) {
+    s = { ...s, status: "done" };
   } else if (step === "finish") {
     s = await ensurePlaces(deps, s);
     if (s.status !== "failed") s = await pickRestaurant(deps, matchRestaurants(deps, s), now, rng);

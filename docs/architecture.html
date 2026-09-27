@@ -172,16 +172,16 @@
 
 <div class="page">
   <header>
-    <span class="eyebrow">fat-horses · main · ap-southeast-2 · no LLM</span>
+    <span class="eyebrow">fat-horses · main · ap-southeast-2 · menus read by Claude Haiku 4.5</span>
     <h1>How Fat Horses runs</h1>
-    <p class="lede">The restaurants near you decide which countries run; a horse race picks one of them. These are the moving parts on AWS, the path a pick takes through them, who gets a horse, and how logging in works.</p>
+    <p class="lede">The restaurants near you decide which countries run, and a horse race picks one of them — or, once you're seated, picks your top three dishes from a photo of the menu. These are the moving parts on AWS, the path a pick takes through them, who gets a horse, and how logging in works.</p>
   </header>
 
   <section aria-labelledby="sys">
     <h2 id="sys">The system</h2>
     <figure>
       <div class="canvas">
-        <svg class="dg" viewBox="0 0 1290 580" role="img" aria-label="The browser reaches everything through one CloudFront address: static files come from S3, and /api/* goes through API Gateway to the api Lambda, which reads DynamoDB and SSM, geocodes with Nominatim and starts the Step Functions pick workflow. The workflow invokes the workflow Lambda once per step, which calls the TAB NZ API and Overpass and saves the pick to DynamoDB. Failed executions raise a CloudWatch alarm that emails through SNS.">
+        <svg class="dg" viewBox="0 0 1290 580" role="img" aria-label="The browser reaches everything through one CloudFront address: static files come from S3, and /api/* goes through API Gateway to the api Lambda, which reads DynamoDB and SSM, geocodes with Nominatim, has Claude Haiku 4.5 on Bedrock read menu photos, and starts the Step Functions pick workflow. The workflow invokes the workflow Lambda once per step, which calls the TAB NZ API and Overpass and saves the pick to DynamoDB. Failed executions raise a CloudWatch alarm that emails through SNS.">
           <defs>
             <marker id="s-ink" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" orient="auto"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
             <marker id="s-req" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto"><path class="ah req" d="M0,0 L10,5 L0,10 z"/></marker>
@@ -209,6 +209,9 @@
           <text class="lbl" x="806" y="113" text-anchor="middle">every 5 min</text>
           <path class="edge" d="M780,250 V200 H1114" marker-end="url(#s-ink)"/>
           <text class="lbl" x="975" y="191" text-anchor="middle">geocode address</text>
+
+          <path class="edge" d="M690,250 V196 H596" marker-end="url(#s-ink)"/>
+          <text class="lbl" x="643" y="188" text-anchor="middle">menu photo</text>
 
           <!-- pick workflow -->
           <path class="edge wf" d="M745,314 V414" marker-end="url(#s-wf)"/>
@@ -262,6 +265,10 @@
           <rect class="box" x="890" y="250" width="170" height="64" rx="6"/>
           <text class="t" x="975" y="277" text-anchor="middle">DynamoDB</text>
           <text class="s" x="975" y="296" text-anchor="middle">one table · shared view</text>
+
+          <rect class="box" x="460" y="168" width="130" height="56" rx="6"/>
+          <text class="t" x="525" y="192" text-anchor="middle">Bedrock</text>
+          <text class="s" x="525" y="210" text-anchor="middle">Claude Haiku 4.5</text>
 
           <rect class="box" x="670" y="420" width="150" height="64" rx="6"/>
           <text class="t" x="745" y="447" text-anchor="middle">Step Functions</text>
@@ -421,6 +428,53 @@
     </figure>
   </section>
 
+  <section aria-labelledby="dishes">
+    <h2 id="dishes">Dish picks</h2>
+    <figure>
+      <div class="canvas">
+        <svg class="dg" viewBox="0 0 1050 190" role="img" aria-label="A dish pick: the menu photo is shrunk in the browser and sent to the api Lambda, which has Claude Haiku 4.5 on Bedrock read the dishes; you review the list; a race gives each horse a dish; the first three distinct dishes past the post are the podium.">
+          <defs>
+            <marker id="d-wf" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto"><path class="ah wf" d="M0,0 L10,5 L0,10 z"/></marker>
+          </defs>
+
+          <path class="edge wf" d="M160,72 H224" marker-end="url(#d-wf)"/>
+          <text class="lbl on-surface wf" x="195" y="62" text-anchor="middle">~300 KB</text>
+          <path class="edge wf" d="M380,72 H444" marker-end="url(#d-wf)"/>
+          <text class="lbl on-surface wf" x="415" y="62" text-anchor="middle">dishes</text>
+          <path class="edge wf" d="M600,72 H664" marker-end="url(#d-wf)"/>
+          <text class="lbl on-surface wf" x="635" y="62" text-anchor="middle">≥ 3 ticked</text>
+          <path class="edge wf" d="M820,72 H884" marker-end="url(#d-wf)"/>
+          <text class="lbl on-surface wf" x="855" y="62" text-anchor="middle">places</text>
+
+          <rect class="box" x="10" y="40" width="150" height="64" rx="6"/>
+          <text class="t" x="85" y="67" text-anchor="middle">Menu photo</text>
+          <text class="s" x="85" y="86" text-anchor="middle">shrunk in the browser</text>
+
+          <rect class="box" x="230" y="40" width="150" height="64" rx="6"/>
+          <text class="t" x="305" y="67" text-anchor="middle">Claude Haiku 4.5</text>
+          <text class="s" x="305" y="86" text-anchor="middle">reads, never chooses</text>
+
+          <rect class="box gate" x="450" y="40" width="150" height="64" rx="6"/>
+          <text class="t" x="525" y="67" text-anchor="middle">You review</text>
+          <text class="s" x="525" y="86" text-anchor="middle">tick · fix · add</text>
+
+          <rect class="box" x="670" y="40" width="150" height="64" rx="6"/>
+          <text class="t" x="745" y="67" text-anchor="middle">The race</text>
+          <text class="s" x="745" y="86" text-anchor="middle">a dish per horse</text>
+
+          <rect class="box" x="890" y="40" width="150" height="64" rx="6"/>
+          <text class="t" x="965" y="67" text-anchor="middle">Podium 🥇🥈🥉</text>
+          <text class="s" x="965" y="86" text-anchor="middle">top 3 distinct dishes</text>
+
+          <text class="note" x="85" y="130" text-anchor="middle">never stored</text>
+          <text class="note" x="745" y="130" text-anchor="middle">≥ 3 runners · repeats if short</text>
+          <text class="note" x="965" y="130" text-anchor="middle">repeats passed over</text>
+        </svg>
+      </div>
+      <figcaption>The one AI call in the app reads the menu, and only that: Claude lists the dishes and the restaurant's name, you decide what's in, and a real race does the choosing. The workflow is the same state machine as a restaurant pick — the start deals out dishes instead of countries, and the result check settles three places instead of one.</figcaption>
+    </figure>
+  </section>
+
   <section aria-labelledby="login">
     <h2 id="login">Logging in</h2>
     <figure>
@@ -483,6 +537,7 @@
           <tr><th scope="row">Password</th><td>scrypt hash in SSM</td><td><code>FAT_HORSES_PASSWORD</code></td></tr>
           <tr><th scope="row">Session key</th><td>SSM, rotated on demand</td><td>new at every start</td></tr>
           <tr><th scope="row">Cookie</th><td>Secure (https only)</td><td>not Secure (plain http)</td></tr>
+          <tr><th scope="row">Menu photos</th><td>Bedrock, <code>MENU_MODEL_ID</code></td><td><code>MENU_READER=fake</code>, or Bedrock via your AWS profile</td></tr>
         </tbody>
       </table>
     </div>
@@ -508,8 +563,10 @@
           <dt>server/src/app/api.ts</dt><dd>routes, login, every endpoint</dd>
           <dt>server/src/app/workflow.ts</dt><dd>what each pick step does</dd>
           <dt>server/src/domain/matching.ts</dt><dd>which countries may run; restaurant matches</dd>
+          <dt>server/src/domain/dishes.ts</dt><dd>dish lists, dealing dishes to horses</dd>
+          <dt>server/src/adapters/bedrockMenu.ts</dt><dd>Claude reading a menu photo</dd>
           <dt>server/src/adapters/</dt><dd>TAB NZ, Nominatim, Overpass</dd>
-          <dt>web/src/</dt><dd>the page: login, map, passport</dd>
+          <dt>web/src/</dt><dd>the page: login, map, dishes, passport</dd>
         </dl>
       </div>
     </div>

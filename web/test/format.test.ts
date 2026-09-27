@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  fitWithin,
+  podiumNote,
   circleRing,
   countdown,
   directionsUrl,
@@ -117,5 +119,26 @@ describe("osmUrl", () => {
   it("links OSM objects", () => {
     expect(osmUrl("osm:way/42")).toBe("https://www.openstreetmap.org/way/42");
     expect(osmUrl("something")).toBeNull();
+  });
+});
+
+describe("fitWithin (F15 photo upload)", () => {
+  it("shrinks the long edge to the limit, keeping the shape", () => {
+    expect(fitWithin(4032, 3024, 1568)).toEqual({ width: 1568, height: 1176 });
+    expect(fitWithin(3024, 4032, 1568)).toEqual({ width: 1176, height: 1568 });
+  });
+
+  it("leaves small photos alone", () => {
+    expect(fitWithin(800, 600, 1568)).toEqual({ width: 800, height: 600 });
+  });
+});
+
+describe("podiumNote (F15)", () => {
+  it("explains places the result didn't decide", () => {
+    expect(podiumNote("result")).toBeNull();
+    expect(podiumNote("dead_heat")).toBe("dead heat, order drawn");
+    expect(podiumNote("drawn")).toBe("not placed: drawn at random");
+    expect(podiumNote("abandoned")).toBe("race abandoned: drawn at random");
+    expect(podiumNote("timeout")).toBe("no result in time: drawn at random");
   });
 });

@@ -1,8 +1,10 @@
 // The HTTP API behind API Gateway (SPEC.md §5).
 // Environment: TABLE_NAME, STATE_MACHINE_ARN, GEOCODE_COUNTRIES, and the two
-// SSM SecureStrings PASSWORD_HASH_PARAM and SESSION_SECRET_PARAM (F11.1).
+// SSM SecureStrings PASSWORD_HASH_PARAM and SESSION_SECRET_PARAM (F11.1), and
+// MENU_MODEL_ID, the Bedrock model that reads menu photos (F15; empty = not set up).
 
 import type { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from "aws-lambda";
+import { menuReaderFromEnv } from "../adapters/bedrockMenu";
 import { Api, type AuthConfig } from "../app/api";
 import { bundledCountries } from "../domain/countries";
 import { MINUTE } from "../domain/time";
@@ -37,6 +39,7 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
     store: dynamoStore(),
     starter: new SfnStarter(env("STATE_MACHINE_ARN")),
     countries: bundledCountries(),
+    menus: menuReaderFromEnv(),
   };
   const r = await new Api({ ...parts, auth: config }).handle(toApiRequest(event), new Date().toISOString());
   return toResult(r);

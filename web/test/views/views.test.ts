@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { historyRow } from "../../src/views/history";
 import { renderPassport } from "../../src/views/passport";
-import { watchLink } from "../../src/views/pick";
+import { chosenDishes, renderPodium } from "../../src/views/dishes";
+import { raceCard, watchLink } from "../../src/views/race";
 
 describe("renderPassport", () => {
   it("shows progress and puts visited countries first", () => {
@@ -87,5 +88,58 @@ describe("watchLink", () => {
 
   it("is absent for picks saved before links existed", () => {
     expect(watchLink({ ...race, url: null })).toBeNull();
+  });
+});
+
+describe("race card", () => {
+  const race = {
+    venue: "Ellerslie",
+    race_number: 3,
+    name: "Test Stakes",
+    start_time: "2026-09-21T10:00:00Z",
+    url: null,
+    runners: [
+      { number: 1, horse: "Alpha", country: null, dish: "Pad Thai", scratched: false },
+      { number: 2, horse: "Bravo", country: null, dish: "Satay", scratched: true },
+    ],
+  };
+
+  it("labels each horse by what it runs for, and marks the highlighted ones", () => {
+    const { el, stop } = raceCard(race, { label: (r) => r.dish ?? "—", highlight: [1], live: false });
+    stop();
+    const rows = [...el.querySelectorAll(".card li")];
+    expect(rows.map((r) => r.querySelector(".country")?.textContent)).toEqual(["Pad Thai", "Satay"]);
+    expect(rows[0]?.classList.contains("winner")).toBe(true);
+    expect(rows[1]?.classList.contains("scratched")).toBe(true);
+  });
+});
+
+describe("dish review (F15)", () => {
+  it("races only ticked, non-empty dishes, once each", () => {
+    expect(
+      chosenDishes([
+        { name: " Pad Thai ", checked: true },
+        { name: "pad thai", checked: true },
+        { name: "Coke", checked: false },
+        { name: "  ", checked: true },
+        { name: "Satay", checked: true },
+      ]),
+    ).toEqual(["Pad Thai", "Satay"]);
+  });
+});
+
+describe("renderPodium (F15)", () => {
+  it("shows three dishes with medals, horses and any note", () => {
+    const el = renderPodium([
+      { place: 1, number: 4, horse: "Delta", dish: "Pad Thai", reason: "result" },
+      { place: 2, number: 2, horse: "Bravo", dish: "Satay", reason: "dead_heat" },
+      { place: 3, number: 1, horse: "Alpha", dish: "Larb", reason: "drawn" },
+    ]);
+    const rows = [...el.querySelectorAll("li")];
+    expect(rows.map((r) => r.querySelector(".dish")?.textContent)).toEqual(["Pad Thai", "Satay", "Larb"]);
+    expect(rows[0]?.textContent).toContain("🥇");
+    expect(rows[0]?.textContent).toContain("#4 Delta");
+    expect(rows[1]?.querySelector(".note")?.textContent).toBe("dead heat, order drawn");
+    expect(rows[0]?.querySelector(".note")).toBeNull();
   });
 });

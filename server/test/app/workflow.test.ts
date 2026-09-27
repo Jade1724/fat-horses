@@ -5,7 +5,7 @@ import { Countries, type Country } from "../../src/domain/countries";
 import { parseCuisine, PlacesUnavailable, type Place, type Places } from "../../src/domain/places";
 import type { Race, RaceProvider, RaceStatus, RaceUpdate } from "../../src/domain/race";
 import { seeded } from "../../src/domain/rng";
-import { newSession, type PickSession, type PickStatus } from "../../src/domain/session";
+import { newDishSession, newSession, type PickSession, type PickStatus } from "../../src/domain/session";
 import { recordVisit } from "../../src/domain/store";
 import { addMs, ms, MINUTE, type Iso } from "../../src/domain/time";
 import { contractRestaurant } from "../store/contract";
@@ -335,6 +335,99 @@ describe("picks drawn before countries were limited to nearby ones", () => {
     expect(ok.places_loaded).toBe(true);
     const down = await ensurePlaces(deps({ places: new FakePlaces(onePerCountry(), 1) }), legacy([], false));
     expect(down).toMatchObject({ status: "failed", error: "places_unavailable" });
+  });
+});
+
+describe("dish picks (F15)", () => {
+  const MENU = ["Pad Thai", "Green curry", "Satay", "Tom yum"];
+  const dishSession = () =>
+    newDishSession("d1", T0, { mode: "dish", dishes: MENU, restaurant_name: "Siam House", max_wait_min: 10 });
+  const fourRunners = (status: RaceStatus): Race => ({
+    ...race(status),
+    runners: [1, 2, 3, 4].map((n) => ({ number: n, name: `Horse ${n}`, scratched: false })),
+  });
+  const placed = (status: RaceStatus, placings: [number, number][]): RaceUpdate => ({
+    race: fourRunners(status),
+    placings: placings.map(([position, number]) => ({ position, number })),
+  });
+
+  it("gives every horse a dish and puts the first three dishes on the podium", async () => {
+    const d = deps({
+      schedule: [fourRunners("open")],
+      updates: [
+        placed("open", []),
+        placed("closed", []),
+        placed("final", [
+          [1, 4],
+          [2, 2],
+          [3, 1],
+        ]),
+      ],
+    });
+    const s = await runPick(d, dishSession(), new FakeClock(), seeded(7));
+    expect(s.status).toBe("done");
+    expect(new Set(s.card?.entries.map((e) => e.dish))).toEqual(new Set(MENU));
+    const dishOf = (n: number) => s.card?.entries.find((e) => e.number === n)?.dish;
+    expect(s.podium?.map((p) => p.dish)).toEqual([dishOf(4), dishOf(2), dishOf(1)]);
+    expect(s.podium?.every((p) => p.reason === "result")).toBe(true);
+  });
+
+  it("never looks for restaurants or touches the picked restaurant", async () => {
+    const d = deps({
+      schedule: [fourRunners("open")],
+      updates: [placed("open", []), placed("final", [[1, 1]])],
+      places: new FakePlaces([], 99), // would fail if it were asked
+    });
+    const s = await runPick(d, dishSession(), new FakeClock(), seeded(1));
+    expect(s.status).toBe("done");
+    expect(s.places_loaded).toBe(false);
+    expect(s.winner).toBeNull();
+    expect(await d.store.currentlyPicked()).toBeNull();
+  });
+
+  it("needs a race with at least three runners for a podium", async () => {
+    const d = deps({ schedule: [race("open")], updates: [update("open")] });
+    const twoLeft: RaceUpdate = {
+      race: {
+        ...race("open"),
+        runners: [1, 2, 3].map((n) => ({ number: n, name: `H${n}`, scratched: n === 3 })),
+      },
+      placings: [],
+    };
+    const d2 = deps({ schedule: [race("open")], updates: [twoLeft] });
+    expect((await runPick(d, dishSession(), new FakeClock(), seeded(1))).card).not.toBeNull();
+    expect(await runPick(d2, dishSession(), new FakeClock(), seeded(1))).toMatchObject({
+      status: "failed",
+      error: "no_upcoming_race",
+    });
+  });
+
+  it("runs step by step under Step Functions", async () => {
+    const d = deps({
+      schedule: [fourRunners("open")],
+      updates: [
+        placed("open", []),
+        placed("closed", []),
+        placed("final", [
+          [1, 3],
+          [2, 1],
+          [3, 2],
+        ]),
+      ],
+    });
+    await d.store.putPick(dishSession());
+    const rng = seeded(3);
+    expect(await runStep(d, "start", "d1", T0, rng)).toMatchObject({
+      status: "waiting_start",
+      decided: false,
+    });
+    expect(await runStep(d, "check_result", "d1", at(8), rng)).toMatchObject({ decided: false });
+    expect(await runStep(d, "check_result", "d1", at(9), rng)).toMatchObject({
+      decided: true,
+      status: "resolving",
+    });
+    expect((await runStep(d, "finish", "d1", at(10), rng)).status).toBe("done");
+    expect((await d.store.getPick("d1"))?.podium).toHaveLength(3);
   });
 });
 

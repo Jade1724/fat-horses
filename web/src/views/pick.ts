@@ -6,14 +6,12 @@ import type {
   Api,
   PickRestaurant,
   PickView,
-  Race,
   StartPick,
   StoredRestaurant,
   Winner,
 } from "../api";
 import { clear, h } from "../dom";
 import {
-  countdown,
   directionsUrl,
   distanceText,
   errorText,
@@ -25,18 +23,9 @@ import {
 } from "../format";
 import type { MapView } from "../mapView";
 import { storage } from "../storage";
+import { raceCard, watchLink } from "./race";
 
 const POLL_MS = 5000;
-
-/** "Watch the race on TAB", opening the race's page in a new tab (F10.4); null without a link. */
-export function watchLink(race: Race): HTMLAnchorElement | null {
-  if (!race.url) return null;
-  return h(
-    "a",
-    { class: "watch", href: race.url, target: "_blank", rel: "noopener noreferrer" },
-    `📺 Watch ${race.venue} R${race.race_number} on TAB`,
-  );
-}
 
 export class PickPage {
   readonly root: HTMLElement;
@@ -46,13 +35,16 @@ export class PickPage {
   private pick: PickView | null = null;
   private selected: string | null = null;
   private pollTimer: number | undefined;
-  private tickTimer: number | undefined;
+  private stopRaceCard: () => void = () => {};
   private readonly api: Api;
   private readonly map: MapView;
+  private readonly onRaceDishes: (restaurantName: string) => void;
 
-  constructor(api: Api, map: MapView, mapEl: HTMLElement) {
+  /** `onRaceDishes` opens dish mode for a picked restaurant (F15). */
+  constructor(api: Api, map: MapView, mapEl: HTMLElement, onRaceDishes: (restaurantName: string) => void) {
     this.api = api;
     this.map = map;
+    this.onRaceDishes = onRaceDishes;
     this.banner = h("div", { class: "banner", hidden: true });
     this.form = this.buildForm();
     this.panel = h("div", { class: "panel-body", "aria-live": "polite" });
@@ -73,7 +65,7 @@ export class PickPage {
 
   stop(): void {
     window.clearTimeout(this.pollTimer);
-    window.clearInterval(this.tickTimer);
+    this.stopRaceCard();
   }
 
   private buildForm(): HTMLFormElement {
@@ -213,7 +205,7 @@ export class PickPage {
       const view = await this.api.getPick(pickId);
       const firstLoad = this.pick?.pick_id !== view.pick_id;
       this.pick = view;
-      if (firstLoad) {
+      if (firstLoad && view.location) {
         void this.map.showArea(view.location.lat, view.location.lon, view.location.radius_m);
       }
       this.render();
@@ -253,9 +245,9 @@ export class PickPage {
     const p = this.pick;
     if (!p) return;
     clear(this.panel);
-    window.clearInterval(this.tickTimer);
+    this.stopRaceCard();
 
-    this.panel.append(h("p", { class: "where" }, "📍 ", p.location.display_name));
+    if (p.location) this.panel.append(h("p", { class: "where" }, "📍 ", p.location.display_name));
     if (p.world_complete) {
       this.panel.append(
         h(
@@ -279,7 +271,7 @@ export class PickPage {
     }
     if (p.status === "failed") {
       this.panel.append(
-        h("p", { class: "message error" }, errorText(p.error, p.max_wait_min, p.location.radius_m)),
+        h("p", { class: "message error" }, errorText(p.error, p.max_wait_min, p.location?.radius_m)),
       );
     }
     if (p.status === "cancelled") {
@@ -290,45 +282,19 @@ export class PickPage {
     if (p.race) {
       const watch = watchLink(p.race);
       if (watch) this.panel.append(watch);
-      this.panel.append(this.renderRace(p.race, p.winner, isFinished(p.status)));
+      const card = raceCard(p.race, {
+        label: (r) => (r.country ? `${r.country.flag} ${r.country.name}` : "—"),
+        highlight: p.winner ? [p.winner.number] : [],
+        live: !p.winner && !isFinished(p.status),
+      });
+      this.stopRaceCard = card.stop;
+      this.panel.append(card.el);
     }
 
     this.map.showRestaurants(p.restaurants, p.pick, (r) => {
       this.selected = r.id;
       this.render();
     });
-  }
-
-  /** The race card; the countdown only runs while the pick is still waiting on the race. */
-  private renderRace(race: Race, winner: Winner | null, finished: boolean): HTMLElement {
-    const start = new Date(race.start_time);
-    const hhmm = start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    const clock = h("span", { class: "countdown" });
-    const live = !winner && !finished;
-    const tick = () => {
-      const c = countdown(start, new Date());
-      clock.textContent = !live ? `at ${hhmm}` : c ? `starts in ${c}` : `started ${hhmm}`;
-    };
-    tick();
-    if (live) this.tickTimer = window.setInterval(tick, 1000);
-    const rows = race.runners.map((r) =>
-      h(
-        "li",
-        {
-          class: [r.scratched ? "scratched" : "", winner?.number === r.number ? "winner" : ""].join(" "),
-        },
-        h("span", { class: "num" }, String(r.number)),
-        h("span", { class: "horse" }, r.horse),
-        h("span", { class: "country" }, r.country ? `${r.country.flag} ${r.country.name}` : "—"),
-      ),
-    );
-    return h(
-      "details",
-      { class: "race", open: live },
-      h("summary", {}, h("strong", {}, `🏇 ${race.venue} R${race.race_number}`), " ", clock),
-      h("p", { class: "race-name" }, race.name),
-      h("ol", { class: "card" }, ...rows),
-    );
   }
 
   private renderWinner(w: Winner): HTMLElement {
@@ -397,6 +363,11 @@ export class PickPage {
       const skip = h("button", { type: "button" }, "Skip");
       skip.addEventListener("click", () => void this.skip(r, skip));
       actions.append(skip);
+    }
+    if (isPick) {
+      const dishes = h("button", { type: "button", class: "secondary" }, "🍽 Race for our dishes");
+      dishes.addEventListener("click", () => this.onRaceDishes(r.name));
+      actions.append(dishes);
     }
     const osm = osmUrl(r.id);
     return h(

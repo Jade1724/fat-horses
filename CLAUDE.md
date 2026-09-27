@@ -5,7 +5,7 @@ work list: `TASKS.md` (take the first open non-`[human]` task, tick it in the
 same change).
 
 - `server/` — backend: `src/domain` (pure rules and interfaces, no I/O),
-  `src/adapters` (TAB NZ, Nominatim, Overpass), `src/store`, `src/app`
+  `src/adapters` (TAB NZ, Nominatim, Overpass, Bedrock menu reader), `src/store`, `src/app`
   (workflow steps, API handlers), `src/lambda` (handlers), `src/cli`.
 - `web/` — the web UI (Vite, MapLibre).
 - Tests live in `server/test/` and `web/test/`, mirroring `src/` (`src/domain/auth.ts`

@@ -7,6 +7,8 @@ import { recordPick } from "../../src/domain/store";
 import { contractRestaurant } from "../store/contract";
 import { MemoryStore } from "../../src/store/state";
 import { Api, type ApiRequest, type WorkflowStarter } from "../../src/app/api";
+import { FakeMenuReader, MenuUnreadable, type MenuReader } from "../../src/domain/menu";
+import { newDishSession } from "../../src/domain/session";
 import {
   AddressNotFound,
   AmbiguousAddress,
@@ -153,7 +155,7 @@ describe("startPick (F1)", () => {
   });
 });
 
-function api(starter = new FakeStarter()) {
+function api(starter = new FakeStarter(), menus: MenuReader = new FakeMenuReader()) {
   const store = new MemoryStore();
   return {
     api: new Api({
@@ -162,6 +164,7 @@ function api(starter = new FakeStarter()) {
       starter,
       countries: bundledCountries(),
       auth: testAuth(),
+      menus,
     }),
     store,
     starter,
@@ -241,6 +244,7 @@ describe("API (§5)", () => {
         starter: new FakeStarter(),
         countries: bundledCountries(),
         auth: { passwordHash: "unset", sessionSecret: "s", secureCookie: true },
+        menus: new FakeMenuReader(),
       });
       expect(errorOf(await a.handle(post("/login", { password: "x" }), NOW))).toEqual([503, "internal"]);
     });
@@ -312,6 +316,147 @@ describe("API (§5)", () => {
       location: { radius_m: 500, display_name: "Sky Tower, Auckland" },
       restaurants: [],
       race: null,
+    });
+  });
+
+  describe("dish picks (F15)", () => {
+    const dishes = ["Pad Thai", "pad thai", " Green  curry ", "Satay", "Tom yum"];
+
+    it("starts a dish pick from a reviewed list, with no address", async () => {
+      const { api: a, store, starter } = api();
+      const r = await a.handle(post("/picks", { mode: "dish", dishes, restaurant_name: "Siam House" }), NOW);
+      expect(r.status).toBe(202);
+      const id = (r.body as { pick_id: string }).pick_id;
+      expect(starter.started).toEqual([id]);
+      expect((await store.getPick(id))?.request).toEqual({
+        mode: "dish",
+        dishes: ["Pad Thai", "Green curry", "Satay", "Tom yum"],
+        restaurant_name: "Siam House",
+        max_wait_min: 10,
+      });
+      expect((await a.handle(get(`/picks/${id}`), NOW)).body).toMatchObject({
+        mode: "dish",
+        restaurant_name: "Siam House",
+        menu: ["Pad Thai", "Green curry", "Satay", "Tom yum"],
+        location: null,
+        podium: null,
+      });
+    });
+
+    it("refuses fewer than three dishes or a bad wait", async () => {
+      const { api: a } = api();
+      for (const body of [
+        { mode: "dish", dishes: ["Soup", "soup", "Bread"] },
+        { mode: "dish", dishes: ["a", "b", "c"], max_wait_min: 5000 },
+        { mode: "dish" },
+      ]) {
+        expect(errorOf(await a.handle(post("/picks", body), NOW))).toEqual([422, "invalid_request"]);
+      }
+    });
+
+    it("shows each horse's dish and the podium with horse names", async () => {
+      const { api: a } = api();
+      const session = newDishSession("d1", NOW, {
+        mode: "dish",
+        dishes: ["A", "B", "C"],
+        restaurant_name: null,
+      });
+      const card = {
+        entries: [1, 2, 3].map((n) => ({
+          number: n,
+          horse: `Horse ${n}`,
+          country_iso: null,
+          dish: "ABC"[n - 1] ?? null,
+          scratched: false,
+        })),
+      };
+      const race = {
+        id: "r1",
+        meeting_id: "m1",
+        venue: "Ellerslie",
+        venue_country: "NZ",
+        race_number: 1,
+        name: "Test",
+        race_type: "gallops" as const,
+        status: "final" as const,
+        start_time: NOW,
+        runners: [],
+      };
+      const podium = [
+        { place: 1, number: 2, dish: "B", reason: "result" as const },
+        { place: 2, number: 3, dish: "C", reason: "result" as const },
+        { place: 3, number: 1, dish: "A", reason: "drawn" as const },
+      ];
+      const view = await a.pickView({ ...session, race, card, podium, status: "done" }, new MemoryStore());
+      expect(view.race?.runners.map((r) => r.dish)).toEqual(["A", "B", "C"]);
+      expect(view.podium).toEqual([
+        { place: 1, number: 2, horse: "Horse 2", dish: "B", reason: "result" },
+        { place: 2, number: 3, horse: "Horse 3", dish: "C", reason: "result" },
+        { place: 3, number: 1, horse: "Horse 1", dish: "A", reason: "drawn" },
+      ]);
+    });
+  });
+
+  describe("POST /menus/read (F15)", () => {
+    // Only the first bytes matter to the check: each format's signature.
+    const JPEG = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3, 4]).toString("base64");
+    const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).toString("base64");
+
+    it("returns the dishes the reader found, tidied", async () => {
+      const menus = new FakeMenuReader({
+        restaurant_name: "Siam House",
+        dishes: ["Pad Thai", "pad thai", "Satay", "x".repeat(81), "Green curry"],
+      });
+      const r = await api(undefined, menus).api.handle(
+        post("/menus/read", { image: JPEG, media_type: "image/jpeg" }),
+        NOW,
+      );
+      expect(r).toMatchObject({
+        status: 200,
+        body: { restaurant_name: "Siam House", dishes: ["Pad Thai", "Satay", "Green curry"] },
+      });
+      expect(menus.reads).toBe(1);
+    });
+
+    it("refuses what isn't an image of the stated type, without calling the reader", async () => {
+      const menus = new FakeMenuReader();
+      const { api: a } = api(undefined, menus);
+      for (const body of [
+        { image: PNG, media_type: "image/jpeg" },
+        { image: JPEG, media_type: "image/gif" },
+        { image: "not base64!", media_type: "image/jpeg" },
+        { image: "", media_type: "image/jpeg" },
+      ]) {
+        expect(errorOf(await a.handle(post("/menus/read", body), NOW))).toEqual([422, "invalid_request"]);
+      }
+      expect(menus.reads).toBe(0);
+    });
+
+    it("refuses a photo over 4 MB", async () => {
+      const big = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff]), Buffer.alloc(4 * 1024 * 1024)]);
+      const r = await api().api.handle(
+        post("/menus/read", { image: big.toString("base64"), media_type: "image/jpeg" }),
+        NOW,
+      );
+      expect(errorOf(r)).toEqual([422, "invalid_request"]);
+    });
+
+    it("says so when too few dishes can be read", async () => {
+      const menus = new FakeMenuReader({ restaurant_name: null, dishes: ["Coffee", "Tea"] });
+      const r = await api(undefined, menus).api.handle(
+        post("/menus/read", { image: JPEG, media_type: "image/jpeg" }),
+        NOW,
+      );
+      expect(errorOf(r)).toEqual([422, "too_few_dishes"]);
+    });
+
+    it("is 503 when the reader fails", async () => {
+      const menus = new FakeMenuReader(new MenuUnreadable("model down"));
+      const r = await api(undefined, menus).api.handle(
+        post("/menus/read", { image: JPEG, media_type: "image/jpeg" }),
+        NOW,
+      );
+      expect(errorOf(r)).toEqual([503, "menu_unreadable"]);
     });
   });
 

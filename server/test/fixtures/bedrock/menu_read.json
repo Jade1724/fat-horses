@@ -1,0 +1,21 @@
+{
+  "_note": "Synthetic, in the shape of a Messages API reply; replace with a recorded one (TASKS T8.7).",
+  "id": "msg_bdrk_01synthetic",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-haiku-4-5",
+  "content": [
+    {
+      "type": "tool_use",
+      "id": "toolu_bdrk_01synthetic",
+      "name": "record_menu",
+      "input": {
+        "restaurant_name": "Siam House",
+        "dishes": ["Pad Thai", "Green Curry", "Chicken Satay", "Tom Yum Goong"]
+      }
+    }
+  ],
+  "stop_reason": "tool_use",
+  "stop_sequence": null,
+  "usage": { "input_tokens": 1712, "output_tokens": 64 }
+}

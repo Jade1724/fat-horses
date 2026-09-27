@@ -9,10 +9,12 @@ import {
   type SessionProblem,
 } from "../domain/auth";
 import type { Countries, Country } from "../domain/countries";
+import { dishesFromReading, MIN_DISHES } from "../domain/dishes";
+import { MenuUnreadable, type MenuImageType, type MenuReader } from "../domain/menu";
 import { GeocoderUnavailable, type Geocoder } from "../domain/places";
 import { DEFAULT_MIN_POPULATION } from "../domain/pool";
 import { DEFAULT_MAX_WAIT_MIN } from "../domain/race";
-import type { PickSession } from "../domain/session";
+import { isDishPick, type PickSession } from "../domain/session";
 import { InvalidTransition, type Restaurant } from "../domain/status";
 import {
   ConflictError,
@@ -28,9 +30,11 @@ import { log } from "../log";
 import {
   AddressNotFound,
   AmbiguousAddress,
+  dishStartInput,
   InvalidRequest,
   lookupAddress,
   newPickId,
+  startDishPick,
   startInput,
   startPick,
 } from "./start";
@@ -66,6 +70,8 @@ export interface ApiDeps {
   starter: WorkflowStarter;
   countries: Countries;
   auth: AuthConfig;
+  /** Reads dish names from a menu photo (F15). */
+  menus: MenuReader;
 }
 
 /**
@@ -115,7 +121,8 @@ type Route =
   | { kind: "skip"; id: string }
   | { kind: "countries" }
   | { kind: "geocode" }
-  | { kind: "history" };
+  | { kind: "history" }
+  | { kind: "readMenu" };
 
 function route(method: string, rawPath: string): Route | null {
   let path: string;
@@ -136,6 +143,7 @@ function route(method: string, rawPath: string): Route | null {
     if (path === "/login") return { kind: "login" };
     if (path === "/logout") return { kind: "logout" };
     if (path === "/picks") return { kind: "start" };
+    if (path === "/menus/read") return { kind: "readMenu" };
     const c = /^\/picks\/([^/]+)\/cancel$/.exec(path);
     if (c?.[1]) return { kind: "cancel", id: c[1] };
     // Restaurant ids contain '/' (osm:node/1), so match from both ends.
@@ -146,6 +154,31 @@ function route(method: string, rawPath: string): Route | null {
 }
 
 const loginBody = z.object({ password: z.string().min(1) });
+
+/**
+ * A menu photo (F15). The web page shrinks photos to ~300 KB before sending;
+ * 4 MB leaves room while keeping base64 JSON under Lambda's 6 MB payload limit.
+ */
+export const MAX_MENU_IMAGE_BYTES = 4 * 1024 * 1024;
+
+const menuBody = z.object({
+  image: z.string().min(1),
+  media_type: z.enum(["image/jpeg", "image/png", "image/webp"]),
+});
+
+const IMAGE_NAMES: Record<MenuImageType, string> = {
+  "image/jpeg": "JPEG",
+  "image/png": "PNG",
+  "image/webp": "WebP",
+};
+
+/** The file signature each accepted type starts with. */
+const SIGNATURES: Record<MenuImageType, (b: Buffer) => boolean> = {
+  "image/jpeg": (b) => b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff,
+  "image/png": (b) => b.subarray(0, 4).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47])),
+  "image/webp": (b) =>
+    b.subarray(0, 4).toString("latin1") === "RIFF" && b.subarray(8, 12).toString("latin1") === "WEBP",
+};
 
 const visitBody = z.object({
   restaurant: z
@@ -159,6 +192,15 @@ const visitBody = z.object({
     })
     .optional(),
 });
+
+/** `POST /picks` bodies with `mode: "dish"` start a dish pick (F15). */
+function isDishBody(body: string | undefined): boolean {
+  try {
+    return (JSON.parse(body ?? "{}") as { mode?: unknown }).mode === "dish";
+  } catch {
+    return false;
+  }
+}
 
 function parseBody<T>(schema: z.ZodType<T>, body: string | undefined): T | ApiResponse {
   let value: unknown = {};
@@ -216,6 +258,8 @@ export class Api {
           return await this.geocode(req.query.q, now);
         case "history":
           return ok(await this.deps.store.history(req.query.cursor ?? null, HISTORY_PAGE));
+        case "readMenu":
+          return await this.readMenu(req.body);
       }
     } catch (e) {
       return storeError(e);
@@ -223,6 +267,7 @@ export class Api {
   }
 
   private async start(body: string | undefined, now: Iso): Promise<ApiResponse> {
+    if (isDishBody(body)) return await this.startDishes(body, now);
     const input = parseBody(startInput, body);
     if (isResponse(input)) return input;
     let session: PickSession;
@@ -243,6 +288,25 @@ export class Api {
       }
       throw e;
     }
+    return await this.launch(session);
+  }
+
+  /** F15: a dish pick from a reviewed list. */
+  private async startDishes(body: string | undefined, now: Iso): Promise<ApiResponse> {
+    const input = parseBody(dishStartInput, body);
+    if (isResponse(input)) return input;
+    let session: PickSession;
+    try {
+      session = startDishPick(input, newPickId(), now);
+    } catch (e) {
+      if (e instanceof InvalidRequest) return error(422, "invalid_request", e.message);
+      throw e;
+    }
+    return await this.launch(session);
+  }
+
+  /** Store a new pick and start its workflow. */
+  private async launch(session: PickSession): Promise<ApiResponse> {
     await this.deps.store.putPick(session);
     try {
       await this.deps.starter.start(session.pick_id);
@@ -296,6 +360,34 @@ export class Api {
     return { status: 200, body: { ok: true }, setCookie: clearedSessionCookie(this.deps.auth.secureCookie) };
   }
 
+  /**
+   * F15: the dishes on a menu photo, for the people to review. The photo is
+   * checked, passed to the reader and dropped; it is never stored or logged.
+   */
+  private async readMenu(body: string | undefined): Promise<ApiResponse> {
+    const input = parseBody(menuBody, body);
+    if (isResponse(input)) return input;
+    const bytes = /^[A-Za-z0-9+/]+={0,2}$/.test(input.image) ? Buffer.from(input.image, "base64") : null;
+    if (!bytes || bytes.length === 0) return error(422, "invalid_request", "image is not base64");
+    if (bytes.length > MAX_MENU_IMAGE_BYTES) return error(422, "invalid_request", "image is over 4 MB");
+    if (!SIGNATURES[input.media_type](bytes))
+      return error(422, "invalid_request", `That file isn't a ${IMAGE_NAMES[input.media_type]} image.`);
+    let reading;
+    try {
+      reading = await this.deps.menus.read({ media_type: input.media_type, data: input.image });
+    } catch (e) {
+      if (!(e instanceof MenuUnreadable)) throw e;
+      log.warn("menu unreadable", { error: e.message });
+      return error(503, "menu_unreadable", "Couldn't read that menu. Try again, or a clearer photo.");
+    }
+    const dishes = dishesFromReading(reading.dishes);
+    log.info("menu read", { dishes: dishes.length });
+    if (dishes.length < MIN_DISHES) {
+      return error(422, "too_few_dishes", `Found ${dishes.length} dishes; a race needs ${MIN_DISHES}.`);
+    }
+    return ok({ restaurant_name: reading.restaurant_name?.trim() || null, dishes });
+  }
+
   /** F1.2: the distinct places matching an address, so the user can choose one. */
   private async geocode(q: string | undefined, now: Iso): Promise<ApiResponse> {
     const address = q?.trim();
@@ -340,12 +432,18 @@ export class Api {
       });
     }
     const w = s.winner;
+    const horse = (n: number) => s.card?.entries.find((e) => e.number === n)?.horse ?? null;
     return {
       pick_id: s.pick_id,
+      mode: isDishPick(s) ? ("dish" as const) : ("restaurant" as const),
+      restaurant_name: isDishPick(s) ? s.request.restaurant_name : null,
+      /** Dish picks: every dish in the race, including any that sat out, for "Race again". */
+      menu: isDishPick(s) ? s.request.dishes : null,
       status: s.status,
       error: s.error,
       created_at: s.created_at,
-      location: { ...s.location, radius_m: s.request.radius_m },
+      location:
+        s.location && s.request.mode !== "dish" ? { ...s.location, radius_m: s.request.radius_m } : null,
       max_wait_min: s.request.max_wait_min ?? DEFAULT_MAX_WAIT_MIN,
       world_complete: s.world_complete,
       race:
@@ -360,6 +458,7 @@ export class Api {
                 number: e.number,
                 horse: e.horse,
                 country: e.country_iso ? countryView(countries.get(e.country_iso)) : null,
+                dish: e.dish ?? null,
                 scratched: e.scratched,
               })),
             }
@@ -367,12 +466,13 @@ export class Api {
       winner: w
         ? {
             number: w.number,
-            horse: s.card?.entries.find((e) => e.number === w.number)?.horse ?? null,
+            horse: horse(w.number),
             country: countryView(countries.get(w.country_iso)),
             reason: w.reason,
             ...(w.tied.length > 0 ? { tied: w.tied } : {}),
           }
         : null,
+      podium: s.podium ? s.podium.map((p) => ({ ...p, horse: horse(p.number) })) : null,
       restaurants,
       pick: s.pick,
       dishes:

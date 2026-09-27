@@ -129,3 +129,18 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 - [x] **T8.1 Error states in the UI** for every `error` code in §5. (`web/src/format.ts` `errorText`, plus 422 messages on the form.)
 - [ ] **T8.2 Logs (N7) and a CloudWatch alarm** on failed Step Functions executions.
 - [ ] **T8.3 Mobile layout pass** at 360 px (F10.1).
+
+## M9 Dish picks (F15)
+
+Requested by the owner: at a restaurant with friends, photograph the menu and let a race pick the top three dishes to share. No maps API returns menu items, so the photo is the only source; Claude Haiku 4.5 on Bedrock reads it.
+
+- [x] **T9.1 Dish rules (F15.2–F15.4).** `validateDishes`, `assignDishes` (distinct while they last, then repeats), `resolvePodium` sharing the winner's settle check (official, or interim held 10 min), with dead heats, repeats passed over, unplaced spots drawn, abandoned/timeout; races need 3 runners.
+- [x] **T9.2 Dish picks in the workflow.** A dish request and podium on the pick session (`location` null); the same state machine branches inside `start`, `check_result` and `finish`; no places, no PICKED restaurant.
+- [x] **T9.3 API.** `POST /picks` with `mode: "dish"`; `POST /menus/read` (type/size/signature checks, tidied reading, 422/503); the view's `mode`, `restaurant_name`, `menu`, runner `dish`, `podium`.
+- [x] **T9.4 Web.** Restaurant | Dishes switch; photo → shrink in the browser → review list → race → podium; "Race for our dishes" on a picked restaurant; shared race card (`views/race.ts`).
+- [x] **T9.5 Bedrock menu reader and infra.** `BedrockMenuReader` (forced `record_menu` tool call, schema-validated), `menuReaderFromEnv` (`MENU_READER=fake` locally; empty `MENU_MODEL_ID` → "not set up"); Terraform `menu_model_id`, api Lambda 28 s, `bedrock:InvokeModel` only once a model is set; `@anthropic-ai/bedrock-sdk` added, AWS SDK packages aligned to 3.1141.
+- [ ] **T9.6 [human] Bedrock access.** The owner enables Claude Haiku 4.5 in the Bedrock console for the account, picks the model or inference-profile ID callable from `ap-southeast-2` (an Australia or APAC profile), sets `menu_model_id` in `infra/terraform.tfvars`, and runs `make deploy`.
+- [ ] **T9.7 Record a real menu reading.** With T9.6 done, read one real menu photo and save the reply as `server/test/fixtures/bedrock/menu_read.json`, replacing the synthetic one.
+  Needs: T9.6.
+- [ ] **T9.8 [human] Try it on a phone.** Photograph a real menu end to end. (The browser photo shrink, `shrinkPhoto`, has no automated test: jsdom has no canvas.)
+  Needs: T9.6.

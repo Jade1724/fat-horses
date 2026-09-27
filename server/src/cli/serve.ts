@@ -4,6 +4,7 @@
 import { createReadStream, existsSync, statSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { extname, join, normalize } from "node:path";
+import { menuReaderFromEnv } from "../adapters/bedrockMenu";
 import { nominatimFromEnv, Overpass } from "../adapters/osm";
 import { identityFromEnv, TabNz } from "../adapters/tabNz";
 import { Api, type AuthConfig, type WorkflowStarter } from "../app/api";
@@ -105,6 +106,7 @@ export function serve(store: StateStore, port: number, auth: AuthConfig, webDir?
     starter,
     countries: deps.countries,
     auth,
+    menus: menuReaderFromEnv(),
   });
   console.log("Log in with the shared password (POST /api/login).");
   const server = createServer((req, res) => {

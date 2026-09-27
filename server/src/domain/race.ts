@@ -61,9 +61,9 @@ export function activeRunners(race: Race): Runner[] {
   return race.runners.filter((r) => !r.scratched);
 }
 
-/** Enough non-scratched runners to race for a country (F3.3). */
-export function hasEnoughRunners(race: Race): boolean {
-  return activeRunners(race).length >= MIN_RUNNERS;
+/** Enough non-scratched runners (F3.3); a dish pick needs three for its podium (F15). */
+export function hasEnoughRunners(race: Race, min = MIN_RUNNERS): boolean {
+  return activeRunners(race).length >= min;
 }
 
 /**
@@ -81,5 +81,5 @@ export function candidates(races: readonly Race[], now: Iso, maxLeadMs = MAX_LEA
 
 /** The race to use when runners are already known (F3). */
 export function selectRace(races: readonly Race[], now: Iso, maxLeadMs = MAX_LEAD_MS): Race | undefined {
-  return candidates(races, now, maxLeadMs).find(hasEnoughRunners);
+  return candidates(races, now, maxLeadMs).find((r) => hasEnoughRunners(r));
 }

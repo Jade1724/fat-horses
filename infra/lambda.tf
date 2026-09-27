@@ -4,14 +4,16 @@ locals {
   lambdas = {
     api = {
       description = "fat-horses HTTP API"
-      timeout     = 15
-      memory      = 512
+      # Reading a menu photo (F15) takes seconds; API Gateway allows up to 30.
+      timeout = 28
+      memory  = 512
       environment = {
         TABLE_NAME           = aws_dynamodb_table.main.name
         PASSWORD_HASH_PARAM  = aws_ssm_parameter.password_hash.name
         SESSION_SECRET_PARAM = aws_ssm_parameter.session_secret.name
         STATE_MACHINE_ARN    = local.state_machine_arn
         GEOCODE_COUNTRIES    = var.geocode_countries
+        MENU_MODEL_ID        = var.menu_model_id
       }
     }
     workflow = {
@@ -25,6 +27,8 @@ locals {
       }
     }
   }
+  # The model behind a cross-region inference profile ID ("au.anthropic.…" → "anthropic.…").
+  menu_foundation_model = replace(var.menu_model_id, "/^(global|apac|au|us|eu|jp)\\./", "")
   # Known before the state machine exists, so the api Lambda can refer to it.
   state_machine_arn = "arn:aws:states:${var.region}:${data.aws_caller_identity.current.account_id}:stateMachine:${var.name}"
 }
@@ -123,6 +127,19 @@ data "aws_iam_policy_document" "lambda" {
     }
   }
 
+  dynamic "statement" {
+    for_each = each.key == "api" && var.menu_model_id != "" ? [1] : []
+    content {
+      sid     = "ReadMenus"
+      actions = ["bedrock:InvokeModel"]
+      # An inference profile routes to the model in several regions, so the
+      # role needs both the profile and the model it points at.
+      resources = [
+        "arn:aws:bedrock:${var.region}:${data.aws_caller_identity.current.account_id}:inference-profile/${var.menu_model_id}",
+        "arn:aws:bedrock:*::foundation-model/${local.menu_foundation_model}",
+      ]
+    }
+  }
   dynamic "statement" {
     for_each = each.key == "api" ? [1] : []
     content {

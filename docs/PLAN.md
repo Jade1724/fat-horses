@@ -4,6 +4,8 @@
 
 > **Update (2026-09-27):** the LLM (Amazon Bedrock) was dropped. Once the race was limited to countries with a tagged restaurant nearby (`SPEC.md` F2.2), every winner has a match without it. Bedrock mentions below are historical; `SPEC.md` §3 explains.
 
+> **Update (2026-09-27):** Bedrock returned for one narrow job: reading dishes off a menu photo for dish picks (`SPEC.md` F15, §3).
+
 A restaurant picker driven by a real horse race: each horse gets a country, the winning
 horse's country decides the cuisine, and the app picks a nearby restaurant serving it.
 

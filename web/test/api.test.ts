@@ -24,6 +24,22 @@ describe("Api", () => {
     expect(init?.body).toBe(JSON.stringify({ address: "Sky Tower" }));
   });
 
+  it("sends a menu photo to be read (F15)", async () => {
+    const f = fakeFetch(200, { restaurant_name: "Siam House", dishes: ["Pad Thai", "Satay", "Larb"] });
+    const r = await new Api(() => {}, f).readMenu({ media_type: "image/jpeg", data: "AAAA" });
+    expect(r.dishes).toHaveLength(3);
+    expect(f.mock.calls[0]![0]).toBe("/api/menus/read");
+    expect(f.mock.calls[0]![1]?.body).toBe(JSON.stringify({ image: "AAAA", media_type: "image/jpeg" }));
+  });
+
+  it("starts a dish pick from the reviewed list (F15)", async () => {
+    const f = fakeFetch(202, { pick_id: "d1" });
+    const input = { dishes: ["A", "B", "C"], restaurant_name: "Siam House", max_wait_min: 30 };
+    expect(await new Api(() => {}, f).startDishPick(input)).toEqual({ pick_id: "d1" });
+    expect(f.mock.calls[0]![0]).toBe("/api/picks");
+    expect(JSON.parse(String(f.mock.calls[0]![1]?.body))).toEqual({ mode: "dish", ...input });
+  });
+
   it("posts the password to /login", async () => {
     const f = fakeFetch(200, { expires_in: 43200 });
     expect(await new Api(() => {}, f).login("open sesame")).toEqual({ expires_in: 43200 });

@@ -654,3 +654,133 @@ select {
 .watch:focus-visible {
   background: color-mix(in srgb, var(--gold) 15%, var(--surface));
 }
+
+/* Pick tab: Restaurant | Dishes (F15) */
+.mode-switch {
+  display: flex;
+  gap: 0.25rem;
+  padding: 10px 16px 0;
+}
+
+.mode-switch .mode {
+  flex: 1;
+  border-radius: var(--radius);
+}
+
+.mode-switch .mode[aria-pressed="true"] {
+  background: var(--turf);
+  border-color: var(--turf);
+  color: var(--turf-ink);
+  font-weight: 600;
+}
+
+/* Dish picks (F15) */
+.dish-page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 12px 16px 24px;
+}
+
+.dish-page .panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dish-page h2 {
+  margin: 0.5rem 0 0;
+  font-size: 1.15rem;
+}
+
+/* The photo input is a label styled as the primary button; the input itself is hidden. */
+label.button.photo {
+  display: inline-block;
+  text-align: center;
+  background: var(--turf);
+  color: var(--turf-ink);
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.75rem 1.1rem;
+  cursor: pointer;
+}
+
+label.button.photo:focus-within {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+label.button.photo .file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.dish-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.dish-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dish-list input[type="checkbox"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: none;
+}
+
+.dish-list input[type="text"] {
+  flex: 1;
+  min-width: 0;
+}
+
+.dish-page .count {
+  margin: 0;
+  color: var(--muted);
+}
+
+.podium {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.podium li {
+  display: grid;
+  grid-template-columns: 2.25rem 1fr;
+  column-gap: 0.5rem;
+  align-items: baseline;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.8rem;
+}
+
+.podium .medal {
+  grid-row: span 3;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.podium .dish {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.podium .horse,
+.podium .note {
+  grid-column: 2;
+  color: var(--muted);
+  font-size: 0.9rem;
+}

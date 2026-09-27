@@ -21,7 +21,20 @@ export interface Runner {
   number: number;
   horse: string;
   country: Country | null;
+  /** Dish picks (F15): the dish this horse runs for. */
+  dish?: string | null;
   scratched: boolean;
+}
+
+export type PodiumReason = "result" | "dead_heat" | "drawn" | "abandoned" | "timeout";
+
+/** One of a dish pick's top three (F15). */
+export interface PodiumPlace {
+  place: number;
+  number: number;
+  horse: string | null;
+  dish: string;
+  reason: PodiumReason;
 }
 
 export interface Race {
@@ -58,18 +71,44 @@ export interface PickRestaurant {
 
 export interface PickView {
   pick_id: string;
+  /** "dish" for dish picks (F15). */
+  mode: "restaurant" | "dish";
+  /** Dish picks: the restaurant, if named. */
+  restaurant_name: string | null;
+  /** Dish picks: every dish in the race, including any that sat out. */
+  menu: string[] | null;
   status: PickStatus;
   error: PickError | null;
   created_at: string;
-  location: { lat: number; lon: number; display_name: string; radius_m: number };
+  /** null for dish picks, which search nothing. */
+  location: { lat: number; lon: number; display_name: string; radius_m: number } | null;
   /** Races had to start within this many minutes (F3.2). */
   max_wait_min: number;
   world_complete: boolean;
   race: Race | null;
   winner: Winner | null;
+  /** Dish picks: the top three dishes, once the race is decided (F15). */
+  podium: PodiumPlace[] | null;
   restaurants: PickRestaurant[];
   pick: string | null;
   dishes: string[] | null;
+}
+
+/** A menu photo, shrunk and base64-encoded in the browser (F15). */
+export interface MenuImage {
+  media_type: "image/jpeg";
+  data: string;
+}
+
+export interface MenuReading {
+  restaurant_name: string | null;
+  dishes: string[];
+}
+
+export interface StartDishPick {
+  dishes: string[];
+  restaurant_name: string | null;
+  max_wait_min: number;
 }
 
 /** A stored restaurant (`/restaurants/...` responses). */
@@ -196,6 +235,16 @@ export class Api {
   /** End this browser's session. */
   logout(): Promise<{ ok: boolean }> {
     return this.call("POST", "/logout", {});
+  }
+
+  /** F15: the dishes on a menu photo, for review. */
+  readMenu(image: MenuImage): Promise<MenuReading> {
+    return this.call("POST", "/menus/read", { image: image.data, media_type: image.media_type });
+  }
+
+  /** F15: race for the top three of the reviewed dishes. */
+  startDishPick(input: StartDishPick): Promise<{ pick_id: string }> {
+    return this.call("POST", "/picks", { mode: "dish", ...input });
   }
 
   startPick(input: StartPick): Promise<{ pick_id: string }> {

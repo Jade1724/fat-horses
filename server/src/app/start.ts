@@ -1,11 +1,13 @@
-// Starting a pick: validate the request and geocode it (SPEC.md F1).
+// Starting a pick: validate the request and geocode it (SPEC.md F1), or take a
+// reviewed dish list (F15).
 
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
 import { distinctLocations, normaliseAddress, type Geocoder, type Location } from "../domain/places";
 import { DEFAULT_MIN_POPULATION } from "../domain/pool";
 import { DEFAULT_MAX_WAIT_MIN, MAX_WAIT_MIN_RANGE } from "../domain/race";
-import { newSession, type PickSession } from "../domain/session";
+import { InvalidDishes, validateDishes } from "../domain/dishes";
+import { newDishSession, newSession, type PickSession, type RestaurantPick } from "../domain/session";
 import { GEOCODE_TTL_MS, isFresh, type Store } from "../domain/store";
 import type { Iso } from "../domain/time";
 import { log } from "../log";
@@ -28,6 +30,37 @@ export const startInput = z.object({
 });
 export type StartInput = z.infer<typeof startInput>;
 
+/** The body of `POST /picks` for a dish pick (F15): the list the people reviewed. */
+export const dishStartInput = z.object({
+  mode: z.literal("dish"),
+  dishes: z.array(z.string()).max(200),
+  restaurant_name: z.string().max(120).nullish(),
+  max_wait_min: z.number().int().optional(),
+});
+export type DishStartInput = z.infer<typeof dishStartInput>;
+
+function checkMaxWait(maxWait: number): void {
+  const [minWait, maxWaitLimit] = MAX_WAIT_MIN_RANGE;
+  if (maxWait < minWait || maxWait > maxWaitLimit) {
+    throw new InvalidRequest(`max_wait_min must be ${minWait}–${maxWaitLimit}`);
+  }
+}
+
+/** Validate a dish pick (F15); no geocoding, as the people are already at the restaurant. */
+export function startDishPick(input: DishStartInput, pickId: string, now: Iso): PickSession {
+  const maxWait = input.max_wait_min ?? DEFAULT_MAX_WAIT_MIN;
+  checkMaxWait(maxWait);
+  let dishes: string[];
+  try {
+    dishes = validateDishes(input.dishes);
+  } catch (e) {
+    if (e instanceof InvalidDishes) throw new InvalidRequest(e.message);
+    throw e;
+  }
+  const name = input.restaurant_name?.trim() || null;
+  return newDishSession(pickId, now, { mode: "dish", dishes, restaurant_name: name, max_wait_min: maxWait });
+}
+
 export class InvalidRequest extends Error {}
 export class AddressNotFound extends Error {
   constructor() {
@@ -49,16 +82,13 @@ export async function startPick(
   input: StartInput,
   pickId: string,
   now: Iso,
-): Promise<PickSession> {
+): Promise<RestaurantPick> {
   const radius = input.radius_m ?? DEFAULT_RADIUS_M;
   if (radius < RADIUS_MIN || radius > RADIUS_MAX) {
     throw new InvalidRequest(`radius_m must be ${RADIUS_MIN}–${RADIUS_MAX}`);
   }
   const maxWait = input.max_wait_min ?? DEFAULT_MAX_WAIT_MIN;
-  const [minWait, maxWaitLimit] = MAX_WAIT_MIN_RANGE;
-  if (maxWait < minWait || maxWait > maxWaitLimit) {
-    throw new InvalidRequest(`max_wait_min must be ${minWait}–${maxWaitLimit}`);
-  }
+  checkMaxWait(maxWait);
   const address = input.address?.trim() || undefined;
   let location: Location;
   if (address !== undefined && input.lat === undefined && input.lon === undefined) {
@@ -78,17 +108,13 @@ export async function startPick(
   } else {
     throw new InvalidRequest("give exactly one of address or lat+lon");
   }
-  return newSession(
-    pickId,
-    now,
-    {
-      radius_m: radius,
-      min_population: input.min_population ?? DEFAULT_MIN_POPULATION,
-      include_visited: input.include_visited ?? false,
-      max_wait_min: maxWait,
-    },
-    location,
-  );
+  const request = {
+    radius_m: radius,
+    min_population: input.min_population ?? DEFAULT_MIN_POPULATION,
+    include_visited: input.include_visited ?? false,
+    max_wait_min: maxWait,
+  };
+  return { ...newSession(pickId, now, request, location), request, location };
 }
 
 /**

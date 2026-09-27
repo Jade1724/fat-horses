@@ -60,7 +60,7 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 - **F6.3–F6.5** *Dropped:* guessing cuisines for untagged places and matching by dishes with an LLM (§3). Once only countries with a tagged place nearby could run (F2.2), the dish fallback could never trigger, and guesses would only have added variety. Untagged places are never matched.
 - **F6.6** If nothing matches, the pick ends `done` with no restaurant; the UI shows "No match nearby", the country's dishes and "Race again". Since F2.2 this only happens to picks drawn before that rule.
 - **F6.7** The radius is **not** widened automatically in v1.
-- **F6.8** *Dropped with the LLM (§3).*
+- **F6.8** *Dropped with cuisine guessing (§3).*
 
 ### F7. Choosing the restaurant
 - **F7.1** Candidates = the matches (F6.2).
@@ -97,8 +97,9 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 - **F10.5** When done: the winner (horse + country, with a note for dead heat, abandoned or timeout); a pin for every match. Pin colours by status: new, `PICKED`, `VISITED`. The pick is highlighted with a card showing name, cuisine, address and a directions link (`https://www.google.com/maps/dir/?api=1&destination=<lat>,<lon>`).
 - **F10.5a** Options include "Race must start within": 10 minutes (default), 30 minutes, 1 hour, 3 hours (F3.2).
 - **F10.6** Buttons: "We went here", "Skip", "Race again". Clicking a non-picked pin offers "We went here" (F8.2 last row).
-- **F10.7** *Dropped with the LLM (§3).*
+- **F10.7** *Dropped with cuisine guessing (§3).*
 - **F10.8** The current `PICKED` restaurant (if any) is shown on load, so you can mark it visited later.
+- **F10.9** The Pick view has a switch, **Restaurant | Dishes** (remembered per browser). Dishes shows the dish pick (F15) instead of the form and map. A picked restaurant's card also offers **"Race for our dishes"**, which opens Dishes with that restaurant's name filled in.
 
 ### F11. Access
 - **F11.1** One shared password for everyone who uses the app. `POST /api/login` checks it against an **scrypt hash** in SSM (`/fat-horses/password-hash`), re-read at most every 5 minutes, so rotating it applies without a redeploy. Wrong → 401; no password set (or SSM unreadable) → 503. Only the hash is stored: it cannot be reversed or replayed, and nothing is kept on any developer's machine. Locally the password comes from `--password` or `FAT_HORSES_PASSWORD`.
@@ -119,11 +120,25 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 - **F14.2** The consequence: there is no per-user isolation to rely on. Two people picking at the same moment race for the one `PICKED` restaurant, and the later write wins (the store's conditional writes keep it consistent, F13.2, but they don't keep it private).
 - **F14.3** Stores saved under the earlier per-user layout load as the data that was kept for `me`.
 
+### F15. Dish picks
+For when the group is already at a restaurant: a race picks the **top three dishes** to share, since one dish isn't enough for a group.
+- **F15.1 Photo**: the page takes a photo of the menu (camera or file), shrinks it in the browser so its long edge is at most 1568 px, re-encodes it as JPEG and posts it to `POST /api/menus/read`. The server accepts JPEG/PNG/WebP up to 4 MB whose file signature matches the stated type (422 otherwise), has the model read it (§3), and returns the restaurant's name (if shown) and the dishes: tidied (trimmed, repeats removed ignoring case), names over 80 characters dropped, at most 40. Fewer than 3 → 422 `too_few_dishes`; the model failing → 503 `menu_unreadable`. **The photo is never stored or logged.** There is no other menu source: no maps API returns menu items (Google Places only shows menus to the restaurant's owner), and few places have a menu link in OpenStreetMap.
+- **F15.2 Review**: the dishes are listed with a checkbox and an editable name, plus "Add a dish"; everything starts ticked. The race needs at least 3 distinct ticked dishes (at most 40). Options: the restaurant's name, and "Race must start within" (F10.5a).
+- **F15.3 Race**: as F3, but the race needs at least **3** non-scratched runners. Dishes go to the non-scratched horses at random: each horse a different dish while they last (extra dishes sit out), then repeats at random, so every dish runs when there are more horses than dishes.
+- **F15.4 Podium** = the first **three distinct dishes** in finishing order, settled exactly when a winner would be (F5.2: official result, or interim unchanged for 10 min). A horse whose dish is already on the podium is passed over. Tied horses are placed in random order and marked "dead heat". Places the result doesn't fill (repeats, short results) are drawn at random from the other runners' dishes, marked "drawn". Abandoned or no result in 45 min: all three drawn at random, marked so. Scratched horses never place.
+- **F15.5** A dish pick doesn't touch the passport, history or the `PICKED` restaurant. The result offers "Race again (same menu)" and "New menu".
+
 ---
 
-## 3. No LLM
+## 3. LLM: reading menu photos only
 
-Matching uses OpenStreetMap cuisine tags only (F6.2). An earlier version of this spec planned Amazon Bedrock for two jobs — guessing the cuisine of untagged places and matching places by a country's dishes — but neither was built past a fake, and limiting the race to countries with a tagged place nearby (F2.2) removed the need: every winner already has somewhere to eat. The app makes no model calls and needs no Bedrock access. More countries qualify by mapping more OSM tags to them in `data/countries.json`, not by guessing.
+The app uses one model call, for one job: reading the dishes off a menu photo (F15.1). Restaurant matching uses OpenStreetMap cuisine tags only (F6.2); an earlier plan to guess cuisines and match dishes with an LLM was dropped once only countries with a tagged place nearby could run (F2.2).
+
+- **L1 Scope:** transcribe the dishes on the photo and the restaurant's name. The model never chooses dishes; the race does (F15.4).
+- **L2 Input:** only the photo the people took. Never their location, history or session.
+- **L3 Model:** Claude Haiku 4.5 on Amazon Bedrock, via its standard InvokeModel endpoint, named by `MENU_MODEL_ID` (a model or inference-profile ID; Terraform variable `menu_model_id`). Empty → `POST /menus/read` answers 503 "menu reading isn't set up", and the rest of the app works.
+- **L4 Output:** a forced `record_menu` tool call, `{restaurant_name: string|null, dishes: string[]}`, validated with a schema; a refusal, a cut-off answer or anything malformed → 503 `menu_unreadable`. Then tidied as in F15.1.
+- **L5 Limits:** one call per photo; 12 s timeout, one retry, `max_tokens` 4000; the api Lambda allows 28 s. Each call logs its token counts, never the photo.
 
 ---
 
@@ -176,6 +191,8 @@ All paths are under `/api`; JSON in and out; errors are `{"error": "<code>", "me
 | Method | Path | Request | Response |
 |---|---|---|---|
 | POST | `/picks` | `{address?, lat?, lon?, label?, radius_m?, min_population?, include_visited?, max_wait_min?}` (exactly one of address or lat+lon; `label` names the place for lat+lon) | 202 `{pick_id}`; 422 `address_not_found` / `invalid_request`; 409 `ambiguous_address` with `matches` |
+| POST | `/picks` (dish pick) | `{mode: "dish", dishes, restaurant_name?, max_wait_min?}` (F15.2) | 202 `{pick_id}`; 422 `invalid_request` |
+| POST | `/menus/read` | `{image: <base64>, media_type: "image/jpeg"\|"image/png"\|"image/webp"}` (F15.1) | 200 `{restaurant_name, dishes}`; 422 `invalid_request` / `too_few_dishes`; 503 `menu_unreadable` |
 | POST | `/picks/{id}/cancel` | – | 200 pick view (F12); 404 |
 | GET | `/geocode` | `?q=<address>` | 200 `{matches: [{lat, lon, display_name}]}` (0–5, best first); 422 without `q` |
 | GET | `/picks/{id}` | – | 200 pick view (below); 404 |
@@ -187,14 +204,16 @@ All paths are under `/api`; JSON in and out; errors are `{"error": "<code>", "me
 
 Pick view:
 ```
-{ pick_id, status, error?, created_at, location: {lat, lon, display_name, radius_m},
+{ pick_id, mode: "restaurant"|"dish", restaurant_name?, menu?, status, error?, created_at,
+  location: {lat, lon, display_name, radius_m} | null,
   world_complete, race?: {venue, race_number, name, start_time, url,
-     runners: [{number, horse, country: {iso2, name, flag}, scratched}]},
+     runners: [{number, horse, country: {iso2, name, flag}, dish?, scratched}]},
+  podium?: [{place, number, horse, dish, reason: "result"|"dead_heat"|"drawn"|"abandoned"|"timeout"}],
   winner?: {number, horse, country, reason: "result"|"dead_heat"|"abandoned"|"timeout", tied?: [...]},
   restaurants: [{id, name, lat, lon, address, cuisine, match, reason?, status, visit_count}],
   pick?: <restaurant id>, dishes?: [...] }
 ```
-`status` ∈ `finding_race`, `waiting_start`, `running`, `resolving`, `searching`, `done`, `failed`, `cancelled`. The view also carries `max_wait_min`. `error` (when `failed`) ∈ `no_upcoming_race`, `race_source_unavailable`, `places_unavailable`, `no_matching_places`, `internal`.
+Dish picks (F15) have `mode: "dish"`, `location: null`, `menu` (every dish in the race), each runner's `dish` and, once decided, `podium`; they have no winner or restaurants. `status` ∈ `finding_race`, `waiting_start`, `running`, `resolving`, `searching`, `done`, `failed`, `cancelled`. The view also carries `max_wait_min`. `error` (when `failed`) ∈ `no_upcoming_race`, `race_source_unavailable`, `places_unavailable`, `no_matching_places`, `internal`.
 
 ---
 
@@ -208,14 +227,16 @@ Pick workflow (AWS Step Functions Standard; each task invokes the `workflow` Lam
 4. `Match` (F6.2) → status `searching`
 5. `PickRestaurant` (F7, F8) → status `done`
 
+A dish pick (F15) runs the same states: `Start` finds a race with at least 3 runners and deals out the dishes (no places); `CheckResult` settles the podium instead of a winner; `Finish` only marks it `done`.
+
 Each step's output has `failed` (true for failed or cancelled picks) and `cancelled`; the state machine stops when `failed` is true. Any unhandled step error → status `failed` with the error code. Step retries: 2 with backoff for network errors.
 
 Infrastructure (Terraform in `infra/`, S3 state backend with native lock file):
 - CloudFront: `/` → private S3 site bucket (OAC); `/api/*` → API Gateway HTTP API → `api` Lambda.
-- `api` Lambda environment includes `GEOCODE_COUNTRIES` (default `nz`, F1.2).
-- Lambdas: TypeScript on the managed **Node.js 22** runtime (`nodejs22.x`), arm64, one esbuild bundle per handler (`make build-lambdas`); the AWS SDK v3 comes from the runtime. Chosen over Rust on the OS-only runtime because a managed runtime is easier to operate.
+- `api` Lambda environment includes `GEOCODE_COUNTRIES` (default `nz`, F1.2) and `MENU_MODEL_ID` (§3). Its timeout is 28 s, to leave room for reading a menu photo; API Gateway allows 30 s.
+- Lambdas: TypeScript on the managed **Node.js 22** runtime (`nodejs22.x`), arm64, one esbuild bundle per handler (`make build-lambdas`); the AWS SDK v3 clients the code uses come from the runtime, while the Bedrock SDK's own AWS dependencies are bundled, as it needs a newer SDK than the runtime's. Chosen over Rust on the OS-only runtime because a managed runtime is easier to operate.
 - Step Functions state machine, DynamoDB table (§4.2), and the two SSM SecureStrings `/fat-horses/password-hash` and `/fat-horses/session-secret` (F11). The Step Functions input is `{pick_id}`, passed to each `workflow` step.
-- IAM: least privilege per Lambda; the `api` Lambda may `states:StartExecution` and `states:StopExecution` on the pick state machine only.
+- IAM: least privilege per Lambda; the `api` Lambda may `states:StartExecution` and `states:StopExecution` on the pick state machine only, and `bedrock:InvokeModel` on the menu model (its inference profile and the model behind it) only once `menu_model_id` is set.
 - AWS Budgets alarm (default USD 10/month) emailing the owner.
 - Region: **`ap-southeast-2`** (default).
 
@@ -255,7 +276,7 @@ infra/                  Terraform
 
 ## 9. Out of scope (v1)
 
-Betting or TAB login; user accounts (sign-up, per-person logins, roles); per-person data — everyone who logs in shares one view (F14); ratings, notes or reviews; ranking by rating, price or opening hours; web search; automatic radius widening; native apps; an LLM "what to order" line.
+Betting or TAB login; user accounts (sign-up, per-person logins, roles); per-person data — everyone who logs in shares one view (F14); ratings, notes or reviews; ranking by rating, price or opening hours; web search; automatic radius widening; native apps; menus from links or third-party APIs (F15.1); an LLM choosing or recommending dishes (§3).
 
 ## 10. Defaults chosen for PLAN's open questions (confirm or change)
 

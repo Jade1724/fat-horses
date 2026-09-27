@@ -12,6 +12,7 @@ import { addMs, ms, MINUTE, type Iso } from "../../src/domain/time";
 import { executionArn } from "../../src/lambda/env";
 import { MemoryStore } from "../../src/store/state";
 import { Api, type ApiRequest, type WorkflowStarter } from "../../src/app/api";
+import { FakeMenuReader } from "../../src/domain/menu";
 import { defaultConfig, runPick, runStep, systemClock, type Clock, type Deps } from "../../src/app/workflow";
 import { sessionCookie, testAuth } from "../auth";
 
@@ -205,7 +206,14 @@ describe("cancel API (F12)", () => {
   function setup() {
     const store = new MemoryStore();
     const starter = new Starter();
-    const api = new Api({ geocoder, store, starter, countries: bundledCountries(), auth: testAuth() });
+    const api = new Api({
+      geocoder,
+      store,
+      starter,
+      countries: bundledCountries(),
+      auth: testAuth(),
+      menus: new FakeMenuReader(),
+    });
     return { store, starter, api };
   }
 

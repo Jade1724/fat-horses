@@ -5,8 +5,10 @@ import { Api, ApiError } from "./api";
 import { clear, h } from "./dom";
 import { PickMap } from "./map";
 import { createMap } from "./mapView";
+import { storage } from "./storage";
 import { historyPage } from "./views/history";
 import { passportPage } from "./views/passport";
+import { DishPage } from "./views/dishes";
 import { PickPage } from "./views/pick";
 
 type Route = "pick" | "passport" | "history";
@@ -76,9 +78,35 @@ function boot(): void {
 
   const mapEl = h("div", { class: "map", role: "region", "aria-label": "Map" });
   const map = createMap(mapEl, (el) => new PickMap(el));
-  const pick = new PickPage(api, map, mapEl);
+  // The Pick tab picks a restaurant, or dishes from a menu (F15).
+  let mode = storage.mode();
+  const dishes = new DishPage(api);
+  const setMode = (m: "restaurant" | "dish") => {
+    mode = m;
+    storage.setMode(m);
+    show();
+  };
+  const pick = new PickPage(api, map, mapEl, (restaurantName) => {
+    dishes.forRestaurant(restaurantName);
+    setMode("dish");
+  });
   const other = h("div", { class: "page" });
   void pick.start();
+  void dishes.start();
+
+  const modeSwitch = () => {
+    const button = (m: "restaurant" | "dish", label: string) => {
+      const b = h("button", { type: "button", class: "mode", "aria-pressed": String(mode === m) }, label);
+      b.addEventListener("click", () => setMode(m));
+      return b;
+    };
+    return h(
+      "div",
+      { class: "mode-switch", role: "group", "aria-label": "What to pick" },
+      button("restaurant", "🗺 Restaurant"),
+      button("dish", "🍽 Dishes"),
+    );
+  };
 
   const show = () => {
     const route = currentRoute();
@@ -88,8 +116,8 @@ function boot(): void {
     }
     clear(main);
     if (route === "pick") {
-      main.append(pick.root);
-      map.resize();
+      main.append(modeSwitch(), mode === "dish" ? dishes.root : pick.root);
+      if (mode === "restaurant") map.resize();
     } else {
       main.append(other);
       void (route === "passport" ? passportPage(api, other) : historyPage(api, other));

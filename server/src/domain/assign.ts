@@ -8,12 +8,14 @@ import { choose, shuffle, type Rng } from "./rng";
 export interface CardEntry {
   number: number;
   horse: string;
-  /** null only for runners already scratched at assignment time. */
+  /** null for runners already scratched at assignment time, and in dish picks. */
   country_iso: string | null;
+  /** Dish picks only (F15): the runner's dish; null if scratched at assignment. */
+  dish?: string | null;
   scratched: boolean;
 }
 
-/** The saved assignment of countries to runners (F4.3). Never re-drawn. */
+/** The saved assignment of countries (or dishes, F15) to runners (F4.3). Never re-drawn. */
 export interface RaceCard {
   entries: CardEntry[];
 }

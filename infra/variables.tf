@@ -33,6 +33,12 @@ variable "tab_from" {
   default     = ""
 }
 
+variable "menu_model_id" {
+  description = "Bedrock model or inference profile ID that reads menu photos (F15), e.g. an Australia or APAC inference profile for Claude Haiku 4.5. Empty until Bedrock access is enabled; dish picks then say menu reading isn't set up."
+  type        = string
+  default     = ""
+}
+
 variable "lambda_dist" {
   description = "Directory with the bundled Lambda handlers (make build-lambdas)."
   type        = string

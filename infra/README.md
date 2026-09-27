@@ -44,6 +44,17 @@ back to the ambient `AWS_PROFILE`, so prefix those with
 
    Everyone who logs in shares one view of picks, passport and history (F14):
    that is the point, not an oversight.
+7. Menu photos for dish picks (F15), optional: in the Bedrock console
+   (ap-southeast-2), enable access to **Claude Haiku 4.5**, then note the ID of
+   an inference profile you can call from Sydney (an Australia or APAC one) and
+   set it in `infra/terraform.tfvars`:
+
+   ```
+   menu_model_id = "<the inference profile ID>"
+   ```
+
+   Then `make deploy`. Until it's set, everything else works and dish picks
+   say menu reading isn't set up. Each photo costs well under US$0.01.
 
 ## Rotating the password
 
