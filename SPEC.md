@@ -49,7 +49,7 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 - **F4.4** A runner scratched after assignment is shown as scratched; its country can't win.
 
 ### F5. Result and winner
-- **F5.1** Polling starts at the scheduled start time, every **60 s**.
+- **F5.1** Polling starts at the scheduled start time, every **10 s**, so a result is picked up within 10 s of TAB publishing it. Each check is one Lambda call and three Step Functions transitions; a pick that runs to the 45-min timeout costs about 810 transitions (Step Functions' free tier is 4,000 a month).
 - **F5.2** Winner = the runner placed 1st in the **official** result. If only an interim result exists, accept it once it has been unchanged for **10 min**.
 - **F5.3** Dead heat for 1st: choose one of the tied runners uniformly at random. The session records `dead_heat = true` and all tied runners.
 - **F5.4** Race abandoned, or no result **45 min** after the scheduled start: choose uniformly at random among the non-scratched assigned countries; `winner.reason = "abandoned"` or `"timeout"`.
@@ -220,7 +220,7 @@ Pick workflow (AWS Step Functions Standard; each task invokes the `workflow` Lam
 1. `Start`: Overpass places (F6.1) and the countries they allow (F2.2) → `FindRace` (F3) → `AssignCountries` (F2, F4) → status `waiting_start`
 2. `PrepareNearby`: guesses for untagged places (F6.3), stored on the session
 3. `Wait` until the scheduled start → status `running`
-4. Loop: `CheckResult` (F5) → `Wait 60 s` until a winner is decided or the 45-min timeout → status `resolving`
+4. Loop: `CheckResult` (F5) → `Wait 10 s` until a winner is decided or the 45-min timeout → status `resolving`
 5. `Match`: tiers 1–2 (F6.2–F6.4) → if empty, `FallbackMatch` (F6.5) → status `searching`
 6. `PickRestaurant` (F7, F8) → status `done`
 

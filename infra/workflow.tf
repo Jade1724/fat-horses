@@ -1,5 +1,5 @@
 # The pick workflow (SPEC.md §6): start → prepare_nearby → wait for the start →
-# check_result every 60 s until decided → finish. A task that keeps failing
+# check_result every 10 s until decided → finish. A task that keeps failing
 # goes to `fail`, which marks the pick failed. Cancelling a pick stops the
 # execution (F12). Every task keeps the input {pick_id} and puts the
 # step's output under $.out.
@@ -54,7 +54,7 @@ locals {
         ]
         Default = "Poll"
       }
-      Poll   = { Type = "Wait", Seconds = 60, Next = "CheckResult" }
+      Poll   = { Type = "Wait", Seconds = 10, Next = "CheckResult" } # = POLL_INTERVAL_MS
       Finish = merge(local.task["finish"], { Next = "Done", Catch = local.catch })
       Fail   = merge(local.task["fail"], { Next = "Done", Retry = local.retry })
       Done   = { Type = "Succeed" }

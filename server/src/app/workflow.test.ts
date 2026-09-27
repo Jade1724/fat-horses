@@ -209,6 +209,24 @@ describe("runPick", () => {
     expect(s.pick).not.toBeNull();
   });
 
+  it("checks for the result every 10 s (F5.1)", async () => {
+    // Open when the race is found; then no result at the start, +10 s and
+    // +20 s, and the result at +30 s.
+    const d = deps({
+      updates: [
+        update("open"),
+        update("closed"),
+        update("closed"),
+        update("closed"),
+        update("final", [[1, 1]]),
+      ],
+    });
+    const clock = new FakeClock();
+    const s = await runPick(d, session(), clock, seeded(7));
+    expect(s.winner?.reason).toBe("result");
+    expect(clock.now()).toBe(addMs(at(8), 30_000));
+  });
+
   it("no result times out", async () => {
     const { s } = await run(deps({ updates: [update("open"), update("closed")] }));
     expect(s.winner?.reason).toBe("timeout");

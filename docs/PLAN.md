@@ -53,7 +53,7 @@ CloudFront ── /        → S3 (static site, private, OAC)
                                                   ▼
                               Step Functions (Standard) "pick workflow"
                                  FindRace → AssignCountries → WaitUntilStart
-                                 → loop { Wait 60s → CheckResult } (timeout)
+                                 → loop { Wait 10s → CheckResult } (timeout)
                                  → ResolveWinner → FindRestaurants
                                  → [none] FallbackSearch → PickRestaurant
                                  each step = Rust Lambda; state saved in DynamoDB

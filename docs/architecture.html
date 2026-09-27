@@ -103,13 +103,15 @@
   .legend li { display: flex; align-items: center; gap: 8px; }
   .legend svg { width: 34px; height: 10px; flex: none; }
 
-  /* Diagram vocabulary, shared by all three figures. */
+  /* Diagram vocabulary, shared by every figure. */
   .dg .zone { fill: var(--zone); stroke: var(--rule); }
   .dg .zlabel { font: 500 11px var(--mono); fill: var(--muted); letter-spacing: 0.04em; }
   .dg .box { fill: var(--surface); stroke: var(--ink); stroke-width: 1.2; }
   .dg .box.ext { fill: none; stroke: var(--muted); }
   .dg .box.wait { fill: var(--zone); stroke: var(--muted); }
   .dg .box.plan { fill: none; stroke: var(--planned); stroke-dasharray: 5 4; }
+  .dg .box.gate { stroke: var(--amber); stroke-width: 2.2; }
+  .dg .note { font: 11px var(--mono); fill: var(--amber); }
   .dg .t { font: 700 14px var(--display); font-stretch: 85%; fill: var(--ink); }
   .dg .s { font: 12px var(--body); fill: var(--muted); }
   .dg .plan-t { fill: var(--planned); }
@@ -177,9 +179,9 @@
 
 <div class="page">
   <header>
-    <span class="eyebrow">fat-horses · main @ 3a73e9d · ap-southeast-2</span>
+    <span class="eyebrow">fat-horses · main @ 66840ae · ap-southeast-2</span>
     <h1>How Fat Horses runs</h1>
-    <p class="lede">A horse race picks the country; the app finds a restaurant from it. These are the moving parts on AWS, the path a pick takes through them, and how logging in works.</p>
+    <p class="lede">The restaurants near you decide which countries run; a horse race picks one of them. These are the moving parts on AWS, the path a pick takes through them, who gets a horse, and how logging in works.</p>
   </header>
 
   <section aria-labelledby="sys">
@@ -318,7 +320,7 @@
     <h2 id="pick">A pick, start to finish</h2>
     <figure>
       <div class="canvas">
-        <svg class="dg" viewBox="0 0 1080 300" role="img" aria-label="The pick state machine: Start loads nearby restaurants, finds a race and draws countries only from cuisines found nearby, PrepareNearby guesses cuisines for untagged places, WaitForStart waits until post time, CheckResult polls for the result every 60 seconds until a winner is decided, then Finish matches restaurants and marks one PICKED. A step that keeps failing goes to Fail, which marks the pick failed.">
+        <svg class="dg" viewBox="0 0 1080 300" role="img" aria-label="The pick state machine: Start loads nearby restaurants, finds a race and draws countries only from cuisines found nearby, PrepareNearby guesses cuisines for untagged places, WaitForStart waits until post time, CheckResult polls for the result every 10 seconds until a winner is decided, then Finish matches restaurants and marks one PICKED. A step that keeps failing goes to Fail, which marks the pick failed.">
           <defs>
             <marker id="p-wf" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto"><path class="ah wf" d="M0,0 L10,5 L0,10 z"/></marker>
             <marker id="p-quiet" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" orient="auto"><path class="ah quiet" d="M0,0 L10,5 L0,10 z"/></marker>
@@ -361,7 +363,7 @@
 
           <rect class="box wait" x="615" y="16" width="100" height="44" rx="6"/>
           <text class="t" x="665" y="36" text-anchor="middle">Poll</text>
-          <text class="s" x="665" y="52" text-anchor="middle">wait 60 s</text>
+          <text class="s" x="665" y="52" text-anchor="middle">wait 10 s</text>
 
           <rect class="box" x="780" y="110" width="150" height="56" rx="6"/>
           <text class="t" x="855" y="134" text-anchor="middle">Finish</text>
@@ -376,6 +378,65 @@
         </svg>
       </div>
       <figcaption>Start looks up the restaurants <em>before</em> the race, and only countries with a tagged restaurant nearby get a horse, so whichever wins, there is somewhere to eat. White boxes each invoke the workflow Lambda once. Tinted ones run nothing: WaitForStart and Poll are Step Functions waits, so a pick can sit up to three hours before post time at no compute cost. After any step, a pick that has failed or been cancelled skips straight to Done.</figcaption>
+    </figure>
+  </section>
+
+  <section aria-labelledby="who">
+    <h2 id="who">Who gets a horse</h2>
+    <figure>
+      <div class="canvas">
+        <svg class="dg" viewBox="0 0 1050 262" role="img" aria-label="Inside the Start step: nearby places are loaded first, 247 within 500 metres; 177 carry a cuisine tag; those tags match 17 of 95 countries; only then is a race found on TAB, and the card is drawn from those 17 countries. If the lookup fails, no country matches, or no race is starting, the pick fails at once without waiting for a race.">
+          <defs>
+            <marker id="w-wf" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto"><path class="ah wf" d="M0,0 L10,5 L0,10 z"/></marker>
+            <marker id="w-quiet" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" orient="auto"><path class="ah quiet" d="M0,0 L10,5 L0,10 z"/></marker>
+          </defs>
+
+          <!-- main line, in the order the step runs -->
+          <path class="edge wf" d="M160,72 H224" marker-end="url(#w-wf)"/>
+          <text class="lbl on-surface wf" x="195" y="62" text-anchor="middle">tags only</text>
+          <path class="edge wf" d="M380,72 H444" marker-end="url(#w-wf)"/>
+          <text class="lbl on-surface wf" x="415" y="62" text-anchor="middle">match tag</text>
+          <path class="edge wf" d="M600,72 H664" marker-end="url(#w-wf)"/>
+          <text class="lbl on-surface wf" x="635" y="62" text-anchor="middle">≥ 1 found</text>
+          <path class="edge wf" d="M820,72 H884" marker-end="url(#w-wf)"/>
+          <text class="lbl on-surface wf" x="855" y="62" text-anchor="middle">open race</text>
+
+          <!-- early exits: all before any waiting -->
+          <path class="edge quiet" d="M85,104 V218 H224" marker-end="url(#w-quiet)"/>
+          <text class="lbl on-surface" x="93" y="160">places_unavailable</text>
+          <path class="edge quiet" d="M500,104 V184" marker-end="url(#w-quiet)"/>
+          <text class="lbl on-surface" x="508" y="160">no_matching_places</text>
+          <path class="edge quiet" d="M745,104 V218 H536" marker-end="url(#w-quiet)"/>
+          <text class="lbl on-surface" x="753" y="160">no_upcoming_race</text>
+
+          <!-- boxes -->
+          <rect class="box" x="10" y="40" width="150" height="64" rx="6"/>
+          <text class="t" x="85" y="67" text-anchor="middle">Nearby places</text>
+          <text class="s" x="85" y="86" text-anchor="middle">247 within 500 m</text>
+
+          <rect class="box" x="230" y="40" width="150" height="64" rx="6"/>
+          <text class="t" x="305" y="67" text-anchor="middle">With a cuisine tag</text>
+          <text class="s" x="305" y="86" text-anchor="middle">177 of 247</text>
+
+          <text class="note" x="525" y="28" text-anchor="middle">Algeria: nothing tagged algerian → no horse</text>
+          <rect class="box gate" x="450" y="40" width="150" height="64" rx="6"/>
+          <text class="t" x="525" y="67" text-anchor="middle">Countries matched</text>
+          <text class="s" x="525" y="86" text-anchor="middle">17 of 95</text>
+
+          <rect class="box" x="670" y="40" width="150" height="64" rx="6"/>
+          <text class="t" x="745" y="67" text-anchor="middle">Find a race</text>
+          <text class="s" x="745" y="86" text-anchor="middle">TAB · next gallops</text>
+
+          <rect class="box" x="890" y="40" width="150" height="64" rx="6"/>
+          <text class="t" x="965" y="67" text-anchor="middle">Draw the card</text>
+          <text class="s" x="965" y="86" text-anchor="middle">only those 17</text>
+
+          <rect class="box wait" x="230" y="190" width="300" height="56" rx="6"/>
+          <text class="t" x="380" y="214" text-anchor="middle">Pick fails at once</text>
+          <text class="s" x="380" y="233" text-anchor="middle">before any race is waited on</text>
+        </svg>
+      </div>
+      <figcaption>This is the inside of the Start step. The restaurants come first and decide the field: at the address of the first real pick (500 m radius), 17 of the 95 countries had a restaurant tagged with their cuisine, so only they can run. With more horses than countries, some run twice; a country you can't eat at never does. Every way the step can fail happens before the race, so nobody waits for a pick that was never going to work.</figcaption>
     </figure>
   </section>
 
@@ -465,6 +526,7 @@
           <dt>server/src/lambda/api.ts</dt><dd>api Lambda entry; loads secrets</dd>
           <dt>server/src/app/api.ts</dt><dd>routes, login, every endpoint</dd>
           <dt>server/src/app/workflow.ts</dt><dd>what each pick step does</dd>
+          <dt>server/src/domain/matching.ts</dt><dd>which countries may run; restaurant matches</dd>
           <dt>server/src/adapters/</dt><dd>TAB NZ, Nominatim, Overpass</dd>
           <dt>web/src/</dt><dd>the page: login, map, passport</dd>
         </dl>

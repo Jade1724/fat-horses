@@ -90,6 +90,8 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 
 - [x] **T4.12 Only countries with a restaurant nearby run (F2.2, F6.1).** Found by the owner in the first real pick: Algeria won and nothing within 500 m was tagged `algerian`, which with Bedrock not yet wired is the usual outcome — about 90 countries race, and only a handful of cuisines are tagged near any one address. Now the places load first and only countries with a tagged match nearby get a horse (repeating countries if there are more horses than cuisines); a pick with nothing matchable fails at once with `no_matching_places` instead of after a race. Guesses still run during the wait, adding restaurants for countries already drawn.
 
+- [x] **T4.13 Check for the result every 10 s (F5.1).** Requested by the owner: with 60 s, a result could sit up to a minute before the pick moved on. `POLL_INTERVAL_MS` and the state machine's `Poll` wait both 10 s; tested by the time a result published 30 s after the start is seen.
+
 ## M5 Web UI (`web/`)
 
 - [x] **T5.1 Scaffold.** Vite + TypeScript + ESLint + Vitest. Extend `make check` with `web` typecheck, lint and test. `make check` runs `npm ci` first rather than skipping the web checks when `web/node_modules` is missing.

@@ -25,12 +25,13 @@ import type { Rng } from "../domain/rng";
 import { failed, isFinished, type PickSession } from "../domain/session";
 import type { Restaurant } from "../domain/status";
 import { NotFoundError, PickCancelled, recordPick, type Store } from "../domain/store";
-import { addMs, ms, MINUTE, type Iso } from "../domain/time";
+import { addMs, ms, MINUTE, SECOND, type Iso } from "../domain/time";
 import { resolve, type ResultSnapshot } from "../domain/winner";
 import { log } from "../log";
 
 /** Poll interval for results (F5.1). */
-export const POLL_INTERVAL_MS = MINUTE;
+// Keep in step with the Poll state's Seconds in infra/workflow.tf.
+export const POLL_INTERVAL_MS = 10 * SECOND;
 
 export interface Config {
   amenities: string[];
