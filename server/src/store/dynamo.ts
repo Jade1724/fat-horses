@@ -22,13 +22,11 @@ import type { LogEntry, Restaurant } from "../domain/status";
 import {
   ConflictError,
   GEOCODE_TTL_MS,
-  GUESS_TTL_MS,
   logKey,
   pickedAfter,
   PICK_TTL_MS,
   PickCancelled,
   StoreUnavailable,
-  type CachedGuess,
   type CachedLocation,
   type Change,
   type CountryVisits,
@@ -261,19 +259,6 @@ export class DynamoStore implements Store {
       if (e instanceof ConditionalCheckFailedException) throw new PickCancelled(s.pick_id);
       throw new StoreUnavailable(String(e));
     }
-  }
-
-  getGuess(placeId: string, promptVersion: number) {
-    return this.getData<CachedGuess>(`PLACE#${placeId}`, `GUESS#v${promptVersion}`);
-  }
-
-  putGuess(g: CachedGuess) {
-    return this.putData(
-      `PLACE#${g.guess.place_id}`,
-      `GUESS#v${g.prompt_version}`,
-      g,
-      ttl(g.created_at, GUESS_TTL_MS),
-    );
   }
 
   getGeocode(key: string) {

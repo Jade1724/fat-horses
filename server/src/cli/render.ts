@@ -47,7 +47,6 @@ export function summary(s: PickSession, countries: Countries): string {
     return out.join("\n") + "\n";
   }
   if (!s.winner) return out.join("\n");
-  if (s.llm_unavailable) out.push("⚠️  Cuisine guessing unavailable, showing tagged places only");
   if (s.matches.length === 0) {
     out.push("No match nearby.");
     const c = countries.get(s.winner.country_iso);

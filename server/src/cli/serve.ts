@@ -8,7 +8,6 @@ import { nominatimFromEnv, Overpass } from "../adapters/osm";
 import { identityFromEnv, TabNz } from "../adapters/tabNz";
 import { Api, type AuthConfig, type WorkflowStarter } from "../app/api";
 import { defaultConfig, runPick, systemClock, type Deps } from "../app/workflow";
-import { FakeClassifier } from "../domain/classify";
 import { bundledCountries } from "../domain/countries";
 import { systemRng } from "../domain/rng";
 import type { PickSession } from "../domain/session";
@@ -93,7 +92,6 @@ export function serve(store: StateStore, port: number, auth: AuthConfig, webDir?
   const deps: Omit<Deps, "store"> = {
     races: new TabNz(identityFromEnv()),
     places: new Overpass(),
-    classifier: new FakeClassifier(),
     countries: bundledCountries(),
     config: defaultConfig(),
   };

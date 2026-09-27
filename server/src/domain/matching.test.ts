@@ -1,30 +1,13 @@
-// Places (F6.1), classifier validation (§3), matching (F6.2–F6.4), pick (F7),
-// status (F8), cached guessing (L5–L6).
+// Places (F6.1), matching by cuisine tag (F6.2), who may run (F2.2), pick (F7),
+// status (F8).
 
 import { describe, expect, it } from "vitest";
-import {
-  FakeClassifier,
-  MAX_REASON_CHARS,
-  ClassifierError,
-  placeInput,
-  validateDishMatches,
-  validateGuesses,
-  type Guess,
-} from "./classify";
 import type { Country } from "./countries";
-import { guessUntagged, inputHash, type GuessConfig } from "./guessing";
-import {
-  chooseRestaurant,
-  countriesWithTaggedPlaces,
-  inferredMatches,
-  primaryMatches,
-  taggedMatches,
-  type Match,
-} from "./matching";
+import { chooseRestaurant, countriesWithTaggedPlaces, taggedMatches, type Match } from "./matching";
 import { distanceM, normaliseAddress, osmId, parseCuisine, type Place } from "./places";
 import { seeded } from "./rng";
 import { applyEvent, InvalidTransition, type Restaurant, type Status } from "./status";
-import { isFresh, logKey, pickedAfter, GEOCODE_TTL_MS, type CachedGuess, type Store } from "./store";
+import { isFresh, logKey, pickedAfter, GEOCODE_TTL_MS } from "./store";
 import { addMs, DAY } from "./time";
 
 const NOW = "2026-09-21T10:00:00.000Z";
@@ -38,7 +21,6 @@ export function place(id: string, cuisine: string, distance = 100): Place {
     address: null,
     amenity: "restaurant",
     cuisine: parseCuisine(cuisine),
-    tags: {},
     distance_m: distance,
   };
 }
@@ -52,17 +34,12 @@ const japan: Country = {
   dishes: ["sushi", "ramen", "tempura"],
 };
 
-const guess = (id: string, tags: [string, number][]): Guess => ({
-  place_id: id,
-  cuisines: tags.map(([tag, confidence]) => ({ tag, confidence })),
-  reason: `reason for ${id}`,
-});
-
 describe("places", () => {
   it("parses cuisine values", () => {
     expect(parseCuisine("Japanese; sushi")).toEqual(["japanese", "sushi"]);
     expect(parseCuisine(" ramen ;;UDON; ")).toEqual(["ramen", "udon"]);
     expect(parseCuisine("South African")).toEqual(["south_african"]);
+    expect(parseCuisine("Tex-Mex;italian-pizza")).toEqual(["tex_mex", "italian_pizza"]);
     expect(parseCuisine("thai;Thai; thai")).toEqual(["thai"]);
     expect(parseCuisine(" ; ")).toEqual([]);
   });
@@ -75,99 +52,8 @@ describe("places", () => {
   });
 });
 
-describe("classifier output validation (L4)", () => {
-  const ids = new Set(["osm:node/1", "osm:node/2"]);
-  const tags = new Set(["japanese", "sushi", "italian"]);
-
-  it("keeps valid guesses and drops unknown places", () => {
-    const g = validateGuesses(
-      JSON.stringify({
-        guesses: [
-          {
-            place_id: "osm:node/1",
-            cuisines: [{ tag: "japanese", confidence: 0.9 }],
-            reason: "Sakura Sushi",
-          },
-          { place_id: "osm:node/99", cuisines: [], reason: "x" },
-        ],
-      }),
-      ids,
-      tags,
-    );
-    expect(g).toEqual([
-      { place_id: "osm:node/1", cuisines: [{ tag: "japanese", confidence: 0.9 }], reason: "Sakura Sushi" },
-    ]);
-  });
-
-  it("drops unknown tags and bad confidence, keeps one guess per place", () => {
-    const g = validateGuesses(
-      JSON.stringify({
-        guesses: [
-          {
-            place_id: "osm:node/1",
-            cuisines: [
-              { tag: "Japanese", confidence: 0.8 },
-              { tag: "martian", confidence: 0.9 },
-              { tag: "sushi", confidence: 1.5 },
-              { tag: "italian", confidence: -0.1 },
-            ],
-            reason: "first",
-          },
-          { place_id: "osm:node/1", cuisines: [], reason: "second" },
-        ],
-      }),
-      ids,
-      tags,
-    );
-    expect(g).toEqual([
-      { place_id: "osm:node/1", cuisines: [{ tag: "japanese", confidence: 0.8 }], reason: "first" },
-    ]);
-  });
-
-  it("clamps long reasons", () => {
-    const g = validateGuesses(
-      JSON.stringify({ guesses: [{ place_id: "osm:node/1", cuisines: [], reason: "x".repeat(300) }] }),
-      ids,
-      tags,
-    );
-    expect([...g[0]!.reason]).toHaveLength(MAX_REASON_CHARS);
-    expect(g[0]!.reason.endsWith("…")).toBe(true);
-  });
-
-  it.each(["", "not json", '{"guesses":"no"}', '{"other":[]}'])("rejects %j", (bad) => {
-    expect(() => validateGuesses(bad, ids, tags)).toThrow(ClassifierError);
-  });
-
-  it("validates dish matches", () => {
-    const m = validateDishMatches(
-      JSON.stringify({
-        matches: [
-          { place_id: "osm:node/2", reason: "Serves raclette" },
-          { place_id: "osm:node/2", reason: "dup" },
-          { place_id: "osm:node/7", reason: "unknown" },
-        ],
-      }),
-      ids,
-    );
-    expect(m).toEqual([{ place_id: "osm:node/2", reason: "Serves raclette" }]);
-    expect(() => validateDishMatches("[]", ids)).toThrow(ClassifierError);
-  });
-
-  it("FakeClassifier returns configured answers", async () => {
-    const fake = new FakeClassifier()
-      .withGuess(guess("osm:node/1", []))
-      .withDishMatch("Switzerland", "osm:node/2", "fondue")
-      .withDishMatch("Switzerland", "osm:node/3", "not asked");
-    const inputs = [place("osm:node/1", ""), place("osm:node/2", "")].map(placeInput);
-    expect(await fake.guessCuisines(inputs)).toHaveLength(1);
-    expect(await fake.matchDishes(inputs, { name: "Switzerland", dishes: ["fondue"] })).toHaveLength(1);
-    expect(fake.guessedPlaces).toEqual(["osm:node/1", "osm:node/2"]);
-    await expect(FakeClassifier.failing().guessCuisines(inputs)).rejects.toThrow(ClassifierError);
-  });
-});
-
-describe("matching (F6.2–F6.4)", () => {
-  it("tier 1 matches any cuisine value", () => {
+describe("matching by cuisine tag (F6.2)", () => {
+  it("matches any cuisine value", () => {
     const ms = taggedMatches(
       [
         place("osm:node/1", "Japanese; sushi"),
@@ -179,41 +65,6 @@ describe("matching (F6.2–F6.4)", () => {
     );
     expect(ms.map((m) => m.place_id)).toEqual(["osm:node/1", "osm:way/2"]);
     expect(ms.every((m) => m.match === "tagged" && m.reason === null)).toBe(true);
-  });
-
-  it("tier 2 needs the threshold and an untagged place", () => {
-    const places = [
-      place("osm:node/1", ""),
-      place("osm:node/2", ""),
-      place("osm:node/3", ""),
-      place("osm:node/4", "italian"),
-    ];
-    const guesses = [
-      guess("osm:node/1", [["japanese", 0.7]]),
-      guess("osm:node/2", [["japanese", 0.69]]),
-      guess("osm:node/3", [
-        ["italian", 0.95],
-        ["sushi", 0.8],
-      ]),
-      guess("osm:node/4", [["japanese", 0.99]]),
-    ];
-    const ms = inferredMatches(places, guesses, japan, 0.7);
-    expect(ms.map((m) => m.place_id)).toEqual(["osm:node/1", "osm:node/3"]);
-    expect(ms[0]).toEqual({ place_id: "osm:node/1", match: "inferred", reason: "reason for osm:node/1" });
-    expect(inferredMatches([place("osm:node/9", "")], [], japan, 0.7)).toEqual([]);
-  });
-
-  it("primary is tagged then inferred", () => {
-    const ms = primaryMatches(
-      [place("osm:node/1", ""), place("osm:node/2", "sushi")],
-      [guess("osm:node/1", [["ramen", 0.9]])],
-      japan,
-      0.7,
-    );
-    expect(ms.map((m) => [m.place_id, m.match])).toEqual([
-      ["osm:node/2", "tagged"],
-      ["osm:node/1", "inferred"],
-    ]);
   });
 });
 
@@ -229,7 +80,7 @@ describe("countries that can enter the race (F2.2)", () => {
     ]);
   });
 
-  it("ignores untagged places: a guess can't put a country in the race", () => {
+  it("ignores untagged places", () => {
     expect(countriesWithTaggedPlaces([japan, italy], [place("osm:node/1", "")])).toEqual([]);
   });
 
@@ -239,29 +90,26 @@ describe("countries that can enter the race (F2.2)", () => {
 });
 
 describe("choosing the restaurant (F7)", () => {
-  const m = (id: string, match: Match["match"] = "tagged"): Match => ({ place_id: id, match, reason: null });
-  const picks = (primary: Match[], fallback: Match[], visited: string[]) =>
+  const m = (id: string): Match => ({ place_id: id, match: "tagged", reason: null });
+  const picks = (matches: Match[], visited: string[]) =>
     new Set(
       Array.from(
         { length: 100 },
-        (_, s) =>
-          chooseRestaurant(primary, fallback, (id) => (visited.includes(id) ? 1 : 0), seeded(s))?.place_id,
+        (_, s) => chooseRestaurant(matches, (id) => (visited.includes(id) ? 1 : 0), seeded(s))?.place_id,
       ),
     );
 
-  it("chooses among all primary matches", () => {
-    expect(picks([m("a"), m("b", "inferred")], [], [])).toEqual(new Set(["a", "b"]));
+  it("chooses among all matches", () => {
+    expect(picks([m("a"), m("b")], [])).toEqual(new Set(["a", "b"]));
   });
 
   it("prefers never-visited, else all", () => {
-    expect(picks([m("a"), m("b"), m("c")], [], ["a", "b"])).toEqual(new Set(["c"]));
-    expect(picks([m("a"), m("b")], [], ["a", "b"])).toEqual(new Set(["a", "b"]));
+    expect(picks([m("a"), m("b"), m("c")], ["a", "b"])).toEqual(new Set(["c"]));
+    expect(picks([m("a"), m("b")], ["a", "b"])).toEqual(new Set(["a", "b"]));
   });
 
-  it("uses fallback only without primary matches", () => {
-    expect(picks([m("a")], [m("f", "fallback")], ["a"])).toEqual(new Set(["a"]));
-    expect(picks([], [m("f", "fallback")], [])).toEqual(new Set(["f"]));
-    expect(chooseRestaurant([], [], () => 0, seeded(0))).toBeUndefined();
+  it("is undefined without matches", () => {
+    expect(chooseRestaurant([], () => 0, seeded(0))).toBeUndefined();
   });
 });
 
@@ -364,83 +212,5 @@ describe("store helpers", () => {
   it("log key format", () => {
     const t = applyEvent(restaurant(), { kind: "visit" }, NOW);
     expect(logKey(t.log)).toBe("2026-09-21T10:00:00.000000Z#osm:node/1#visited");
-  });
-});
-
-describe("cached guessing (L5, L6)", () => {
-  const config = (v = 1): GuessConfig => ({ prompt_version: v, model_id: "fake" });
-  function cache(): Pick<Store, "getGuess" | "putGuess"> {
-    const m = new Map<string, CachedGuess>();
-    return {
-      getGuess: async (id, v) => m.get(`${id}#${v}`) ?? null,
-      putGuess: async (g) => void m.set(`${g.guess.place_id}#${g.prompt_version}`, g),
-    };
-  }
-
-  it("asks only about untagged places", async () => {
-    const fake = new FakeClassifier().withGuess(guess("osm:node/1", [["japanese", 0.9]]));
-    const out = await guessUntagged(
-      [place("osm:node/1", ""), place("osm:node/2", "thai")],
-      fake,
-      cache(),
-      config(),
-      NOW,
-    );
-    expect(out.guesses.map((g) => g.place_id)).toEqual(["osm:node/1"]);
-    expect(fake.guessedPlaces).toEqual(["osm:node/1"]);
-    expect(out.llm_unavailable).toBe(false);
-  });
-
-  it("reuses cached guesses until the place, prompt or age changes", async () => {
-    const places = [place("osm:node/1", "")];
-    const fake = new FakeClassifier().withGuess(guess("osm:node/1", [["japanese", 0.9]]));
-    const c = cache();
-    await guessUntagged(places, fake, c, config(), NOW);
-    await guessUntagged(places, fake, c, config(), NOW);
-    expect(fake.guessCalls).toBe(1);
-    places[0]!.name = "Renamed";
-    await guessUntagged(places, fake, c, config(), NOW);
-    expect(fake.guessCalls).toBe(2);
-    await guessUntagged(places, fake, c, config(2), NOW);
-    expect(fake.guessCalls).toBe(3);
-    await guessUntagged(places, fake, c, config(2), addMs(NOW, 181 * DAY));
-    expect(fake.guessCalls).toBe(4);
-  });
-
-  it("caches skipped places as empty guesses", async () => {
-    const fake = new FakeClassifier();
-    const c = cache();
-    const out = await guessUntagged([place("osm:node/1", "")], fake, c, config(), NOW);
-    expect(out.guesses[0]!.cuisines).toEqual([]);
-    await guessUntagged([place("osm:node/1", "")], fake, c, config(), NOW);
-    expect(fake.guessCalls).toBe(1);
-  });
-
-  it("batches of 50, at most 200 closest", async () => {
-    const places = Array.from({ length: 230 }, (_, i) => place(`osm:node/${i}`, "", i));
-    const fake = new FakeClassifier();
-    const out = await guessUntagged(places, fake, cache(), config(), NOW);
-    expect(fake.guessCalls).toBe(4);
-    expect(out.guesses).toHaveLength(200);
-    expect(fake.guessedPlaces).toContain("osm:node/199");
-    expect(fake.guessedPlaces).not.toContain("osm:node/200");
-  });
-
-  it("failure marks llm_unavailable", async () => {
-    const out = await guessUntagged(
-      [place("osm:node/1", "")],
-      FakeClassifier.failing(),
-      cache(),
-      config(),
-      NOW,
-    );
-    expect(out).toEqual({ guesses: [], llm_unavailable: true });
-  });
-
-  it("hash depends on name and tags", () => {
-    const p = placeInput(place("osm:node/1", ""));
-    expect(inputHash(p)).toBe(inputHash({ ...p }));
-    expect(inputHash(p)).not.toBe(inputHash({ ...p, tags: { website: "x" } }));
-    expect(inputHash(p)).toHaveLength(64);
   });
 });

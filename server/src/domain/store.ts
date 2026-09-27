@@ -1,13 +1,11 @@
 // Storage interfaces (SPEC.md §4.2) and the visit operations built on them (F8).
 
-import type { Guess } from "./classify";
 import type { Location } from "./places";
 import { isFinished, type PickSession } from "./session";
 import { applyEvent, type Event, type LogEntry, type Restaurant, type Transition } from "./status";
 import { DAY, ms, type Iso } from "./time";
 
 export const GEOCODE_TTL_MS = 30 * DAY;
-export const GUESS_TTL_MS = 180 * DAY;
 export const PICK_TTL_MS = 30 * DAY;
 export const HISTORY_PAGE = 50;
 
@@ -51,15 +49,6 @@ export interface HistoryPage {
   next_cursor: string | null;
 }
 
-export interface CachedGuess {
-  guess: Guess;
-  prompt_version: number;
-  /** SHA-256 of the place's name and sorted tags (L6). */
-  input_hash: string;
-  model_id: string;
-  created_at: Iso;
-}
-
 /** Geocoder matches for one address (F1.3). */
 export interface CachedLocation {
   results: Location[];
@@ -84,9 +73,6 @@ export interface Store {
   getPick(pickId: string): Promise<PickSession | null>;
   /** Throws PickCancelled if the stored pick is cancelled and `session` isn't (F12.2). */
   putPick(session: PickSession): Promise<void>;
-
-  getGuess(placeId: string, promptVersion: number): Promise<CachedGuess | null>;
-  putGuess(guess: CachedGuess): Promise<void>;
 
   /** `key` is `normaliseAddress` of the address. */
   getGeocode(key: string): Promise<CachedLocation | null>;

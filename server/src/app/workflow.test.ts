@@ -1,7 +1,6 @@
 // Whole-pick scenarios with fakes, one step at a time too (SPEC.md §6).
 
 import { describe, expect, it } from "vitest";
-import { FakeClassifier, type Guess } from "../domain/classify";
 import { Countries, type Country } from "../domain/countries";
 import { parseCuisine, PlacesUnavailable, type Place, type Places } from "../domain/places";
 import type { Race, RaceProvider, RaceStatus, RaceUpdate } from "../domain/race";
@@ -14,8 +13,8 @@ import { MemoryStore } from "../store/state";
 import {
   defaultConfig,
   ensurePlaces,
-  fallbackMatch,
   matchRestaurants,
+  pickRestaurant,
   runPick,
   runStep,
   type Clock,
@@ -94,7 +93,6 @@ const place = (id: string, name: string, cuisine: string): Place => ({
   address: null,
   amenity: "restaurant",
   cuisine: parseCuisine(cuisine),
-  tags: {},
   distance_m: 50,
 });
 
@@ -137,7 +135,6 @@ function deps(over: Partial<Deps> & { updates?: RaceUpdate[]; schedule?: Race[] 
   return {
     races: new FakeRaces(over.schedule ?? [race("open")], over.updates ?? []),
     places: over.places ?? new FakePlaces(onePerCountry()),
-    classifier: over.classifier ?? new FakeClassifier(),
     store: over.store ?? new MemoryStore(),
     countries,
     config: defaultConfig(),
@@ -149,12 +146,6 @@ async function run(d: Deps) {
   const s = await runPick(d, session(), new FakeClock(), seeded(7), (x) => statuses.push(x.status));
   return { s, statuses };
 }
-
-const guess = (id: string, tag: string): Guess => ({
-  place_id: id,
-  cuisines: [{ tag, confidence: 0.9 }],
-  reason: `${tag} name`,
-});
 
 describe("runPick", () => {
   it("normal pick", async () => {
@@ -270,33 +261,15 @@ describe("runPick", () => {
     expect((d.races as FakeRaces).scheduleCalls).toBe(0);
   });
 
-  it("LLM failure still finishes", async () => {
-    const { s } = await run(
-      deps({
-        updates: openThen(update("final", [[1, 1]])),
-        places: new FakePlaces([
-          place("osm:node/1", "Sakura", "sushi"),
-          place("osm:node/9", "Mystery Kitchen", ""),
-        ]),
-        classifier: FakeClassifier.failing(),
-      }),
-    );
-    expect(s.status).toBe("done");
-    expect(s.llm_unavailable).toBe(true);
-    expect(s.pick).toBe("osm:node/1");
-  });
-
-  it("an inferred match joins the winner's tagged ones", async () => {
+  it("untagged places are never candidates, only tagged ones", async () => {
     const { s } = await run(
       deps({
         updates: openThen(update("final", [[1, 1]])),
         places: new FakePlaces([place("osm:node/1", "Sakura", "sushi"), place("osm:node/2", "Kaiten", "")]),
-        classifier: new FakeClassifier().withGuess(guess("osm:node/2", "japanese")),
       }),
     );
-    expect(s.guesses).toHaveLength(1);
-    expect(s.matches.map((m) => m.match).sort()).toEqual(["inferred", "tagged"]);
-    expect(s.pick).not.toBeNull();
+    expect(s.matches).toEqual([{ place_id: "osm:node/1", match: "tagged", reason: null }]);
+    expect(s.pick).toBe("osm:node/1");
   });
 
   it("no race fails", async () => {
@@ -345,16 +318,16 @@ describe("picks drawn before countries were limited to nearby ones", () => {
     places_loaded: loaded,
   });
 
-  it("falls back to dishes when there is no primary match", async () => {
-    let fake = new FakeClassifier();
-    for (const n of ["Japan", "Italy", "Mexico"])
-      fake = fake.withDishMatch(n, "osm:node/9", "has the dishes");
-    const d = deps({ classifier: fake });
-    const s = await fallbackMatch(
+  it("a winner with nothing tagged nearby ends done with no restaurant (F6.6)", async () => {
+    const d = deps();
+    const s = await pickRestaurant(
       d,
       matchRestaurants(d, legacy([place("osm:node/9", "Corner Bistro", "")], true)),
+      T0,
+      seeded(1),
     );
-    expect(s.matches).toEqual([{ place_id: "osm:node/9", match: "fallback", reason: "has the dishes" }]);
+    expect(s).toMatchObject({ status: "done", matches: [], pick: null });
+    expect(await d.store.currentlyPicked()).toBeNull();
   });
 
   it("loads missing places after the race, and fails if it can't", async () => {

@@ -12,7 +12,6 @@
     --rule: #c9d3cb;
     --green: #1d6a47;
     --amber: #a2660f;
-    --planned: #86938b;
     --display: "Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
     --body: "Source Sans 3", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
@@ -28,7 +27,6 @@
       --rule: #34403a;
       --green: #62c294;
       --amber: #e2a54c;
-      --planned: #6f7c74;
     }
   }
   :root[data-theme="dark"] {
@@ -41,7 +39,6 @@
     --rule: #34403a;
     --green: #62c294;
     --amber: #e2a54c;
-    --planned: #6f7c74;
   }
 
   body {
@@ -109,22 +106,18 @@
   .dg .box { fill: var(--surface); stroke: var(--ink); stroke-width: 1.2; }
   .dg .box.ext { fill: none; stroke: var(--muted); }
   .dg .box.wait { fill: var(--zone); stroke: var(--muted); }
-  .dg .box.plan { fill: none; stroke: var(--planned); stroke-dasharray: 5 4; }
   .dg .box.gate { stroke: var(--amber); stroke-width: 2.2; }
   .dg .note { font: 11px var(--mono); fill: var(--amber); }
   .dg .t { font: 700 14px var(--display); font-stretch: 85%; fill: var(--ink); }
   .dg .s { font: 12px var(--body); fill: var(--muted); }
-  .dg .plan-t { fill: var(--planned); }
   .dg .edge { fill: none; stroke: var(--ink); stroke-width: 1.4; }
   .dg .edge.req { stroke: var(--green); stroke-width: 2; }
   .dg .edge.wf { stroke: var(--amber); stroke-width: 2; }
-  .dg .edge.plan { stroke: var(--planned); stroke-dasharray: 5 4; }
   .dg .edge.quiet { stroke: var(--muted); }
   .dg .life { stroke: var(--rule); stroke-width: 1.2; }
   .dg .ah { fill: var(--ink); }
   .dg .ah.req { fill: var(--green); }
   .dg .ah.wf { fill: var(--amber); }
-  .dg .ah.plan { fill: var(--planned); }
   .dg .ah.quiet { fill: var(--muted); }
   .dg .lbl {
     font: 11px var(--mono);
@@ -179,7 +172,7 @@
 
 <div class="page">
   <header>
-    <span class="eyebrow">fat-horses · main @ 66840ae · ap-southeast-2</span>
+    <span class="eyebrow">fat-horses · main · ap-southeast-2 · no LLM</span>
     <h1>How Fat Horses runs</h1>
     <p class="lede">The restaurants near you decide which countries run; a horse race picks one of them. These are the moving parts on AWS, the path a pick takes through them, who gets a horse, and how logging in works.</p>
   </header>
@@ -188,15 +181,14 @@
     <h2 id="sys">The system</h2>
     <figure>
       <div class="canvas">
-        <svg class="dg" viewBox="0 0 1290 620" role="img" aria-label="The browser reaches everything through one CloudFront address: static files come from S3, and /api/* goes through API Gateway to the api Lambda, which reads DynamoDB and SSM, geocodes with Nominatim and starts the Step Functions pick workflow. The workflow invokes the workflow Lambda once per step, which calls the TAB NZ API and Overpass and saves the pick to DynamoDB. Failed executions raise a CloudWatch alarm that emails through SNS.">
+        <svg class="dg" viewBox="0 0 1290 580" role="img" aria-label="The browser reaches everything through one CloudFront address: static files come from S3, and /api/* goes through API Gateway to the api Lambda, which reads DynamoDB and SSM, geocodes with Nominatim and starts the Step Functions pick workflow. The workflow invokes the workflow Lambda once per step, which calls the TAB NZ API and Overpass and saves the pick to DynamoDB. Failed executions raise a CloudWatch alarm that emails through SNS.">
           <defs>
             <marker id="s-ink" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" orient="auto"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
             <marker id="s-req" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto"><path class="ah req" d="M0,0 L10,5 L0,10 z"/></marker>
             <marker id="s-wf" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto"><path class="ah wf" d="M0,0 L10,5 L0,10 z"/></marker>
-            <marker id="s-plan" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" orient="auto"><path class="ah plan" d="M0,0 L10,5 L0,10 z"/></marker>
           </defs>
 
-          <rect class="zone" x="200" y="36" width="880" height="570" rx="10"/>
+          <rect class="zone" x="200" y="36" width="880" height="520" rx="10"/>
           <text class="zlabel" x="216" y="60">AWS · ap-southeast-2</text>
           <text class="zlabel" x="1120" y="150">PUBLIC APIS</text>
 
@@ -229,8 +221,6 @@
           <text class="lbl on-surface wf" x="1090" y="430" text-anchor="middle">races</text>
           <path class="edge wf" d="M1020,484 V532 H1114" marker-end="url(#s-wf)"/>
           <text class="lbl wf" x="1068" y="523" text-anchor="middle">places</text>
-          <path class="edge plan" d="M930,484 V558 H826" marker-end="url(#s-plan)"/>
-          <text class="lbl" x="878" y="549" text-anchor="middle">cuisines</text>
 
           <!-- alerts and map tiles -->
           <path class="edge quiet" d="M670,452 H606" marker-end="url(#s-ink)"/>
@@ -289,9 +279,6 @@
           <text class="t" x="305" y="447" text-anchor="middle">SNS topic</text>
           <text class="s" x="305" y="466" text-anchor="middle">emails the owner</text>
 
-          <rect class="box plan" x="670" y="530" width="150" height="56" rx="6"/>
-          <text class="t plan-t" x="745" y="554" text-anchor="middle">Bedrock</text>
-          <text class="s" x="745" y="572" text-anchor="middle">not wired yet · T3.9</text>
 
           <rect class="box ext" x="1120" y="168" width="150" height="64" rx="6"/>
           <text class="t" x="1195" y="195" text-anchor="middle">Nominatim</text>
@@ -310,7 +297,6 @@
         <li><svg class="dg" viewBox="0 0 34 10" aria-hidden="true"><line class="edge req" x1="0" y1="5" x2="34" y2="5"/></svg>request from the browser</li>
         <li><svg class="dg" viewBox="0 0 34 10" aria-hidden="true"><line class="edge wf" x1="0" y1="5" x2="34" y2="5"/></svg>pick workflow, running on its own</li>
         <li><svg class="dg" viewBox="0 0 34 10" aria-hidden="true"><line class="edge" x1="0" y1="5" x2="34" y2="5"/></svg>reads and calls</li>
-        <li><svg class="dg" viewBox="0 0 34 10" aria-hidden="true"><line class="edge plan" x1="0" y1="5" x2="34" y2="5"/></svg>planned, not built</li>
       </ul>
       <figcaption>The API only <em>starts</em> a pick and answers questions about it; the slow part — waiting for a real race to run — belongs to Step Functions, so no request stays open for it. Site and API sit behind one CloudFront address, which is what lets the login session be an HttpOnly cookie.</figcaption>
     </figure>
@@ -320,7 +306,7 @@
     <h2 id="pick">A pick, start to finish</h2>
     <figure>
       <div class="canvas">
-        <svg class="dg" viewBox="0 0 1080 300" role="img" aria-label="The pick state machine: Start loads nearby restaurants, finds a race and draws countries only from cuisines found nearby, PrepareNearby guesses cuisines for untagged places, WaitForStart waits until post time, CheckResult polls for the result every 10 seconds until a winner is decided, then Finish matches restaurants and marks one PICKED. A step that keeps failing goes to Fail, which marks the pick failed.">
+        <svg class="dg" viewBox="0 0 890 300" role="img" aria-label="The pick state machine: Start loads nearby restaurants, finds a race and draws countries only from cuisines found nearby, WaitForStart waits until post time, CheckResult polls for the result every 10 seconds until a winner is decided, then Finish matches restaurants by cuisine tag and marks one PICKED. A step that keeps failing goes to Fail, which marks the pick failed.">
           <defs>
             <marker id="p-wf" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto"><path class="ah wf" d="M0,0 L10,5 L0,10 z"/></marker>
             <marker id="p-quiet" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" orient="auto"><path class="ah quiet" d="M0,0 L10,5 L0,10 z"/></marker>
@@ -330,51 +316,46 @@
           <path class="edge wf" d="M170,138 H204" marker-end="url(#p-wf)"/>
           <path class="edge wf" d="M360,138 H394" marker-end="url(#p-wf)"/>
           <path class="edge wf" d="M550,138 H584" marker-end="url(#p-wf)"/>
+          <text class="lbl on-surface wf" x="567" y="128" text-anchor="middle">won</text>
           <path class="edge wf" d="M740,138 H774" marker-end="url(#p-wf)"/>
-          <text class="lbl on-surface wf" x="757" y="128" text-anchor="middle">won</text>
-          <path class="edge wf" d="M930,138 H964" marker-end="url(#p-wf)"/>
 
           <!-- poll loop -->
-          <path class="edge wf" d="M635,110 V66" marker-end="url(#p-wf)"/>
-          <text class="lbl on-surface wf" x="627" y="92" text-anchor="end">no result yet</text>
-          <path class="edge wf" d="M695,60 V104" marker-end="url(#p-wf)"/>
+          <path class="edge wf" d="M445,110 V66" marker-end="url(#p-wf)"/>
+          <text class="lbl on-surface wf" x="437" y="92" text-anchor="end">no result yet</text>
+          <path class="edge wf" d="M505,60 V104" marker-end="url(#p-wf)"/>
 
           <!-- failure bus -->
-          <path class="edge quiet" d="M95,166 V196 M285,166 V196 M665,166 V196 M855,166 V196 M95,196 H855 M475,196 V214" marker-end="url(#p-quiet)"/>
-          <text class="lbl on-surface" x="104" y="214">a step still failing after retries</text>
-          <path class="edge quiet" d="M550,248 H1015 V172" marker-end="url(#p-quiet)"/>
+          <path class="edge quiet" d="M95,166 V196 M475,166 V196 M665,166 V196 M95,196 H665 M285,196 V214" marker-end="url(#p-quiet)"/>
+          <text class="lbl on-surface" x="372" y="214">a step still failing after retries</text>
+          <path class="edge quiet" d="M360,248 H825 V172" marker-end="url(#p-quiet)"/>
 
           <!-- states -->
           <rect class="box" x="20" y="110" width="150" height="56" rx="6"/>
           <text class="t" x="95" y="134" text-anchor="middle">Start</text>
           <text class="s" x="95" y="153" text-anchor="middle">places · race · draw</text>
 
-          <rect class="box" x="210" y="110" width="150" height="56" rx="6"/>
-          <text class="t" x="285" y="134" text-anchor="middle">PrepareNearby</text>
-          <text class="s" x="285" y="153" text-anchor="middle">guess cuisines</text>
+          <rect class="box wait" x="210" y="110" width="150" height="56" rx="6"/>
+          <text class="t" x="285" y="134" text-anchor="middle">WaitForStart</text>
+          <text class="s" x="285" y="153" text-anchor="middle">until post time</text>
 
-          <rect class="box wait" x="400" y="110" width="150" height="56" rx="6"/>
-          <text class="t" x="475" y="134" text-anchor="middle">WaitForStart</text>
-          <text class="s" x="475" y="153" text-anchor="middle">until post time</text>
+          <rect class="box" x="400" y="110" width="150" height="56" rx="6"/>
+          <text class="t" x="475" y="134" text-anchor="middle">CheckResult</text>
+          <text class="s" x="475" y="153" text-anchor="middle">ask TAB once</text>
+
+          <rect class="box wait" x="425" y="16" width="100" height="44" rx="6"/>
+          <text class="t" x="475" y="36" text-anchor="middle">Poll</text>
+          <text class="s" x="475" y="52" text-anchor="middle">wait 10 s</text>
 
           <rect class="box" x="590" y="110" width="150" height="56" rx="6"/>
-          <text class="t" x="665" y="134" text-anchor="middle">CheckResult</text>
-          <text class="s" x="665" y="153" text-anchor="middle">ask TAB once</text>
+          <text class="t" x="665" y="134" text-anchor="middle">Finish</text>
+          <text class="s" x="665" y="153" text-anchor="middle">match tag · PICKED</text>
 
-          <rect class="box wait" x="615" y="16" width="100" height="44" rx="6"/>
-          <text class="t" x="665" y="36" text-anchor="middle">Poll</text>
-          <text class="s" x="665" y="52" text-anchor="middle">wait 10 s</text>
+          <rect class="box wait" x="780" y="110" width="90" height="56" rx="6"/>
+          <text class="t" x="825" y="143" text-anchor="middle">Done</text>
 
-          <rect class="box" x="780" y="110" width="150" height="56" rx="6"/>
-          <text class="t" x="855" y="134" text-anchor="middle">Finish</text>
-          <text class="s" x="855" y="153" text-anchor="middle">match · mark PICKED</text>
-
-          <rect class="box wait" x="970" y="110" width="90" height="56" rx="6"/>
-          <text class="t" x="1015" y="143" text-anchor="middle">Done</text>
-
-          <rect class="box" x="400" y="220" width="150" height="56" rx="6"/>
-          <text class="t" x="475" y="244" text-anchor="middle">Fail</text>
-          <text class="s" x="475" y="263" text-anchor="middle">mark pick failed</text>
+          <rect class="box" x="210" y="220" width="150" height="56" rx="6"/>
+          <text class="t" x="285" y="244" text-anchor="middle">Fail</text>
+          <text class="s" x="285" y="263" text-anchor="middle">mark pick failed</text>
         </svg>
       </div>
       <figcaption>Start looks up the restaurants <em>before</em> the race, and only countries with a tagged restaurant nearby get a horse, so whichever wins, there is somewhere to eat. White boxes each invoke the workflow Lambda once. Tinted ones run nothing: WaitForStart and Poll are Step Functions waits, so a pick can sit up to three hours before post time at no compute cost. After any step, a pick that has failed or been cancelled skips straight to Done.</figcaption>

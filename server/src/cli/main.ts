@@ -13,7 +13,6 @@ import {
   startPick,
 } from "../app/start";
 import { defaultConfig, runPick, systemClock } from "../app/workflow";
-import { FakeClassifier } from "../domain/classify";
 import { bundledCountries } from "../domain/countries";
 import { DEFAULT_MIN_POPULATION } from "../domain/pool";
 import { systemRng } from "../domain/rng";
@@ -26,7 +25,7 @@ import { serve } from "./serve";
 const USAGE = `Usage: fat-horses [--store PATH] <command>
 
 Commands:
-  pick <address> [--radius M] [--max-wait MIN] [--min-population N] [--include-visited] --fake-llm
+  pick <address> [--radius M] [--max-wait MIN] [--min-population N] [--include-visited]
   visit <restaurant-id>
   skip <restaurant-id>
   passport [--min-population N]
@@ -64,7 +63,6 @@ async function main(argv: string[]): Promise<void> {
       "max-wait": { type: "string" },
       "min-population": { type: "string" },
       "include-visited": { type: "boolean" },
-      "fake-llm": { type: "boolean" },
       cursor: { type: "string" },
       port: { type: "string" },
       password: { type: "string" },
@@ -85,8 +83,6 @@ async function main(argv: string[]): Promise<void> {
   switch (command) {
     case "pick": {
       if (!arg) fail("pick needs an address");
-      if (!values["fake-llm"])
-        fail("the Bedrock classifier isn't built yet (TASKS.md T3.9); pass --fake-llm");
       let session;
       try {
         session = await startPick(
@@ -116,7 +112,6 @@ async function main(argv: string[]): Promise<void> {
       const deps = {
         races: new TabNz(identityFromEnv()),
         places: new Overpass(),
-        classifier: new FakeClassifier(),
         store,
         countries,
         config: defaultConfig(),

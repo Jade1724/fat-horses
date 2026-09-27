@@ -65,9 +65,8 @@ describe("validateCountries", () => {
     expect(() => new Countries(file([]))).toThrow(/invalid/);
   });
 
-  it("knownTags is the union", () => {
+  it("finds a country by ISO code", () => {
     const c = new Countries(file([country(), country({ iso2: "FR", cuisine_tags: ["french", "sushi"] })]));
-    expect([...c.knownTags()].sort()).toEqual(["french", "japanese", "sushi"]);
     expect(c.get("FR")?.iso2).toBe("FR");
     expect(c.get("XX")).toBeUndefined();
   });
@@ -79,5 +78,17 @@ describe("bundled data/countries.json", () => {
     expect(c.file.source.population).toBe("World Bank WDI SP.POP.TOTL");
     expect(c.all.filter((x) => x.population >= 10_000_000).length).toBeGreaterThanOrEqual(90);
     for (const iso of ["JP", "IT", "MX", "IN", "CN", "FR", "TH", "ET"]) expect(c.get(iso)).toBeDefined();
+  });
+
+  // Seen untagged-to-any-country near a real address (TASKS T4.14): the data
+  // had the OSM wiki's spelling, the map had another.
+  it.each([
+    ["crepes", "FR"],
+    ["hotpot", "CN"],
+    ["noodles", "CN"],
+    ["italian_pizza", "IT"],
+    ["tex_mex", "MX"],
+  ])("claims %s for %s", (tag, iso) => {
+    expect(bundledCountries().get(iso)?.cuisine_tags).toContain(tag);
   });
 });

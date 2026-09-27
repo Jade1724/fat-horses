@@ -7,7 +7,8 @@ export type PickError =
   "no_upcoming_race" | "race_source_unavailable" | "places_unavailable" | "no_matching_places" | "internal";
 
 export type RestaurantStatus = "PICKED" | "VISITED" | null;
-export type MatchKind = "tagged" | "inferred" | "fallback";
+/** Places match by their OpenStreetMap cuisine tag only. */
+export type MatchKind = "tagged";
 export type WinReason = "result" | "dead_heat" | "abandoned" | "timeout";
 
 export interface Country {
@@ -69,7 +70,6 @@ export interface PickView {
   restaurants: PickRestaurant[];
   pick: string | null;
   dishes: string[] | null;
-  llm_unavailable: boolean;
 }
 
 /** A stored restaurant (`/restaurants/...` responses). */

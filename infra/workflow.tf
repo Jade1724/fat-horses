@@ -1,4 +1,4 @@
-# The pick workflow (SPEC.md §6): start → prepare_nearby → wait for the start →
+# The pick workflow (SPEC.md §6): start → wait for the start →
 # check_result every 10 s until decided → finish. A task that keeps failing
 # goes to `fail`, which marks the pick failed. Cancelling a pick stops the
 # execution (F12). Every task keeps the input {pick_id} and puts the
@@ -18,7 +18,7 @@ locals {
 
   catch = [{ ErrorEquals = ["States.ALL"], ResultPath = "$.error", Next = "Fail" }]
 
-  task = { for step in ["start", "prepare_nearby", "check_result", "finish", "fail"] : step => {
+  task = { for step in ["start", "check_result", "finish", "fail"] : step => {
     Type     = "Task"
     Resource = "arn:aws:states:::lambda:invoke"
     Parameters = {
@@ -40,12 +40,10 @@ locals {
     StartAt        = "Start"
     TimeoutSeconds = 5 * 3600 # up to 3 h to the start + 45 min for a result, with margin
     States = {
-      Start         = merge(local.task["start"], { Next = "StartDone", Catch = local.catch })
-      StartDone     = { Type = "Choice", Choices = [local.stopped], Default = "PrepareNearby" }
-      PrepareNearby = merge(local.task["prepare_nearby"], { Next = "PrepareDone", Catch = local.catch })
-      PrepareDone   = { Type = "Choice", Choices = [local.stopped], Default = "WaitForStart" }
-      WaitForStart  = { Type = "Wait", TimestampPath = "$.out.result.start_time", Next = "CheckResult" }
-      CheckResult   = merge(local.task["check_result"], { Next = "Decided", Catch = local.catch })
+      Start        = merge(local.task["start"], { Next = "StartDone", Catch = local.catch })
+      StartDone    = { Type = "Choice", Choices = [local.stopped], Default = "WaitForStart" }
+      WaitForStart = { Type = "Wait", TimestampPath = "$.out.result.start_time", Next = "CheckResult" }
+      CheckResult  = merge(local.task["check_result"], { Next = "Decided", Catch = local.catch })
       Decided = {
         Type = "Choice"
         Choices = [

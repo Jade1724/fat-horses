@@ -1,5 +1,6 @@
 // One pick-workflow step per invocation, called by Step Functions (SPEC.md §6).
-// Input: {"step": "start" | "prepare_nearby" | "check_result" | "finish" | "fail", "pick_id": "…"}.
+// Input: {"step": "start" | "check_result" | "finish" | "fail", "pick_id": "…"}
+// ("prepare_nearby" is a no-op kept for executions started before it was removed).
 // Output: StepOutput. Environment: TABLE_NAME.
 
 import { z } from "zod";

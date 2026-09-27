@@ -1,23 +1,20 @@
-// Matching places to the winning country (SPEC.md F6.2–F6.4) and choosing one (F7).
+// Matching places to countries by their OSM cuisine tag (SPEC.md F6) and choosing one (F7).
 
-import type { Guess } from "./classify";
 import type { Country } from "./countries";
-import { isTagged, type Place } from "./places";
+import type { Place } from "./places";
 import { choose, type Rng } from "./rng";
 
-/** Default confidence needed for an inferred match (F6.3). */
-export const DEFAULT_CONFIDENCE_THRESHOLD = 0.7;
-
-export type MatchKind = "tagged" | "inferred" | "fallback";
+/** How a place matched. Only by its own cuisine tag since the AI tiers were dropped. */
+export type MatchKind = "tagged";
 
 export interface Match {
   place_id: string;
   match: MatchKind;
-  /** The LLM's reason, for inferred and fallback matches. */
+  /** Why it matched, beyond the tag. No tier gives one now; kept so stored restaurants keep their shape. */
   reason: string | null;
 }
 
-/** Tier 1 (F6.2): the place's own cuisine tag matches the country. */
+/** A place matches when its own cuisine tag is one of the country's (F6.2). */
 export function taggedMatches(places: readonly Place[], country: Country): Match[] {
   const tags = new Set(country.cuisine_tags);
   return places
@@ -27,8 +24,7 @@ export function taggedMatches(places: readonly Place[], country: Country): Match
 
 /**
  * The countries allowed into the race (F2.2): those with at least one tagged
- * restaurant nearby, so whichever horse wins, there is somewhere to eat. Only
- * tags count; a guess is too uncertain to put a country in the draw.
+ * restaurant nearby, so whichever horse wins, there is somewhere to eat.
  */
 export function countriesWithTaggedPlaces(
   countries: readonly Country[],
@@ -37,46 +33,12 @@ export function countriesWithTaggedPlaces(
   return countries.filter((c) => taggedMatches(places, c).length > 0);
 }
 
-/** Tier 2 (F6.3): untagged places whose guess matches with enough confidence. */
-export function inferredMatches(
-  places: readonly Place[],
-  guesses: readonly Guess[],
-  country: Country,
-  threshold: number,
-): Match[] {
-  const tags = new Set(country.cuisine_tags);
-  const out: Match[] = [];
-  for (const p of places) {
-    if (isTagged(p)) continue;
-    const g = guesses.find((x) => x.place_id === p.id);
-    if (g?.cuisines.some((c) => c.confidence >= threshold && tags.has(c.tag))) {
-      out.push({ place_id: p.id, match: "inferred", reason: g.reason });
-    }
-  }
-  return out;
-}
-
-/** Tiers 1 and 2 together: the primary matches (F6.4). */
-export function primaryMatches(
-  places: readonly Place[],
-  guesses: readonly Guess[],
-  country: Country,
-  threshold: number,
-): Match[] {
-  return [...taggedMatches(places, country), ...inferredMatches(places, guesses, country, threshold)];
-}
-
-/**
- * Choose uniformly (F7.1–F7.3): primary matches, or fallback ones when there
- * are none; among them only never-visited ones if any. The LLM plays no part.
- */
+/** Choose uniformly among the matches, only never-visited ones if any (F7). */
 export function chooseRestaurant(
-  primary: readonly Match[],
-  fallback: readonly Match[],
+  candidates: readonly Match[],
   visitCount: (placeId: string) => number,
   rng: Rng,
 ): Match | undefined {
-  const candidates = primary.length > 0 ? primary : fallback;
   const fresh = candidates.filter((m) => visitCount(m.place_id) === 0);
   return choose(fresh.length > 0 ? fresh : candidates, rng);
 }

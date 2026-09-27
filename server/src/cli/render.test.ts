@@ -58,7 +58,6 @@ describe("CLI output", () => {
         address: "1 Queen St",
         amenity: "restaurant",
         cuisine: ["sushi"],
-        tags: {},
         distance_m: 120,
       },
     ];

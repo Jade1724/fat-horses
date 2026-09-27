@@ -8,7 +8,6 @@ import { nominatimFromEnv, type Nominatim, Overpass } from "../adapters/osm";
 import { identityFromEnv, TabNz } from "../adapters/tabNz";
 import type { ApiRequest, ApiResponse, WorkflowStarter } from "../app/api";
 import { defaultConfig, type Deps } from "../app/workflow";
-import { FakeClassifier } from "../domain/classify";
 import { bundledCountries } from "../domain/countries";
 import { DynamoStore } from "../store/dynamo";
 
@@ -61,19 +60,13 @@ export function executionArn(stateMachineArn: string, pickId: string): string {
   return `${stateMachineArn.replace(":stateMachine:", ":execution:")}:${pickId}`;
 }
 
-/**
- * Workflow dependencies except the store. The classifier guesses nothing until
- * Bedrock is wired in (T3.9), so only tagged matches (tier 1) are found.
- */
+/** Workflow dependencies except the store. */
 export function workflowDeps(): Omit<Deps, "store"> {
-  const config = defaultConfig();
-  config.guess.model_id = process.env.BEDROCK_MODEL_ID ?? "none";
   return {
     races: new TabNz(identityFromEnv()),
     places: new Overpass(),
-    classifier: new FakeClassifier(),
     countries: bundledCountries(),
-    config,
+    config: defaultConfig(),
   };
 }
 

@@ -42,7 +42,9 @@
         "dim_sum",
         "dumpling",
         "noodle",
+        "noodles",
         "hot_pot",
+        "hotpot",
         "hunan",
         "shanghai"
       ],
@@ -226,7 +228,8 @@
       "cuisine_tags": [
         "mexican",
         "taco",
-        "burrito"
+        "burrito",
+        "tex_mex"
       ],
       "dishes": [
         "tacos",
@@ -480,6 +483,7 @@
       "cuisine_tags": [
         "french",
         "crepe",
+        "crepes",
         "bistro",
         "brasserie"
       ],
@@ -522,6 +526,7 @@
       "cuisine_tags": [
         "italian",
         "pizza",
+        "italian_pizza",
         "pasta",
         "trattoria",
         "gelato"

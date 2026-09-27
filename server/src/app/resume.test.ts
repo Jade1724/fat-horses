@@ -5,7 +5,6 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { FakeClassifier } from "../domain/classify";
 import { bundledCountries } from "../domain/countries";
 import { parseCuisine, type Place, type Places } from "../domain/places";
 import type { Race, RaceProvider, RaceUpdate } from "../domain/race";
@@ -70,7 +69,6 @@ const places: Places = {
         address: null,
         amenity: "restaurant",
         cuisine: parseCuisine(c.cuisine_tags[0] ?? ""),
-        tags: {},
         distance_m: 10,
       }));
   },
@@ -80,7 +78,6 @@ function deps(store: Deps["store"], races = new Races()): Deps {
   return {
     races,
     places,
-    classifier: new FakeClassifier(),
     store,
     countries: bundledCountries(),
     config: defaultConfig(),

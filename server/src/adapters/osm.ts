@@ -126,20 +126,6 @@ export const OVERPASS_ENDPOINTS = [
 export const OVERPASS_ATTEMPTS = 3;
 export const OVERPASS_RETRY_MS = 3000;
 
-/** OSM tags passed on to the classifier (SPEC.md L3). Public data only. */
-const KEPT_TAGS = [
-  "brand",
-  "description",
-  "menu",
-  "website",
-  "contact:website",
-  "website:menu",
-  "name:en",
-  "diet:vegetarian",
-  "diet:vegan",
-  "diet:halal",
-];
-
 export function buildQuery(lat: number, lon: number, radiusM: number, amenities: readonly string[]): string {
   return (
     "[out:json][timeout:25];" +
@@ -197,7 +183,6 @@ export function parseOverpass(body: string, lat: number, lon: number, radiusM: n
       address: address(e.tags),
       amenity,
       cuisine: e.tags.cuisine ? parseCuisine(e.tags.cuisine) : [],
-      tags: Object.fromEntries(KEPT_TAGS.flatMap((k) => (e.tags[k] ? [[k, e.tags[k]]] : []))),
       distance_m: d,
     });
   }

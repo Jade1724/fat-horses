@@ -17,9 +17,8 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 | **Pick** | One run of the whole flow for one address: race → winner country → restaurants → the chosen restaurant. Identified by `pick_id` (ULID). |
 | **Pool** | The countries eligible to be assigned to horses in a pick. |
 | **Place** | Any OSM restaurant-like node/way returned by Overpass inside the radius. |
-| **Match** | A place judged to serve the winning country's food, with `match` = `tagged`, `inferred` or `fallback`. |
+| **Match** | A place whose OSM `cuisine` tag is one of the winning country's `cuisine_tags` (`match` = `tagged`). |
 | **The pick / picked restaurant** | The one match chosen at random. |
-| **Guess** | The LLM's cuisine guess for an untagged place (cached). |
 
 ---
 
@@ -33,7 +32,7 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 
 ### F2. Country pool
 - **F2.1** Countries come from `data/countries.json` (schema §4.1).
-- **F2.2** Pool = countries with `population >= min_population` **and at least one tagged restaurant nearby** (a tier-1 match, F6.2, among the places of F6.1). So whichever horse wins, there is somewhere to eat. Only tags count: a guess (F6.3) is too uncertain to put a country in the race. If no country qualifies, the pick fails at once with `no_matching_places`, before a race is looked for; the UI says "No restaurant within <radius> has a cuisine we can match to a country" and suggests a bigger radius.
+- **F2.2** Pool = countries with `population >= min_population` **and at least one tagged restaurant nearby** (a match, F6.2, among the places of F6.1). So whichever horse wins, there is somewhere to eat. If no country qualifies, the pick fails at once with `no_matching_places`, before a race is looked for; the UI says "No restaurant within <radius> has a cuisine we can match to a country" and suggests a bigger radius.
 - **F2.3** Unless `include_visited`, countries with `visit_count > 0` are removed from the pool.
 - **F2.4** If F2.3 leaves the pool empty, use the F2.2 pool and set `world_complete = true` on the pick session. Because F2.2 is limited to what's nearby, this means every cuisine *near here* has been visited; the UI says so ("You've eaten every cuisine near here! They're all back in the draw.").
 
@@ -57,18 +56,16 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 
 ### F6. Restaurant matching
 - **F6.1 Places:** Overpass query for nodes/ways (ways via `out center`) inside the radius with `amenity` in `{restaurant, fast_food}` (**`cafe` excluded by default**; configurable list). Place ID = `osm:<type>/<id>`, e.g. `osm:node/123`. Loaded **first, before a race is chosen**, because the places decide which countries may run (F2.2); this also keeps a slow lookup from eating into the time before the start. If the lookup fails (after the adapter's own retries), the pick fails with `places_unavailable`.
-- **F6.2 Tier 1, tagged:** a place matches when any value of its `cuisine` tag (split on `;`, trimmed, lowercased) is in the winning country's `cuisine_tags`.
-- **F6.3 Tier 2, inferred:** for places **without** a `cuisine` tag, use the cached or new Guess (§3). A place matches when a guessed tag with `confidence >= 0.7` is in the country's `cuisine_tags`. Its `reason` is the Guess reason.
-- **F6.4** Tiers 1 and 2 together form the **primary** matches. Guesses are made while waiting for the race (§6), before the winner is known, so the wait is used productively. They can only add restaurants for a country already on the card.
-- **F6.5 Tier 3, fallback:** only if there are no primary matches. Since F2.2 every drawn country has a tagged match, so this and F6.6 are a safety net for picks drawn before that rule. The LLM receives every place (tagged or not) and the country's `dishes`, and returns places likely to serve them, each with a reason (§3). These are `match = fallback`.
-- **F6.6** If all tiers are empty, the pick ends `done` with no restaurant; the UI shows "No match nearby", the country's dishes and "Race again".
+- **F6.2 Matching:** a place matches when any value of its `cuisine` tag (split on `;`, trimmed, lowercased) is in the winning country's `cuisine_tags`.
+- **F6.3–F6.5** *Dropped:* guessing cuisines for untagged places and matching by dishes with an LLM (§3). Once only countries with a tagged place nearby could run (F2.2), the dish fallback could never trigger, and guesses would only have added variety. Untagged places are never matched.
+- **F6.6** If nothing matches, the pick ends `done` with no restaurant; the UI shows "No match nearby", the country's dishes and "Race again". Since F2.2 this only happens to picks drawn before that rule.
 - **F6.7** The radius is **not** widened automatically in v1.
-- **F6.8** If Bedrock fails (error, throttling, timeout or invalid output after a retry), skip tier 2 and/or 3, set `llm_unavailable = true`, and carry on. A pick never fails because of the LLM.
+- **F6.8** *Dropped with the LLM (§3).*
 
 ### F7. Choosing the restaurant
-- **F7.1** Candidates = primary matches, or fallback matches if there are no primary ones.
+- **F7.1** Candidates = the matches (F6.2).
 - **F7.2** If any candidate has `visit_count == 0`, choose among only those; otherwise among all candidates.
-- **F7.3** Choose uniformly at random with the injected RNG. The LLM never influences this choice.
+- **F7.3** Choose uniformly at random with the injected RNG.
 - **F7.4** The chosen restaurant becomes `PICKED` (F8). All matches, with their current status, are saved on the pick session.
 
 ### F8. Restaurant status and visit tracking
@@ -97,10 +94,10 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 - **F10.2** First visit: ask for the shared password (F11.1) and post it to `/api/login`. Nothing is kept in the page: the session is an `HttpOnly` cookie the browser holds, so no script can read it. A 401 shows the password form again.
 - **F10.3** Pick view: address field; advanced options (radius, min population, include visited). An ambiguous address shows "Which …?" with the matches, without the country, as buttons (F1.2). A map (MapLibre + OpenFreeMap tiles) centred on the location with the radius circle.
 - **F10.4** While the pick runs: poll `GET /api/picks/{id}` every **5 s**; show the status and the race card (number, horse, flag + country, scratched state) with a countdown to the start, and a **Cancel** button (F12). Above the card, "📺 Watch <venue> R<n> on TAB" opens the race's page on tab.co.nz (`https://www.tab.co.nz/racing/race/<race id>`, with TAB's Trackside stream) in a new tab; shown whenever the race is known. The countdown stops once the pick has finished or been cancelled.
-- **F10.5** When done: the winner (horse + country, with a note for dead heat, abandoned or timeout); a pin for every match. Pin colours by status: new, `PICKED`, `VISITED`. The pick is highlighted with a card showing name, cuisine, address, match type (`likely` badge + reason for inferred/fallback) and a directions link (`https://www.google.com/maps/dir/?api=1&destination=<lat>,<lon>`).
+- **F10.5** When done: the winner (horse + country, with a note for dead heat, abandoned or timeout); a pin for every match. Pin colours by status: new, `PICKED`, `VISITED`. The pick is highlighted with a card showing name, cuisine, address and a directions link (`https://www.google.com/maps/dir/?api=1&destination=<lat>,<lon>`).
 - **F10.5a** Options include "Race must start within": 10 minutes (default), 30 minutes, 1 hour, 3 hours (F3.2).
 - **F10.6** Buttons: "We went here", "Skip", "Race again". Clicking a non-picked pin offers "We went here" (F8.2 last row).
-- **F10.7** If `llm_unavailable`, show a small notice "Cuisine guessing unavailable, showing tagged places only".
+- **F10.7** *Dropped with the LLM (§3).*
 - **F10.8** The current `PICKED` restaurant (if any) is shown on load, so you can mark it visited later.
 
 ### F11. Access
@@ -124,20 +121,9 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 
 ---
 
-## 3. LLM rules (Bedrock)
+## 3. No LLM
 
-- **L1 Scope:** the LLM does exactly two things: `guess_cuisines` (F6.3) and `match_dishes` (F6.5). It never chooses the race, a country, the winner or the picked restaurant.
-- **L2 Interface:** interface `Classifier` in `server/src/domain/classify.ts`:
-  - `guess_cuisines(places: &[PlaceInput]) -> Result<Vec<Guess>>`, where `Guess = {place_id, cuisines: [{tag, confidence}], reason}`
-  - `match_dishes(places: &[PlaceInput], country: &CountryDishes) -> Result<Vec<DishMatch>>`, where `DishMatch = {place_id, reason}`
-  - Implementations: `BedrockClassifier` (`server/src/adapters/bedrock.ts`) and `FakeClassifier` (deterministic, configured from a map; for tests and offline runs).
-- **L3 Input:** only public OSM data (name, tags, `website`/`menu` URLs if present) and the country's name and dishes. Never the user's address, coordinates, history or API key.
-- **L4 Output validation:** the model returns JSON (via tool use / JSON-schema output in the Converse API). Drop any entry whose `place_id` wasn't in the input, any `tag` not in the known tag set (union of all `cuisine_tags`), and any confidence outside [0, 1]. Clamp `reason` to 120 characters. Invalid JSON → one retry → otherwise error (F6.8).
-- **L5 Limits:** at most **50 places per call** and **200 places per pick** (closest first); max output tokens per call set in config; per-call timeout **20 s**.
-- **L6 Caching:** a Guess is cached per `(place_id, prompt_version)` together with `input_hash` = SHA-256 of the name and sorted tags. A cached Guess is reused only if the hash matches. TTL 180 days. `match_dishes` results are not cached.
-- **L7 Prompts:** versioned files `server/prompts/guess_cuisines.v<N>.md` and `match_dishes.v<N>.md`; the version number is part of the cache key.
-- **L8 Model:** configured by env var `BEDROCK_MODEL_ID` (a model ID or inference profile ARN); default a small Claude model (e.g. Claude Haiku 4.5), final choice from spike T1.3. Region is configured separately (`BEDROCK_REGION`).
-- **L9 Evaluation:** `fat-horses eval` runs a labelled set (`server/eval/*.json`) through the configured classifier and prints precision/recall per tier. It is run by hand, never by `make check`.
+Matching uses OpenStreetMap cuisine tags only (F6.2). An earlier version of this spec planned Amazon Bedrock for two jobs — guessing the cuisine of untagged places and matching places by a country's dishes — but neither was built past a fake, and limiting the race to countries with a tagged place nearby (F2.2) removed the need: every winner already has somewhere to eat. The app makes no model calls and needs no Bedrock access. More countries qualify by mapping more OSM tags to them in `data/countries.json`, not by guessing.
 
 ---
 
@@ -172,8 +158,7 @@ All items are shared: everyone who logs in sees the same data (F14.1).
 | Currently picked | `STATE` | `PICKED` | restaurant_id. Written in the same transaction as every change to or from `PICKED` (enforces F8.3) |
 | Country | `COUNTRY` | `<iso2>` | visit_count, first_visited_at, last_visited_at (one partition, so the Passport is a single Query) |
 | Log entry | `LOG` | `<RFC3339 µs timestamp>#<restaurant_id>#<reason>` (JS has millisecond precision; the microseconds are zero-padded) | the fields of F8.6 |
-| Pick session | `PICK#<pick_id>` | `META` | request, location, status, pool size, world_complete, race card, winner, places, matches, pick, llm_unavailable, error; `ttl` = +30 days |
-| Guess | `PLACE#<place_id>` | `GUESS#v<prompt_version>` | cuisines, reason, model_id, input_hash, created_at; `ttl` = +180 days |
+| Pick session | `PICK#<pick_id>` | `META` | request, location, status, pool size, world_complete, race card, winner, places, matches, pick, error; `ttl` = +30 days |
 | Geocode cache | `GEOCODE#<normalised address>` | `META` | lat, lon, display_name; `ttl` = +30 days |
 
 Records are stored as JSON in a `data` attribute; attributes used in conditions or updates (`status`, `restaurant_id`, country counters, `ttl`) are top level.
@@ -207,7 +192,7 @@ Pick view:
      runners: [{number, horse, country: {iso2, name, flag}, scratched}]},
   winner?: {number, horse, country, reason: "result"|"dead_heat"|"abandoned"|"timeout", tied?: [...]},
   restaurants: [{id, name, lat, lon, address, cuisine, match, reason?, status, visit_count}],
-  pick?: <restaurant id>, dishes?: [...], llm_unavailable }
+  pick?: <restaurant id>, dishes?: [...] }
 ```
 `status` ∈ `finding_race`, `waiting_start`, `running`, `resolving`, `searching`, `done`, `failed`, `cancelled`. The view also carries `max_wait_min`. `error` (when `failed`) ∈ `no_upcoming_race`, `race_source_unavailable`, `places_unavailable`, `no_matching_places`, `internal`.
 
@@ -218,11 +203,10 @@ Pick view:
 Pick workflow (AWS Step Functions Standard; each task invokes the `workflow` Lambda with `{step, pick_id}`; the same steps are plain async functions in `server/src/app/workflow.ts`, which the CLI calls in-process):
 
 1. `Start`: Overpass places (F6.1) and the countries they allow (F2.2) → `FindRace` (F3) → `AssignCountries` (F2, F4) → status `waiting_start`
-2. `PrepareNearby`: guesses for untagged places (F6.3), stored on the session
-3. `Wait` until the scheduled start → status `running`
-4. Loop: `CheckResult` (F5) → `Wait 10 s` until a winner is decided or the 45-min timeout → status `resolving`
-5. `Match`: tiers 1–2 (F6.2–F6.4) → if empty, `FallbackMatch` (F6.5) → status `searching`
-6. `PickRestaurant` (F7, F8) → status `done`
+2. `Wait` until the scheduled start → status `running`
+3. Loop: `CheckResult` (F5) → `Wait 10 s` until a winner is decided or the 45-min timeout → status `resolving`
+4. `Match` (F6.2) → status `searching`
+5. `PickRestaurant` (F7, F8) → status `done`
 
 Each step's output has `failed` (true for failed or cancelled picks) and `cancelled`; the state machine stops when `failed` is true. Any unhandled step error → status `failed` with the error code. Step retries: 2 with backoff for network errors.
 
@@ -231,9 +215,9 @@ Infrastructure (Terraform in `infra/`, S3 state backend with native lock file):
 - `api` Lambda environment includes `GEOCODE_COUNTRIES` (default `nz`, F1.2).
 - Lambdas: TypeScript on the managed **Node.js 22** runtime (`nodejs22.x`), arm64, one esbuild bundle per handler (`make build-lambdas`); the AWS SDK v3 comes from the runtime. Chosen over Rust on the OS-only runtime because a managed runtime is easier to operate.
 - Step Functions state machine, DynamoDB table (§4.2), and the two SSM SecureStrings `/fat-horses/password-hash` and `/fat-horses/session-secret` (F11). The Step Functions input is `{pick_id}`, passed to each `workflow` step.
-- IAM: least privilege per Lambda; `bedrock:InvokeModel` only on the configured model/profile; the `api` Lambda may `states:StartExecution` and `states:StopExecution` on the pick state machine only.
+- IAM: least privilege per Lambda; the `api` Lambda may `states:StartExecution` and `states:StopExecution` on the pick state machine only.
 - AWS Budgets alarm (default USD 10/month) emailing the owner.
-- Region: **`ap-southeast-2`** (default; subject to Bedrock model availability, confirmed in T1.3).
+- Region: **`ap-southeast-2`** (default).
 
 ---
 
@@ -241,8 +225,8 @@ Infrastructure (Terraform in `infra/`, S3 state backend with native lock file):
 
 ```
 server/                 TypeScript, Node.js 22
-  src/domain/           types, rules F2–F8, interfaces (RaceProvider, Geocoder, Places, Classifier, Store, Clock). No I/O
-  src/adapters/         TAB NZ, Nominatim, Overpass (and Bedrock, T3.9)
+  src/domain/           types, rules F2–F8, interfaces (RaceProvider, Geocoder, Places, Store, Clock). No I/O
+  src/adapters/         TAB NZ, Nominatim, Overpass
   src/store/            memory, JSON-file and DynamoDB stores + shared contract suite
   src/app/              workflow steps, start, API handlers
   src/lambda/           `api` and `workflow` handlers; wiring only
@@ -260,7 +244,7 @@ infra/                  Terraform
 
 - **N1 Testability:** randomness (`rand::Rng`) and time (`Clock`) are injected everywhere; every rule in F2–F8 has unit tests with a seeded RNG and a fixed clock.
 - **N2 Offline gate:** `make check` needs no network and no AWS credentials. External clients are tested against recorded fixtures in `server/test/fixtures/`.
-- **N3 Integration tests** (DynamoDB Local, live TAB/Overpass/Bedrock) run only through separate make targets (`make it`, `make live`), never through `make check`.
+- **N3 Integration tests** (DynamoDB Local, live TAB/Overpass) run only through separate make targets (`make it`, `make live`), never through `make check`.
 - **N4 Etiquette:** Nominatim and Overpass calls send `User-Agent: fat-horses/<version> (<contact>)`. At most 1 Nominatim request per second.
 - **N5 Cost:** expected < USD 5/month at personal use; nothing billed while idle except storage.
 - **N6 Latency:** `POST /picks` < 3 s; `GET /picks/{id}` < 500 ms warm.
@@ -284,4 +268,3 @@ Betting or TAB login; user accounts (sign-up, per-person logins, roles); per-per
 | Directions link | Google Maps URL, no API key (F10.5) |
 | `PICKED` expires automatically? | No; it stays until visited, skipped or superseded (F8.2) |
 | Note or rating on a visit? | No (§9) |
-| "Likely" confidence threshold | 0.7 (F6.3) |

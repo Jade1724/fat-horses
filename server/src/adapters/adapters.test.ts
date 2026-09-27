@@ -213,9 +213,7 @@ describe("Overpass", () => {
       amenity: "restaurant",
       cuisine: ["japanese", "sushi"],
       address: "12 Victoria Street West, Auckland",
-      tags: { website: "https://example.com/sakura" },
     });
-    expect(sakura.tags).not.toHaveProperty("opening_hours");
     expect(places.find((p) => p.id === "osm:way/2002")).toMatchObject({
       lat: -36.849,
       lon: 174.7615,
@@ -223,7 +221,6 @@ describe("Overpass", () => {
     });
     expect(places.find((p) => p.id === "osm:node/1003")).toMatchObject({
       cuisine: [],
-      tags: { description: "Fondue and raclette" },
     });
     expect(places.find((p) => p.id === "osm:node/1004")).toMatchObject({
       name: "Unnamed restaurant",

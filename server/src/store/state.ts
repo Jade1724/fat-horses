@@ -8,7 +8,6 @@ import {
   PickCancelled,
   logKey,
   pickedAfter,
-  type CachedGuess,
   type CachedLocation,
   type Change,
   type CountryVisits,
@@ -23,8 +22,6 @@ export interface RootData {
   /** Keyed by logKey; read in reverse key order for newest first. */
   log: Record<string, LogEntry>;
   picks: Record<string, PickSession>;
-  /** Public map data only. Keyed by `<place_id>#v<prompt_version>`. */
-  guesses: Record<string, CachedGuess>;
   geocodes: Record<string, CachedLocation>;
 }
 
@@ -34,7 +31,6 @@ export const emptyRoot = (): RootData => ({
   countries: {},
   log: {},
   picks: {},
-  guesses: {},
   geocodes: {},
 });
 
@@ -55,7 +51,6 @@ export function upgradeRoot(raw: Record<string, unknown>): RootData {
     countries: mine.countries ?? {},
     log: mine.log ?? {},
     picks: mine.picks ?? {},
-    guesses: caches.guesses ?? {},
     geocodes: caches.geocodes ?? {},
   };
 }
@@ -157,16 +152,6 @@ export class StateStore implements Store {
   /** Picks that are neither done, failed nor cancelled (F13.1). */
   async unfinishedPicks(): Promise<PickSession[]> {
     return this.read((d) => Object.values(d.picks).filter((p) => !isFinished(p.status)));
-  }
-
-  async getGuess(placeId: string, promptVersion: number) {
-    return this.read((d) => d.guesses[`${placeId}#v${promptVersion}`] ?? null);
-  }
-
-  async putGuess(guess: CachedGuess) {
-    await this.write((d) => {
-      d.guesses[`${guess.guess.place_id}#v${guess.prompt_version}`] = clone(guess);
-    });
   }
 
   async getGeocode(key: string) {

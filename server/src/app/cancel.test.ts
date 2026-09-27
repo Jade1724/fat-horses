@@ -1,7 +1,6 @@
 // Maximum wait for a race (F3.2) and cancelling a pick (F12).
 
 import { describe, expect, it } from "vitest";
-import { FakeClassifier } from "../domain/classify";
 import { bundledCountries } from "../domain/countries";
 import type { Geocoder } from "../domain/places";
 import { parseCuisine, type Place, type Places } from "../domain/places";
@@ -68,7 +67,6 @@ const places: Places = {
       address: null,
       amenity: "restaurant",
       cuisine: parseCuisine(c),
-      tags: {},
       distance_m: 10,
     }));
   },
@@ -78,7 +76,6 @@ function deps(schedule: Race[]): Deps {
   return {
     races: new Races(schedule),
     places,
-    classifier: new FakeClassifier(),
     store: new MemoryStore(),
     countries: bundledCountries(),
     config: defaultConfig(),

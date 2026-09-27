@@ -1,7 +1,6 @@
 // The pick session: everything one pick knows, stored as it progresses (§4.2, §5, §6).
 
 import type { RaceCard } from "./assign";
-import type { Guess } from "./classify";
 import type { Match } from "./matching";
 import type { Location, Place } from "./places";
 import type { Race } from "./race";
@@ -54,13 +53,9 @@ export interface PickSession {
    */
   places_loaded: boolean;
   places: Place[];
-  guesses: Guess[];
-  /** Cuisine guessing for untagged places is done (F6.3). Absent in picks saved before it existed. */
-  guessed?: boolean;
   matches: Match[];
   /** Place id of the chosen restaurant. */
   pick: string | null;
-  llm_unavailable: boolean;
 }
 
 export function newSession(
@@ -84,10 +79,8 @@ export function newSession(
     winner: null,
     places_loaded: false,
     places: [],
-    guesses: [],
     matches: [],
     pick: null,
-    llm_unavailable: false,
   };
 }
 

@@ -349,9 +349,6 @@ export class PickPage {
 
   private renderResults(p: PickView): HTMLElement {
     const box = h("div", { class: "results" });
-    if (p.llm_unavailable) {
-      box.append(h("p", { class: "note" }, "Cuisine guessing unavailable, showing tagged places only."));
-    }
     if (p.restaurants.length === 0) {
       box.append(h("p", { class: "message" }, "No match nearby."));
       if (p.dishes) box.append(h("p", { class: "note" }, "Look out for: ", p.dishes.join(", ")));
@@ -412,9 +409,6 @@ export class PickPage {
         { class: "meta" },
         [r.cuisine.join(", "), r.address, distanceText(r.distance_m)].filter(Boolean).join(" · "),
       ),
-      r.match !== "tagged"
-        ? h("p", { class: "likely" }, h("span", { class: "badge" }, "likely"), " ", r.reason ?? "")
-        : null,
       r.status === "VISITED" ? h("p", { class: "note good" }, `✅ Visited ${r.visit_count}×`) : null,
       h(
         "p",

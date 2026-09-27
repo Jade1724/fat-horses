@@ -13,7 +13,6 @@ import {
   recordPick,
   recordSkip,
   recordVisit,
-  type CachedGuess,
   type HistoryPage,
   type Store,
 } from "../domain/store";
@@ -178,22 +177,6 @@ const scenarios: Record<string, (s: Store) => Promise<void>> = {
     await s.putPick({ ...session, pick_id: "p10", status: "done" });
     assert.equal((await cancelPick(s, "p10")).status, "done");
     await rejects(cancelPick(s, "missing"), NotFoundError);
-  },
-
-  async "guess cache"(s) {
-    const g = (v: number, tag: string): CachedGuess => ({
-      guess: { place_id: "osm:node/1", cuisines: [{ tag, confidence: 0.9 }], reason: "name" },
-      prompt_version: v,
-      input_hash: "abc",
-      model_id: "model",
-      created_at: T0,
-    });
-    assert.equal(await s.getGuess("osm:node/1", 1), null);
-    await s.putGuess(g(1, "japanese"));
-    await s.putGuess(g(2, "sushi"));
-    assert.deepEqual(await s.getGuess("osm:node/1", 1), g(1, "japanese"));
-    assert.deepEqual(await s.getGuess("osm:node/1", 2), g(2, "sushi"));
-    assert.equal(await s.getGuess("osm:node/2", 1), null);
   },
 
   async "geocode cache"(s) {

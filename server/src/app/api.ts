@@ -379,7 +379,6 @@ export class Api {
         w && s.status === "done" && s.matches.length === 0
           ? (countries.get(w.country_iso)?.dishes ?? null)
           : null,
-      llm_unavailable: s.llm_unavailable,
     };
   }
 

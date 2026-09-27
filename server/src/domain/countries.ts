@@ -13,7 +13,7 @@ export interface Country {
   population: number;
   /** OSM `cuisine=*` values that count as this country's food. */
   cuisine_tags: string[];
-  /** Signature dishes and ingredients, used by the LLM fallback. */
+  /** Signature dishes and ingredients, shown when nothing nearby matches (F6.6). */
   dishes: string[];
 }
 
@@ -64,11 +64,6 @@ export class Countries {
 
   get(iso2: string): Country | undefined {
     return this.byIso.get(iso2);
-  }
-
-  /** The only tags the LLM may return (SPEC.md L4). */
-  knownTags(): Set<string> {
-    return new Set(this.file.countries.flatMap((c) => c.cuisine_tags));
   }
 }
 

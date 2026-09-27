@@ -24,7 +24,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
   Done when: the doc and fixtures exist.
 - [ ] **T1.2 [human] Review TAB NZ terms.** The owner reads `docs/spikes/tab-nz.md` and confirms automated read-only use is acceptable, or picks another source.
   Needs: T1.1.
-- [ ] **T1.3 [human] Bedrock access.** The owner enables model access for a small Claude model in the chosen region (or a cross-region inference profile), creates local AWS credentials for development, and writes the model ID/profile ARN and region into `docs/spikes/bedrock.md`.
+- [x] ~~**T1.3 [human] Bedrock access.** The owner enables model access for a small Claude model in the chosen region (or a cross-region inference profile), creates local AWS credentials for development, and writes the model ID/profile ARN and region into `docs/spikes/bedrock.md`.~~ *Dropped in T4.14: the app uses no LLM.*
 - [ ] **T1.4 [human] Sample addresses.** The owner adds 3–5 addresses they would really use to `docs/spikes/overpass.md`.
 - [ ] **T1.5 Overpass coverage spike.** For each T1.4 address, query places within 200 m and 500 m; record counts of total places, places with a `cuisine` tag and the most common tags. Save the raw responses as fixtures in `server/test/fixtures/overpass/`.
   Needs: T1.4. Done when: the table is in `docs/spikes/overpass.md` and the fixtures are saved.
@@ -64,9 +64,9 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 - [x] **T3.7 `Classifier` trait, `FakeClassifier` and output validation (L2, L4).** Validation as a pure function with tests: unknown place IDs, unknown tags, confidence out of range, long reasons, bad JSON.
 - [x] **T3.8 Guess caching (L6).** Wraps any `Classifier`: uses the `GuessCache`, recomputes when `input_hash` or prompt version changes, batches of 50, cap 200 closest places (L5). Tests with `FakeClassifier` that count calls.
   Needs: T3.4, T3.7.
-- [ ] **T3.9 `BedrockClassifier` (L3, L5, L7, L8).** `@aws-sdk/client-bedrock-runtime` Converse API with tool-use JSON output, prompts in `server/prompts/`, timeout and one retry. Unit tests build the request from fixtures and parse recorded responses (no network). `make live` runs one real call.
+- [x] ~~**T3.9 `BedrockClassifier` (L3, L5, L7, L8).** `@aws-sdk/client-bedrock-runtime` Converse API with tool-use JSON output, prompts in `server/prompts/`, timeout and one retry. Unit tests build the request from fixtures and parse recorded responses (no network). `make live` runs one real call.~~ *Dropped in T4.14: the app uses no LLM.*
   Needs: T1.3, T3.7.
-- [ ] **T3.10 Eval set and `fat-horses eval` (L9).** At least 40 labelled places from T1.5 fixtures; prints precision/recall per tier.
+- [x] ~~**T3.10 Eval set and `fat-horses eval` (L9).** At least 40 labelled places from T1.5 fixtures; prints precision/recall per tier.~~ *Dropped in T4.14: the app uses no LLM.*
   Needs: T1.5, T3.9.
 
 ## M4 App layer and CLI
@@ -92,6 +92,8 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 
 - [x] **T4.13 Check for the result every 10 s (F5.1).** Requested by the owner: with 60 s, a result could sit up to a minute before the pick moved on. `POLL_INTERVAL_MS` and the state machine's `Poll` wait both 10 s; tested by the time a result published 30 s after the start is seen.
 
+- [x] **T4.14 Drop the LLM; map more OSM tags (§3, F6).** Requested by the owner after T4.12: with only countries that have a tagged place nearby in the race, the dish fallback (tier 3) could never trigger, and cuisine guessing (tier 2) would only add variety. Removed the classifier, guess cache, `PrepareNearby` step (still accepted as a no-op for executions already running), `llm_unavailable` and the "likely" badge. More countries now qualify through tag mappings in `data/countries.json` instead.
+
 ## M5 Web UI (`web/`)
 
 - [x] **T5.1 Scaffold.** Vite + TypeScript + ESLint + Vitest. Extend `make check` with `web` typecheck, lint and test. `make check` runs `npm ci` first rather than skipping the web checks when `web/node_modules` is missing.
@@ -108,7 +110,7 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 - [x] **T6.2 Terraform scaffold.** Providers, S3 backend (native lock file), variables; `make check` runs `terraform fmt -check` (offline); `make infra-plan`/`deploy` validate.
   Needs: T6.1.
 - [x] **T6.3 Data resources.** DynamoDB table (§4.2: keys, TTL, PITR, on-demand) and the two SSM SecureStrings for the password hash and the session secret (values set by `scripts/set-password.sh`, never in state).
-- [x] **T6.4 Lambdas.** `make build-lambdas` (esbuild bundles); Terraform Lambda functions on `nodejs22.x`, arm64, log groups (14-day retention), least-privilege IAM (§6). Bedrock permissions come with T3.9.
+- [x] **T6.4 Lambdas.** `make build-lambdas` (esbuild bundles); Terraform Lambda functions on `nodejs22.x`, arm64, log groups (14-day retention), least-privilege IAM (§6). No Bedrock permissions: the app uses no LLM (T4.14).
 - [x] **T6.5 Step Functions state machine (§6).** Definition file with Wait states, the result loop, retries, the 45-min timeout and the failure path (stop when a step returns `failed`, which includes cancelled picks).
 - [x] **T6.6 API Gateway + CloudFront + S3 site (§6, F11.3).** Throttling, OAC, `/api/*` behaviour. No SPA fallback: the UI uses hash routes, and a distribution-wide error page would also rewrite API 404s.
 - [x] **T6.7 Budget alarm (§6).**
@@ -116,9 +118,9 @@ The ordered work list for building `SPEC.md`. Requirement IDs (e.g. `F4.2`) poin
 - [ ] **T6.9 [human] First deploy.** The owner runs `make deploy`, `scripts/set-password.sh`, and one real pick in the browser. (T6.2–T6.8 are written and validated offline; they count as done only once this deploy works.)
   Needs: T6.8.
 
-## M7 LLM fallback
+## M7 LLM fallback (dropped in T4.14)
 
-- [ ] **T7.1 `match_dishes` end to end (F6.5).** Prompt, Bedrock call, validation, wiring into `fallback_match`; tests with fakes and recorded responses; eval cases for tier 3.
+- [x] ~~**T7.1 `match_dishes` end to end (F6.5).** Prompt, Bedrock call, validation, wiring into `fallback_match`; tests with fakes and recorded responses; eval cases for tier 3.~~ *Dropped in T4.14: the app uses no LLM.*
   Needs: T3.9, T4.1.
 - [x] **T7.2 Fallback UI.** "No match nearby" state with dishes, fallback pins with reasons. (Built with T5.5: fallback matches get the same "likely" badge and reason as inferred ones.)
 

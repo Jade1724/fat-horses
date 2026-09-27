@@ -2,6 +2,8 @@
 
 > **Update (2026-09-21):** the backend moved from Rust to TypeScript on Lambda's managed Node.js runtime, at the owner's request (easier to manage). Rust mentions below are historical; `SPEC.md` is current.
 
+> **Update (2026-09-27):** the LLM (Amazon Bedrock) was dropped. Once the race was limited to countries with a tagged restaurant nearby (`SPEC.md` F2.2), every winner has a match without it. Bedrock mentions below are historical; `SPEC.md` §3 explains.
+
 A restaurant picker driven by a real horse race: each horse gets a country, the winning
 horse's country decides the cuisine, and the app picks a nearby restaurant serving it.
 

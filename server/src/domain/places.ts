@@ -14,8 +14,6 @@ export interface Place {
   amenity: string;
   /** Parsed OSM `cuisine` values; empty when untagged. */
   cuisine: string[];
-  /** Public OSM tags passed to the classifier (website, menu, description, ...). */
-  tags: Record<string, string>;
   distance_m: number;
 }
 
@@ -59,10 +57,6 @@ export function osmId(kind: string, id: number): string {
   return `osm:${kind}/${id}`;
 }
 
-export function isTagged(p: Place): boolean {
-  return p.cuisine.length > 0;
-}
-
 /**
  * Parse an OSM `cuisine` value: `;`-separated, trimmed, lowercased, empty parts
  * dropped, duplicates removed. Spaces become `_` so "South African" matches
@@ -71,7 +65,13 @@ export function isTagged(p: Place): boolean {
 export function parseCuisine(raw: string): string[] {
   const out: string[] = [];
   for (const part of raw.split(";")) {
-    const v = part.trim().toLowerCase().split(/\s+/).filter(Boolean).join("_");
+    // Spaces and hyphens both become underscores: "Tex-Mex" and "tex mex" are `tex_mex`.
+    const v = part
+      .trim()
+      .toLowerCase()
+      .split(/[\s-]+/)
+      .filter(Boolean)
+      .join("_");
     if (v && !out.includes(v)) out.push(v);
   }
   return out;

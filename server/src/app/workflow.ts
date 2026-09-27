@@ -2,16 +2,8 @@
 // updated; Step Functions runs them one per Lambda call, the CLI via `runPick`.
 
 import { applyScratchings, assign, EmptyPoolError } from "../domain/assign";
-import { placeInput, type Classifier } from "../domain/classify";
 import type { Countries } from "../domain/countries";
-import { guessUntagged, MAX_PLACES, type GuessConfig } from "../domain/guessing";
-import {
-  chooseRestaurant,
-  countriesWithTaggedPlaces,
-  DEFAULT_CONFIDENCE_THRESHOLD,
-  primaryMatches,
-  type Match,
-} from "../domain/matching";
+import { chooseRestaurant, countriesWithTaggedPlaces, taggedMatches, type Match } from "../domain/matching";
 import { DEFAULT_AMENITIES, type Place, type Places } from "../domain/places";
 import { pool, type Pool } from "../domain/pool";
 import {
@@ -35,20 +27,13 @@ export const POLL_INTERVAL_MS = 10 * SECOND;
 
 export interface Config {
   amenities: string[];
-  confidence_threshold: number;
-  guess: GuessConfig;
 }
 
-export const defaultConfig = (): Config => ({
-  amenities: [...DEFAULT_AMENITIES],
-  confidence_threshold: DEFAULT_CONFIDENCE_THRESHOLD,
-  guess: { prompt_version: 1, model_id: "none" },
-});
+export const defaultConfig = (): Config => ({ amenities: [...DEFAULT_AMENITIES] });
 
 export interface Deps {
   races: RaceProvider;
   places: Places;
-  classifier: Classifier;
   store: Store;
   countries: Countries;
   config: Config;
@@ -132,28 +117,6 @@ export async function assignCountries(deps: Deps, s: PickSession, rng: Rng): Pro
   }
 }
 
-/**
- * Step 4: guess cuisines for untagged places while the race hasn't started
- * (F6.3, F6.4). They can only add restaurants for a country already running;
- * a guess never puts a country in the race. A pick saved before places were
- * loaded first gets them here, and after the race if this lookup fails.
- */
-export async function prepareNearby(deps: Deps, s: PickSession, now: Iso): Promise<PickSession> {
-  let next = s;
-  if (!next.places_loaded) {
-    const places = await fetchPlaces(deps, s);
-    if (!places) return s;
-    next = { ...next, places, places_loaded: true };
-  }
-  const out = await guessUntagged(next.places, deps.classifier, deps.store, deps.config.guess, now);
-  return {
-    ...next,
-    guesses: out.guesses,
-    guessed: true,
-    llm_unavailable: next.llm_unavailable || out.llm_unavailable,
-  };
-}
-
 /** Before matching: load places if an older pick still lacks them; fail if that fails. */
 export async function ensurePlaces(deps: Deps, s: PickSession): Promise<PickSession> {
   if (s.places_loaded) return s;
@@ -161,7 +124,7 @@ export async function ensurePlaces(deps: Deps, s: PickSession): Promise<PickSess
   return places ? { ...s, places, places_loaded: true } : failed(s, "places_unavailable");
 }
 
-/** Step 5: poll the race once (F5). Sets `resolving` when a winner is decided. */
+/** Step 4: poll the race once (F5). Sets `resolving` when a winner is decided. */
 export async function checkResult(deps: Deps, s: PickSession, now: Iso, rng: Rng): Promise<PickSession> {
   if (!s.race || !s.card) return failed(s, "internal");
   let next: PickSession = { ...s };
@@ -189,35 +152,11 @@ export async function checkResult(deps: Deps, s: PickSession, now: Iso, rng: Rng
   return winner ? { ...next, winner, status: "resolving" } : next;
 }
 
-/** Step 6: tiers 1–2 (F6.2–F6.4). Sets `searching`. */
+/** Step 5: the places tagged with the winning country's cuisine (F6.2). Sets `searching`. */
 export function matchRestaurants(deps: Deps, s: PickSession): PickSession {
   const country = s.winner ? deps.countries.get(s.winner.country_iso) : undefined;
   if (!country) return failed(s, "internal");
-  return {
-    ...s,
-    status: "searching",
-    matches: primaryMatches(s.places, s.guesses, country, deps.config.confidence_threshold),
-  };
-}
-
-/** Step 7: tier 3, only without primary matches (F6.5, F6.8). Every drawn country has a tagged match, so this is a safety net. */
-export async function fallbackMatch(deps: Deps, s: PickSession): Promise<PickSession> {
-  if (s.matches.length > 0 || s.places.length === 0) return s;
-  const country = s.winner ? deps.countries.get(s.winner.country_iso) : undefined;
-  if (!country) return failed(s, "internal");
-  try {
-    const found = await deps.classifier.matchDishes(s.places.slice(0, MAX_PLACES).map(placeInput), {
-      name: country.name,
-      dishes: country.dishes,
-    });
-    return {
-      ...s,
-      matches: found.map((m) => ({ place_id: m.place_id, match: "fallback", reason: m.reason })),
-    };
-  } catch (e) {
-    log.warn("dish matching failed", { pick_id: s.pick_id, error: String(e) });
-    return { ...s, llm_unavailable: true };
-  }
+  return { ...s, status: "searching", matches: taggedMatches(s.places, country) };
 }
 
 /** The stored restaurant for a matched place. */
@@ -241,15 +180,13 @@ export function restaurantFrom(p: Place, countryIso: string, m: Match): Restaura
   };
 }
 
-/** Step 8: choose the restaurant and mark it PICKED (F7, F8). Sets `done`. */
+/** Step 6: choose the restaurant and mark it PICKED (F7, F8). Sets `done`. */
 export async function pickRestaurant(deps: Deps, s: PickSession, now: Iso, rng: Rng): Promise<PickSession> {
   if (!s.winner) return failed(s, "internal");
   const counts = new Map<string, number>();
   for (const m of s.matches)
     counts.set(m.place_id, (await deps.store.getRestaurant(m.place_id))?.visit_count ?? 0);
-  const primary = s.matches.filter((m) => m.match !== "fallback");
-  const fallback = s.matches.filter((m) => m.match === "fallback");
-  const chosen = chooseRestaurant(primary, fallback, (id) => counts.get(id) ?? 0, rng);
+  const chosen = chooseRestaurant(s.matches, (id) => counts.get(id) ?? 0, rng);
   const place = chosen && s.places.find((p) => p.id === chosen.place_id);
   if (chosen && place) {
     await recordPick(deps.store, restaurantFrom(place, s.winner.country_iso, chosen), s.pick_id, now);
@@ -326,10 +263,6 @@ export async function runPick(
     s = await assignCountries(deps, s, rng);
     if (await save()) return end();
   }
-  if (!s.guessed) {
-    s = await prepareNearby(deps, s, clock.now());
-    if (await save()) return end();
-  }
   if (!s.winner) {
     if (s.race) await clock.sleepUntil(s.race.start_time, signal);
     for (;;) {
@@ -342,7 +275,7 @@ export async function runPick(
   }
   s = await ensurePlaces(deps, s);
   if (await save()) return end();
-  s = await fallbackMatch(deps, matchRestaurants(deps, s));
+  s = matchRestaurants(deps, s);
   if (await save()) return end();
   // Last check before marking a restaurant PICKED.
   if (signal?.aborted || (await deps.store.getPick(s.pick_id))?.status === "cancelled") return cancelled();
@@ -352,9 +285,11 @@ export async function runPick(
 }
 
 /**
- * One Step Functions task (§6): start → prepare_nearby → wait → check_result
- * (loop) → finish. `fail` is the error handler's: it marks a pick whose step
- * kept failing as failed, so it doesn't stay mid-way forever.
+ * One Step Functions task (§6): start → wait → check_result (loop) → finish.
+ * `fail` is the error handler's: it marks a pick whose step kept failing as
+ * failed, so it doesn't stay mid-way forever. `prepare_nearby` guessed
+ * cuisines before the AI tiers were dropped; it is still accepted, as a step
+ * that does nothing, for executions started before the change.
  */
 export type Step = "start" | "prepare_nearby" | "check_result" | "finish" | "fail";
 
@@ -396,16 +331,13 @@ export async function runStep(
     if (!s.places_loaded) s = await loadNearby(deps, s);
     if (s.status !== "failed") s = await findRace(deps, s, now);
     if (s.status !== "failed") s = await assignCountries(deps, s, rng);
-  } else if (step === "prepare_nearby" && !s.guessed) {
-    s = await prepareNearby(deps, s, now);
   } else if (step === "check_result" && !s.winner) {
     s = await checkResult(deps, s, now, rng);
   } else if (step === "fail") {
     s = failed(s, "internal");
   } else if (step === "finish") {
     s = await ensurePlaces(deps, s);
-    if (s.status !== "failed")
-      s = await pickRestaurant(deps, await fallbackMatch(deps, matchRestaurants(deps, s)), now, rng);
+    if (s.status !== "failed") s = await pickRestaurant(deps, matchRestaurants(deps, s), now, rng);
   }
   try {
     await deps.store.putPick(s);
