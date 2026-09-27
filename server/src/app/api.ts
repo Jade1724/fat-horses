@@ -10,7 +10,7 @@ import {
 } from "../domain/auth";
 import type { Countries, Country } from "../domain/countries";
 import { dishesFromReading, MIN_DISHES } from "../domain/dishes";
-import { MenuUnreadable, type MenuImageType, type MenuReader } from "../domain/menu";
+import { MenuReadingNotSetUp, MenuUnreadable, type MenuImageType, type MenuReader } from "../domain/menu";
 import { GeocoderUnavailable, type Geocoder } from "../domain/places";
 import { DEFAULT_MIN_POPULATION } from "../domain/pool";
 import { DEFAULT_MAX_WAIT_MIN } from "../domain/race";
@@ -376,6 +376,10 @@ export class Api {
     try {
       reading = await this.deps.menus.read({ media_type: input.media_type, data: input.image });
     } catch (e) {
+      if (e instanceof MenuReadingNotSetUp) {
+        log.warn("menu reading not set up", { error: e.message });
+        return error(503, "menu_reading_not_set_up", "Reading menus isn't set up yet.");
+      }
       if (!(e instanceof MenuUnreadable)) throw e;
       log.warn("menu unreadable", { error: e.message });
       return error(503, "menu_unreadable", "Couldn't read that menu. Try again, or a clearer photo.");

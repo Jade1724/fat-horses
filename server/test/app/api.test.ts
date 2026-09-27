@@ -7,7 +7,7 @@ import { recordPick } from "../../src/domain/store";
 import { contractRestaurant } from "../store/contract";
 import { MemoryStore } from "../../src/store/state";
 import { Api, type ApiRequest, type WorkflowStarter } from "../../src/app/api";
-import { FakeMenuReader, MenuUnreadable, type MenuReader } from "../../src/domain/menu";
+import { FakeMenuReader, MenuReadingNotSetUp, MenuUnreadable, type MenuReader } from "../../src/domain/menu";
 import { newDishSession } from "../../src/domain/session";
 import {
   AddressNotFound,
@@ -448,6 +448,16 @@ describe("API (§5)", () => {
         NOW,
       );
       expect(errorOf(r)).toEqual([422, "too_few_dishes"]);
+    });
+
+    it("says menu reading isn't set up, rather than blaming the photo", async () => {
+      const menus = new FakeMenuReader(new MenuReadingNotSetUp("MENU_MODEL_ID is empty"));
+      const r = await api(undefined, menus).api.handle(
+        post("/menus/read", { image: JPEG, media_type: "image/jpeg" }),
+        NOW,
+      );
+      expect(errorOf(r)).toEqual([503, "menu_reading_not_set_up"]);
+      expect((r.body as { message: string }).message).toBe("Reading menus isn't set up yet.");
     });
 
     it("is 503 when the reader fails", async () => {

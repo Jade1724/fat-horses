@@ -136,7 +136,7 @@ The app uses one model call, for one job: reading the dishes off a menu photo (F
 
 - **L1 Scope:** transcribe the dishes on the photo and the restaurant's name. The model never chooses dishes; the race does (F15.4).
 - **L2 Input:** only the photo the people took. Never their location, history or session.
-- **L3 Model:** Claude Haiku 4.5 on Amazon Bedrock, via its standard InvokeModel endpoint, named by `MENU_MODEL_ID` (a model or inference-profile ID; Terraform variable `menu_model_id`). Empty → `POST /menus/read` answers 503 "menu reading isn't set up", and the rest of the app works.
+- **L3 Model:** Claude Haiku 4.5 on Amazon Bedrock, via its standard InvokeModel endpoint, named by `MENU_MODEL_ID` (a model or inference-profile ID; Terraform variable `menu_model_id`). Empty → `POST /menus/read` answers 503 `menu_reading_not_set_up` ("Reading menus isn't set up yet."), and the rest of the app works.
 - **L4 Output:** a forced `record_menu` tool call, `{restaurant_name: string|null, dishes: string[]}`, validated with a schema; a refusal, a cut-off answer or anything malformed → 503 `menu_unreadable`. Then tidied as in F15.1.
 - **L5 Limits:** one call per photo; 12 s timeout, one retry, `max_tokens` 4000; the api Lambda allows 28 s. Each call logs its token counts, never the photo.
 
@@ -192,7 +192,7 @@ All paths are under `/api`; JSON in and out; errors are `{"error": "<code>", "me
 |---|---|---|---|
 | POST | `/picks` | `{address?, lat?, lon?, label?, radius_m?, min_population?, include_visited?, max_wait_min?}` (exactly one of address or lat+lon; `label` names the place for lat+lon) | 202 `{pick_id}`; 422 `address_not_found` / `invalid_request`; 409 `ambiguous_address` with `matches` |
 | POST | `/picks` (dish pick) | `{mode: "dish", dishes, restaurant_name?, max_wait_min?}` (F15.2) | 202 `{pick_id}`; 422 `invalid_request` |
-| POST | `/menus/read` | `{image: <base64>, media_type: "image/jpeg"\|"image/png"\|"image/webp"}` (F15.1) | 200 `{restaurant_name, dishes}`; 422 `invalid_request` / `too_few_dishes`; 503 `menu_unreadable` |
+| POST | `/menus/read` | `{image: <base64>, media_type: "image/jpeg"\|"image/png"\|"image/webp"}` (F15.1) | 200 `{restaurant_name, dishes}`; 422 `invalid_request` / `too_few_dishes`; 503 `menu_unreadable` / `menu_reading_not_set_up` |
 | POST | `/picks/{id}/cancel` | – | 200 pick view (F12); 404 |
 | GET | `/geocode` | `?q=<address>` | 200 `{matches: [{lat, lon, display_name}]}` (0–5, best first); 422 without `q` |
 | GET | `/picks/{id}` | – | 200 pick view (below); 404 |
