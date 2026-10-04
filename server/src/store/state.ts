@@ -3,6 +3,7 @@
 
 import { isFinished, type PickSession } from "../domain/session";
 import type { LogEntry, Restaurant } from "../domain/status";
+import type { Iso } from "../domain/time";
 import {
   ConflictError,
   PickCancelled,
@@ -48,7 +49,9 @@ export function upgradeRoot(raw: Record<string, unknown>): RootData {
   return {
     restaurants: mine.restaurants ?? {},
     picked: mine.picked ?? null,
-    countries: mine.countries ?? {},
+    countries: Object.fromEntries(
+      Object.entries(mine.countries ?? {}).map(([k, c]) => [k, { ...c, marked_at: c.marked_at ?? null }]),
+    ),
     log: mine.log ?? {},
     picks: mine.picks ?? {},
     geocodes: caches.geocodes ?? {},
@@ -107,6 +110,7 @@ export class StateStore implements Store {
             visit_count: 0,
             first_visited_at: null,
             last_visited_at: null,
+            marked_at: null,
           });
           c.visit_count += 1;
           c.first_visited_at ??= t.log.at;
@@ -120,6 +124,26 @@ export class StateStore implements Store {
 
   async countryVisits() {
     return this.read((d) => Object.values(d.countries).sort((a, b) => a.iso2.localeCompare(b.iso2)));
+  }
+
+  async setCountryMark(iso2: string, markedAt: Iso | null) {
+    await this.write((d) => {
+      const c = d.countries[iso2];
+      // Unmarking leaves the entry in place (as DynamoDB does); it reads as unvisited.
+      if (markedAt === null) {
+        if (c) c.marked_at = null;
+        return;
+      }
+      if (c) c.marked_at ??= markedAt;
+      else
+        d.countries[iso2] = {
+          iso2,
+          visit_count: 0,
+          first_visited_at: null,
+          last_visited_at: null,
+          marked_at: markedAt,
+        };
+    });
   }
 
   async history(cursor: string | null, limit: number): Promise<HistoryPage> {

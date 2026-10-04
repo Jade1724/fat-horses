@@ -585,4 +585,37 @@ describe("API (§5)", () => {
     const h = (await a.handle(get("/history"), NOW)).body as { entries: { reason: string }[] };
     expect(h.entries.map((e) => e.reason)).toEqual(["visited", "picked"]);
   });
+
+  it("marks and unmarks a country by hand (F8.8)", async () => {
+    const { api: a } = api();
+    const passport = async () =>
+      (await a.handle(get("/countries"), NOW)).body as {
+        visited: number;
+        countries: { iso2: string; visited: boolean; marked: boolean }[];
+      };
+    const marked = await a.handle(post("/countries/IT/mark"), NOW);
+    expect(marked.status).toBe(200);
+    expect(marked.body).toEqual({
+      iso2: "IT",
+      name: "Italy",
+      flag: "🇮🇹",
+      visited: true,
+      marked: true,
+      visit_count: 0,
+      last_visited_at: null,
+    });
+    let p = await passport();
+    expect(p.visited).toBe(1);
+    expect(p.countries.find((x) => x.iso2 === "IT")).toMatchObject({ visited: true, marked: true });
+    expect(((await a.handle(get("/history"), NOW)).body as { entries: unknown[] }).entries).toEqual([]);
+
+    const unmarked = await a.handle(post("/countries/it/unmark"), NOW);
+    expect(unmarked.body).toMatchObject({ iso2: "IT", visited: false, marked: false });
+    p = await passport();
+    expect(p.visited).toBe(0);
+
+    expect(errorOf(await a.handle(post("/countries/XX/mark"), NOW))).toEqual([404, "not_found"]);
+    const anon = { ...post("/countries/IT/mark"), cookies: undefined };
+    expect(errorOf(await a.handle(anon, NOW))).toEqual([401, "unauthorized"]);
+  });
 });

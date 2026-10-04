@@ -41,6 +41,13 @@ export interface CountryVisits {
   visit_count: number;
   first_visited_at: Iso | null;
   last_visited_at: Iso | null;
+  /** Marked visited by hand, for places eaten at before using the app; null if not. */
+  marked_at: Iso | null;
+}
+
+/** A country is visited once a restaurant visit credited it or it was marked by hand (F8.5). */
+export function isVisited(v: CountryVisits): boolean {
+  return v.visit_count > 0 || v.marked_at !== null;
 }
 
 export interface HistoryPage {
@@ -67,6 +74,12 @@ export interface Store {
    */
   apply(change: Change): Promise<void>;
   countryVisits(): Promise<CountryVisits[]>;
+  /**
+   * Mark a country visited by hand (`markedAt` set) or clear the mark (null).
+   * Marking a marked country keeps its first date. Visit counts and the log
+   * are untouched (F8.8).
+   */
+  setCountryMark(iso2: string, markedAt: Iso | null): Promise<void>;
   /** Newest first; `cursor` is a previous page's `next_cursor`. */
   history(cursor: string | null, limit: number): Promise<HistoryPage>;
 

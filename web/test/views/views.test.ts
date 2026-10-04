@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { historyRow } from "../../src/views/history";
 import { renderPassport } from "../../src/views/passport";
 import { chosenDishes, renderPodium } from "../../src/views/dishes";
@@ -10,16 +10,33 @@ describe("renderPassport", () => {
       visited: 1,
       total: 3,
       countries: [
-        { iso2: "IT", name: "Italy", flag: "🇮🇹", visited: false, visit_count: 0, last_visited_at: null },
+        {
+          iso2: "IT",
+          name: "Italy",
+          flag: "🇮🇹",
+          visited: false,
+          marked: false,
+          visit_count: 0,
+          last_visited_at: null,
+        },
         {
           iso2: "JP",
           name: "Japan",
           flag: "🇯🇵",
           visited: true,
+          marked: false,
           visit_count: 2,
           last_visited_at: "2026-09-21T10:00:00Z",
         },
-        { iso2: "MX", name: "Mexico", flag: "🇲🇽", visited: false, visit_count: 0, last_visited_at: null },
+        {
+          iso2: "MX",
+          name: "Mexico",
+          flag: "🇲🇽",
+          visited: false,
+          marked: false,
+          visit_count: 0,
+          last_visited_at: null,
+        },
       ],
     });
     expect(el.querySelector(".progress-label")?.textContent).toBe("Visited 1 of 3 countries");
@@ -27,6 +44,64 @@ describe("renderPassport", () => {
     const names = [...el.querySelectorAll(".stamp .name")].map((n) => n.textContent);
     expect(names).toEqual(["Japan", "Italy", "Mexico"]);
     expect(el.querySelector(".stamp.visited .when")?.textContent).toContain("2×");
+  });
+
+  it("offers to mark unvisited countries and unmark marked ones (F8.8)", () => {
+    const onMark = vi.fn();
+    const row = { visit_count: 0, last_visited_at: null };
+    const el = renderPassport(
+      {
+        visited: 2,
+        total: 3,
+        countries: [
+          { iso2: "IT", name: "Italy", flag: "🇮🇹", visited: false, marked: false, ...row },
+          { iso2: "JP", name: "Japan", flag: "🇯🇵", visited: true, marked: true, ...row },
+          {
+            iso2: "MX",
+            name: "Mexico",
+            flag: "🇲🇽",
+            visited: true,
+            marked: true,
+            visit_count: 1,
+            last_visited_at: "2026-09-21T10:00:00Z",
+          },
+        ],
+      },
+      onMark,
+    );
+    const stamp = (name: string) =>
+      [...el.querySelectorAll(".stamp")].find((s) => s.querySelector(".name")?.textContent === name)!;
+    const button = (name: string) => stamp(name).querySelector("button")!;
+    expect(button("Italy").textContent).toBe("Mark visited");
+    expect(stamp("Japan").querySelector(".when")?.textContent).toBe("Visited before");
+    expect(button("Japan").textContent).toBe("Unmark");
+    expect(stamp("Mexico").querySelector(".when")?.textContent).toContain("1×");
+    expect(button("Mexico").textContent).toBe("Unmark");
+    button("Italy").click();
+    button("Japan").click();
+    expect(onMark.mock.calls).toEqual([
+      ["IT", true, button("Italy")],
+      ["JP", false, button("Japan")],
+    ]);
+  });
+
+  it("shows no buttons without a handler", () => {
+    const el = renderPassport({
+      visited: 0,
+      total: 1,
+      countries: [
+        {
+          iso2: "IT",
+          name: "Italy",
+          flag: "🇮🇹",
+          visited: false,
+          marked: false,
+          visit_count: 0,
+          last_visited_at: null,
+        },
+      ],
+    });
+    expect(el.querySelector("button")).toBeNull();
   });
 });
 

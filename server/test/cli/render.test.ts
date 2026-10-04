@@ -93,6 +93,10 @@ describe("CLI output", () => {
     expect(text.split("\n")[0]).toBe("Passport: visited 1 of 95 countries");
     expect(text.split("\n")[1]).toBe("  ✅ 🇯🇵 Japan — 1 visit(s), last 2026-09-21");
     expect(text).toContain("  ·  🇮🇹 Italy");
+    await store.setCountryMark("IT", "2026-09-22T10:00:00.000Z");
+    const marked = render.passport(countries, await store.countryVisits(), 10_000_000);
+    expect(marked.split("\n")[0]).toBe("Passport: visited 2 of 95 countries");
+    expect(marked).toContain("  ✅ 🇮🇹 Italy — visited before");
     const page = await store.history(null, 1);
     const h = render.history(page, countries);
     expect(h.startsWith("2026-09-21 10:30  Sakura")).toBe(true);

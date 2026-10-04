@@ -305,6 +305,15 @@ describe("runPick", () => {
     expect(s.world_complete).toBe(false);
     expect(s.card?.entries.some((e) => e.country_iso === "MX")).toBe(true);
   });
+
+  it("countries marked visited by hand count as visited (F8.8)", async () => {
+    const store = new MemoryStore();
+    await store.setCountryMark("JP", T0);
+    await store.setCountryMark("IT", T0);
+    await recordVisit(store, "osm:node/3", contractRestaurant("osm:node/3", "MX"), T0);
+    const { s } = await run(deps({ store, updates: openThen(update("final", [[1, 1]])) }));
+    expect(s.world_complete).toBe(true);
+  });
 });
 
 describe("picks drawn before countries were limited to nearby ones", () => {

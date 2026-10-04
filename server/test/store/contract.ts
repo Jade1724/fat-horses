@@ -8,6 +8,7 @@ import { applyEvent, type Restaurant } from "../../src/domain/status";
 import {
   cancelPick,
   ConflictError,
+  isVisited,
   NotFoundError,
   PickCancelled,
   recordPick,
@@ -90,12 +91,16 @@ const scenarios: Record<string, (s: Store) => Promise<void>> = {
     assert.equal(v.visit_count, 1);
     assert.equal(await s.currentlyPicked(), null);
     let c = await s.countryVisits();
-    assert.deepEqual(c, [{ iso2: "JP", visit_count: 1, first_visited_at: at(30), last_visited_at: at(30) }]);
+    assert.deepEqual(c, [
+      { iso2: "JP", visit_count: 1, first_visited_at: at(30), last_visited_at: at(30), marked_at: null },
+    ]);
     await recordPick(s, r("osm:node/1", "JP"), "p2", at(60));
     assert.equal((await s.getRestaurant("osm:node/1"))?.status_before_pick, "VISITED");
     assert.equal((await recordVisit(s, "osm:node/1", null, at(90))).visit_count, 2);
     c = await s.countryVisits();
-    assert.deepEqual(c, [{ iso2: "JP", visit_count: 2, first_visited_at: at(30), last_visited_at: at(90) }]);
+    assert.deepEqual(c, [
+      { iso2: "JP", visit_count: 2, first_visited_at: at(30), last_visited_at: at(90), marked_at: null },
+    ]);
   },
 
   async "visit from the map"(s) {
@@ -106,6 +111,41 @@ const scenarios: Record<string, (s: Store) => Promise<void>> = {
     await recordPick(s, r("osm:node/8", "JP"), "p1", at(1));
     await recordVisit(s, "osm:node/7", null, at(2));
     assert.equal((await s.currentlyPicked())?.id, "osm:node/8", "a map visit leaves the PICKED one alone");
+  },
+
+  async "a country marked by hand"(s) {
+    await s.setCountryMark("JP", at(0));
+    let c = await s.countryVisits();
+    assert.deepEqual(c, [
+      { iso2: "JP", visit_count: 0, first_visited_at: null, last_visited_at: null, marked_at: at(0) },
+    ]);
+    assert.ok(c.every(isVisited));
+    await s.setCountryMark("JP", at(5));
+    assert.equal((await s.countryVisits())[0]?.marked_at, at(0), "marking again keeps the first date");
+    assert.deepEqual((await s.history(null, 10)).entries, [], "marks aren't logged");
+    await s.setCountryMark("JP", null);
+    c = await s.countryVisits();
+    assert.ok(!c.some(isVisited));
+    await s.setCountryMark("IT", null);
+    assert.ok(!(await s.countryVisits()).some(isVisited), "unmarking an unmarked country does nothing");
+  },
+
+  async "unmarking keeps restaurant visits"(s) {
+    await recordVisit(s, "osm:node/1", r("osm:node/1", "JP"), at(0));
+    await s.setCountryMark("JP", at(1));
+    assert.equal((await s.countryVisits())[0]?.marked_at, at(1));
+    await s.setCountryMark("JP", null);
+    assert.deepEqual(await s.countryVisits(), [
+      { iso2: "JP", visit_count: 1, first_visited_at: at(0), last_visited_at: at(0), marked_at: null },
+    ]);
+  },
+
+  async "a restaurant visit keeps the mark"(s) {
+    await s.setCountryMark("JP", at(0));
+    await recordVisit(s, "osm:node/1", r("osm:node/1", "JP"), at(1));
+    assert.deepEqual(await s.countryVisits(), [
+      { iso2: "JP", visit_count: 1, first_visited_at: at(1), last_visited_at: at(1), marked_at: at(0) },
+    ]);
   },
 
   async "skip restores"(s) {

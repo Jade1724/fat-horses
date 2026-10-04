@@ -35,6 +35,13 @@ describe("file store", () => {
     expect((await again.history(null, 10)).entries).toHaveLength(2);
   });
 
+  it("reads countries saved before manual marks existed", async () => {
+    const path = join(mkdtempSync(join(tmpdir(), "fat-horses-")), "store.json");
+    const old = { iso2: "JP", visit_count: 1, first_visited_at: NOW, last_visited_at: NOW };
+    writeFileSync(path, JSON.stringify({ countries: { JP: old } }));
+    expect(await new FileStore(path).countryVisits()).toEqual([{ ...old, marked_at: null }]);
+  });
+
   it("refuses a corrupt file", () => {
     const path = join(mkdtempSync(join(tmpdir(), "fat-horses-")), "store.json");
     writeFileSync(path, "{not json");
@@ -71,6 +78,21 @@ describe("DynamoDB store (no network)", () => {
     expect(items[1]?.Put?.Item?.sk).toBe("2026-09-21T10:00:00.000000Z#b#visited");
     expect(items[2]?.Update?.Key).toEqual({ pk: "COUNTRY", sk: "IT" });
     expect(items[3]?.ConditionCheck?.ConditionExpression).toBe("attribute_not_exists(pk)");
+  });
+
+  it("marks and unmarks a country without touching its visit count", () => {
+    const store = new DynamoStore("t");
+    expect(store.markUpdate("JP", NOW)).toEqual({
+      TableName: "t",
+      Key: { pk: "COUNTRY", sk: "JP" },
+      UpdateExpression: "SET marked_at = if_not_exists(marked_at, :at)",
+      ExpressionAttributeValues: { ":at": NOW },
+    });
+    expect(store.markUpdate("JP", null)).toEqual({
+      TableName: "t",
+      Key: { pk: "COUNTRY", sk: "JP" },
+      UpdateExpression: "REMOVE marked_at",
+    });
   });
 
   it("keys items without a per-user prefix: one shared view", () => {

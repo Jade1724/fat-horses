@@ -68,6 +68,17 @@ describe("Api", () => {
     expect(JSON.parse(f.mock.calls[0]![1]?.body as string)).toEqual({ restaurant: details });
   });
 
+  it("marks and unmarks a country (F8.8)", async () => {
+    const f = fakeFetch(200, {});
+    const api = new Api(() => {}, f);
+    await api.markCountry("JP");
+    await api.unmarkCountry("JP");
+    expect(f.mock.calls.map(([url, init]) => [url, init?.method])).toEqual([
+      ["/api/countries/JP/mark", "POST"],
+      ["/api/countries/JP/unmark", "POST"],
+    ]);
+  });
+
   it("looks up addresses", async () => {
     const f = fakeFetch(200, { matches: [] });
     await new Api(() => {}, f).geocode("50 Albert St");

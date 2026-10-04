@@ -144,3 +144,9 @@ Requested by the owner: at a restaurant with friends, photograph the menu and le
   Needs: T9.6.
 - [ ] **T9.8 [human] Try it on a phone.** Photograph a real menu end to end. (The browser photo shrink, `shrinkPhoto`, has no automated test: jsdom has no canvas.)
   Needs: T9.6.
+
+## M10 Countries visited before the app
+
+Requested by the owner: restaurants eaten at before using the app should keep their countries out of the draw.
+
+- [x] **T10.1 Mark countries visited by hand (F8.8).** `marked_at` on country visits and `Store.setCountryMark` (memory/file and DynamoDB, contract-tested); `isVisited` used by the pool, the API and the CLI passport; `POST /countries/{iso2}/mark|unmark`; "Mark visited"/"Unmark" on Passport stamps.

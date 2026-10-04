@@ -81,12 +81,13 @@ Requirement IDs (`F2.3`, `L4`, …) are referenced from `TASKS.md` and should be
 
 - **F8.3** At most one restaurant is `PICKED` at any time.
 - **F8.4** The country credited by a visit is the restaurant's `country_iso`: the winning country of the pick that found it, or, for a map visit, the country given in the request.
-- **F8.5** A country is **visited** when its `visit_count > 0`.
+- **F8.5** A country is **visited** when its `visit_count > 0` or it is marked visited by hand (F8.8).
 - **F8.6** Every transition writes one log entry `{at, restaurant_id, restaurant_name, country_iso, from, to, reason, pick_id?}`. `reason` ∈ `picked`, `visited`, `skipped`, `superseded`.
 - **F8.7** A transition's restaurant update, country update and log entry are written atomically; a transition based on a stale status fails (409) instead of overwriting.
+- **F8.8** A country can be marked visited by hand (for restaurants eaten at before using the app) and unmarked again. The mark is separate from `visit_count`: marking twice keeps the first `marked_at`, unmarking clears only the mark (a country credited by restaurant visits stays visited), and neither writes a log entry.
 
 ### F9. Passport and history
-- **F9.1** Passport: every country in the current F2.2 pool with flag, name, `visited`, `visit_count`, `last_visited_at`, and a total "visited X of Y".
+- **F9.1** Passport: every country in the current F2.2 pool with flag, name, `visited`, `marked`, `visit_count`, `last_visited_at`, and a total "visited X of Y". Each unvisited country offers "Mark visited" and each marked one "Unmark" (F8.8).
 - **F9.2** History: log entries newest first, 50 per page, with a cursor.
 
 ### F10. Web UI
@@ -171,7 +172,7 @@ All items are shared: everyone who logs in sees the same data (F14.1).
 |---|---|---|---|
 | Restaurant | `RESTAURANT#<place_id>` | `META` | name, lat, lon, address, cuisine (list), country_iso, status (`PICKED`/`VISITED`; absent = `null`), status_before_pick, picked_at, visited_at, visit_count, match, reason |
 | Currently picked | `STATE` | `PICKED` | restaurant_id. Written in the same transaction as every change to or from `PICKED` (enforces F8.3) |
-| Country | `COUNTRY` | `<iso2>` | visit_count, first_visited_at, last_visited_at (one partition, so the Passport is a single Query) |
+| Country | `COUNTRY` | `<iso2>` | visit_count, first_visited_at, last_visited_at, marked_at (F8.8; absent = not marked) (one partition, so the Passport is a single Query) |
 | Log entry | `LOG` | `<RFC3339 µs timestamp>#<restaurant_id>#<reason>` (JS has millisecond precision; the microseconds are zero-padded) | the fields of F8.6 |
 | Pick session | `PICK#<pick_id>` | `META` | request, location, status, pool size, world_complete, race card, winner, places, matches, pick, error; `ttl` = +30 days |
 | Geocode cache | `GEOCODE#<normalised address>` | `META` | lat, lon, display_name; `ttl` = +30 days |
@@ -199,7 +200,9 @@ All paths are under `/api`; JSON in and out; errors are `{"error": "<code>", "me
 | GET | `/restaurants/picked` | – | 200 restaurant or `null` |
 | POST | `/restaurants/{id}/visit` | `{restaurant?: {name, lat, lon, address, cuisine, country_iso}}` (required when the restaurant isn't stored yet) | 200 restaurant; 409 `invalid_transition` |
 | POST | `/restaurants/{id}/skip` | – | 200 restaurant; 409 |
-| GET | `/countries` | `?min_population=` | 200 `{visited, total, countries: [{iso2, name, flag, visited, visit_count, last_visited_at}]}` |
+| GET | `/countries` | `?min_population=` | 200 `{visited, total, countries: [{iso2, name, flag, visited, marked, visit_count, last_visited_at}]}` |
+| POST | `/countries/{iso2}/mark` | – (F8.8) | 200 country row as in `/countries`; 404 unknown country |
+| POST | `/countries/{iso2}/unmark` | – (F8.8) | 200 country row; 404 unknown country |
 | GET | `/history` | `?cursor=` | 200 `{entries: [...], next_cursor?}` |
 
 Pick view:

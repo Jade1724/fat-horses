@@ -3,7 +3,7 @@
 import type { Countries } from "../domain/countries";
 import type { PickSession, PickStatus } from "../domain/session";
 import type { Restaurant } from "../domain/status";
-import type { CountryVisits, HistoryPage } from "../domain/store";
+import { isVisited, type CountryVisits, type HistoryPage } from "../domain/store";
 
 function label(countries: Countries, iso2: string): string {
   const c = countries.get(iso2);
@@ -107,14 +107,16 @@ export function restaurant(r: Restaurant, countries: Countries): string {
 
 /** The Passport (F9.1): visited first. */
 export function passport(countries: Countries, visits: CountryVisits[], minPopulation: number): string {
-  const byIso = new Map(visits.filter((v) => v.visit_count > 0).map((v) => [v.iso2, v]));
+  const byIso = new Map(visits.filter(isVisited).map((v) => [v.iso2, v]));
   const rows = countries.all
     .filter((c) => c.population >= minPopulation)
     .map((c) => {
       const v = byIso.get(c.iso2);
-      const line = v
-        ? `  ✅ ${c.flag} ${c.name} — ${v.visit_count} visit(s), last ${v.last_visited_at?.slice(0, 10) ?? ""}`
-        : `  ·  ${c.flag} ${c.name}`;
+      const line = !v
+        ? `  ·  ${c.flag} ${c.name}`
+        : v.visit_count > 0
+          ? `  ✅ ${c.flag} ${c.name} — ${v.visit_count} visit(s), last ${v.last_visited_at?.slice(0, 10) ?? ""}`
+          : `  ✅ ${c.flag} ${c.name} — visited before`;
       return { visited: !!v, line };
     });
   const visited = rows.filter((r) => r.visited).length;

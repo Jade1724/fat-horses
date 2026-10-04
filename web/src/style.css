@@ -555,6 +555,14 @@ select {
   color: var(--muted);
 }
 
+.stamp .mark {
+  grid-column: 2;
+  justify-self: start;
+  margin-top: 0.25rem;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.78rem;
+}
+
 .history {
   list-style: none;
   padding: 0;

@@ -20,9 +20,11 @@ import {
   ConflictError,
   cancelPick,
   HISTORY_PAGE,
+  isVisited,
   NotFoundError,
   recordSkip,
   recordVisit,
+  type CountryVisits,
   type Store,
 } from "../domain/store";
 import type { Iso } from "../domain/time";
@@ -120,6 +122,8 @@ type Route =
   | { kind: "visit"; id: string }
   | { kind: "skip"; id: string }
   | { kind: "countries" }
+  | { kind: "mark"; iso2: string }
+  | { kind: "unmark"; iso2: string }
   | { kind: "geocode" }
   | { kind: "history" }
   | { kind: "readMenu" };
@@ -144,6 +148,8 @@ function route(method: string, rawPath: string): Route | null {
     if (path === "/logout") return { kind: "logout" };
     if (path === "/picks") return { kind: "start" };
     if (path === "/menus/read") return { kind: "readMenu" };
+    const k = /^\/countries\/([^/]+)\/(mark|unmark)$/.exec(path);
+    if (k?.[1]) return { kind: k[2] === "mark" ? "mark" : "unmark", iso2: k[1].toUpperCase() };
     const c = /^\/picks\/([^/]+)\/cancel$/.exec(path);
     if (c?.[1]) return { kind: "cancel", id: c[1] };
     // Restaurant ids contain '/' (osm:node/1), so match from both ends.
@@ -218,6 +224,19 @@ function parseBody<T>(schema: z.ZodType<T>, body: string | undefined): T | ApiRe
 const isResponse = (v: unknown): v is ApiResponse =>
   typeof v === "object" && v !== null && "status" in v && "body" in v;
 
+/** One Passport row (F9.1). */
+function passportRow(c: Country, v: CountryVisits | undefined) {
+  return {
+    iso2: c.iso2,
+    name: c.name,
+    flag: c.flag,
+    visited: v ? isVisited(v) : false,
+    marked: (v?.marked_at ?? null) !== null,
+    visit_count: v?.visit_count ?? 0,
+    last_visited_at: v?.last_visited_at ?? null,
+  };
+}
+
 const countryView = (c: Country | undefined) => (c ? { iso2: c.iso2, name: c.name, flag: c.flag } : null);
 
 export class Api {
@@ -254,6 +273,10 @@ export class Api {
           return ok(await recordSkip(this.deps.store, r.id, now));
         case "countries":
           return await this.countries(req.query.min_population);
+        case "mark":
+          return await this.mark(r.iso2, now);
+        case "unmark":
+          return await this.mark(r.iso2, null);
         case "geocode":
           return await this.geocode(req.query.q, now);
         case "history":
@@ -532,18 +555,21 @@ export class Api {
     const visits = new Map((await this.deps.store.countryVisits()).map((v) => [v.iso2, v]));
     const rows = this.deps.countries.all
       .filter((c) => c.population >= min)
-      .map((c) => {
-        const v = visits.get(c.iso2);
-        const count = v?.visit_count ?? 0;
-        return {
-          iso2: c.iso2,
-          name: c.name,
-          flag: c.flag,
-          visited: count > 0,
-          visit_count: count,
-          last_visited_at: v?.last_visited_at ?? null,
-        };
-      });
+      .map((c) => passportRow(c, visits.get(c.iso2)));
     return ok({ visited: rows.filter((r) => r.visited).length, total: rows.length, countries: rows });
+  }
+
+  /** Mark a country visited by hand, or clear the mark (`at` null) (F8.8). */
+  private async mark(iso2: string, at: Iso | null): Promise<ApiResponse> {
+    const country = this.deps.countries.get(iso2);
+    if (!country) return error(404, "not_found", `unknown country ${iso2}`);
+    await this.deps.store.setCountryMark(iso2, at);
+    const visits = await this.deps.store.countryVisits();
+    return ok(
+      passportRow(
+        country,
+        visits.find((v) => v.iso2 === iso2),
+      ),
+    );
   }
 }

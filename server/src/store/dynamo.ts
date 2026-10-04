@@ -15,7 +15,9 @@ import {
   PutCommand,
   QueryCommand,
   TransactWriteCommand,
+  UpdateCommand,
   type TransactWriteCommandInput,
+  type UpdateCommandInput,
 } from "@aws-sdk/lib-dynamodb";
 import type { PickSession } from "../domain/session";
 import type { LogEntry, Restaurant } from "../domain/status";
@@ -33,7 +35,7 @@ import {
   type HistoryPage,
   type Store,
 } from "../domain/store";
-import { ms } from "../domain/time";
+import { ms, type Iso } from "../domain/time";
 
 type TransactItem = NonNullable<TransactWriteCommandInput["TransactItems"]>[number];
 
@@ -208,11 +210,33 @@ export class DynamoStore implements Store {
           visit_count: Number(i.visit_count ?? 0),
           first_visited_at: (i.first_visited_at as string | undefined) ?? null,
           last_visited_at: (i.last_visited_at as string | undefined) ?? null,
+          marked_at: (i.marked_at as string | undefined) ?? null,
         });
       }
       start = resp.LastEvaluatedKey;
     } while (start);
     return out;
+  }
+
+  /** The update for a manual mark (exported for tests). */
+  markUpdate(iso2: string, markedAt: Iso | null): UpdateCommandInput {
+    const Key = { pk: "COUNTRY", sk: iso2 };
+    return markedAt === null
+      ? { TableName: this.table, Key, UpdateExpression: "REMOVE marked_at" }
+      : {
+          TableName: this.table,
+          Key,
+          UpdateExpression: "SET marked_at = if_not_exists(marked_at, :at)",
+          ExpressionAttributeValues: { ":at": markedAt },
+        };
+  }
+
+  async setCountryMark(iso2: string, markedAt: Iso | null) {
+    try {
+      await this.doc.send(new UpdateCommand(this.markUpdate(iso2, markedAt)));
+    } catch (e) {
+      throw new StoreUnavailable(String(e));
+    }
   }
 
   async history(cursor: string | null, limit: number): Promise<HistoryPage> {

@@ -128,6 +128,8 @@ export interface StoredRestaurant {
 
 export interface PassportCountry extends Country {
   visited: boolean;
+  /** Marked visited by hand (F8.8). */
+  marked: boolean;
   visit_count: number;
   last_visited_at: string | null;
 }
@@ -284,6 +286,15 @@ export class Api {
   countries(minPopulation?: number): Promise<Passport> {
     const q = minPopulation === undefined ? "" : `?min_population=${minPopulation}`;
     return this.call("GET", `/countries${q}`);
+  }
+
+  /** Mark a country visited by hand (F8.8). */
+  markCountry(iso2: string): Promise<PassportCountry> {
+    return this.call("POST", `/countries/${encodeURIComponent(iso2)}/mark`, {});
+  }
+
+  unmarkCountry(iso2: string): Promise<PassportCountry> {
+    return this.call("POST", `/countries/${encodeURIComponent(iso2)}/unmark`, {});
   }
 
   history(cursor?: string | null): Promise<HistoryPage> {

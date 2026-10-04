@@ -24,7 +24,7 @@ import {
   type PickSession,
 } from "../domain/session";
 import type { Restaurant } from "../domain/status";
-import { NotFoundError, PickCancelled, recordPick, type Store } from "../domain/store";
+import { isVisited, NotFoundError, PickCancelled, recordPick, type Store } from "../domain/store";
 import { addMs, ms, MINUTE, SECOND, type Iso } from "../domain/time";
 import { resolve, resolvePodium, type ResultSnapshot } from "../domain/winner";
 import { log } from "../log";
@@ -113,9 +113,7 @@ export async function findRace(deps: Deps, s: PickSession, now: Iso): Promise<Pi
 /** Step 3: draw countries from the nearby pool (F2, F4). Sets `waiting_start`. */
 export async function assignCountries(deps: Deps, s: PickSession, rng: Rng): Promise<PickSession> {
   if (!s.race) return failed(s, "internal");
-  const visited = new Set(
-    (await deps.store.countryVisits()).filter((c) => c.visit_count > 0).map((c) => c.iso2),
-  );
+  const visited = new Set((await deps.store.countryVisits()).filter(isVisited).map((c) => c.iso2));
   const p = countryPool(deps, s, visited);
   try {
     return {
